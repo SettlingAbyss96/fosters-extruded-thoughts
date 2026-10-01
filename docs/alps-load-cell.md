@@ -88,13 +88,94 @@ Full steps: [autopa `docs/ALPS.md`](https://github.com/G0BL1N/autopa/blob/main/d
 ## Still to verify
 
 - [ ] **The HeatCore 4 UHF ALPS uses the same ALPS board as the ALPSv6** that autopa validated: STM32F072 + ADS131M02, with USB-C and BOOT/RESET buttons reachable once installed. The product page lists the same ADC and a USB port, which is promising but not proof.
-- [ ] **Temperature rating of the ALPS electronics** in a 75 °C chamber, sitting on a heatsink next to a 350 °C hot zone. Ask Mellow. Tare-on-every-tap cancels slow thermal drift, but the electronics still have a temperature limit.
+- [ ] **Temperature behaviour of the ALPS electronics** in a 75 °C chamber, next to a 350 °C hot zone. Mellow is unlikely to publish a rating, so **buy one and test it**: log the board temperature (thermocouple taped to the PCB) against chamber temperature, and watch for USB dropouts. Tare-on-every-tap cancels slow thermal drift, but the electronics still have a limit. If it fails, use [ALPS on CAN](#alps-on-can-reading-the-ads131m02-from-the-h36).
 - [ ] A **Stealthburner (or other toolhead) mount** for the HeatCore 4 heatsink with the chosen extruder.
 - [ ] Whether autopa works on Kalico, if the rebuild uses Kalico.
+
+## ALPS on CAN: reading the ADS131M02 from the H36
+
+**Goal:** no USB at the toolhead. The H36 Combo V2 (CAN, rated 125 °C) reads the load cell's ADS131M02 directly, and the ALPS's own STM32F072 + USB drop out of the picture.
+
+**Feasibility: ✅ mainline Klipper, no firmware changes.** All the work is hardware.
+
+| Need | Available |
+|---|---|
+| ADS131M02 driver | `ads131m0x.py` in mainline Klipper. Uses standard `MCU_SPI_from_config`, so **software SPI on any GPIO works** |
+| ADC master clock | `static_pwm_clock`. The H36 is an **STM32G431**, and only **`PB10` / `PB11`** on its spare header have hardware PWM in Klipper's G4 pin table |
+| Clock frequency | `static_pwm_clock` needs the frequency to divide the chip's clock exactly. The G431 runs at 170 MHz, so **6.8 MHz** (170 ÷ 25) works. That's within the ADS131M02's CLKIN range (0.3–8.2 MHz), and Klipper adjusts the sample rate to match. 8 MHz won't work (170 ÷ 8 isn't a whole number). |
+| ADC temperature rating | ADS131M02: **−40 to +125 °C** (TI). It matches the H36. |
+| Spare 3.3 V GPIO on the H36 | 2×6 0.1″ header: `3.3V G PA13 PA15 PB7 PA1` / `5V PA14 G PB11 PB10 G` ([H36 pinout](https://github.com/FYSETC/H36_Combo_V2/blob/main/hardware/H36_V2.0%20PINOUT.pdf)) |
+
+**Proposed pin map** (H36 header → ADS131M02):
+
+| Signal | H36 pin | Note |
+|---|---|---|
+| CLKIN (6.8 MHz) | **`PB10`** | TIM2_CH3 hardware PWM. Has to be this pin or `PB11`. |
+| SCLK | `PA15` | software SPI |
+| MOSI (DIN) | `PB7` | software SPI |
+| MISO (DOUT) | `PA1` | software SPI |
+| CS | `PB11` | spare (could be the clock pin instead) |
+| DRDY | `PA13` or `PA14` | These are SWD debug pins. They work as GPIO under Klipper, but on-board debugging is lost while used this way. |
+| 3.3 V / GND | `3.3V` / `G` | ADS131M02 draws a few mA |
+
+```ini
+# Sketch, untested
+[static_pwm_clock alps_clk]
+pin: H36_combo:PB10
+frequency: 6800000
+
+[load_cell_probe]
+sensor_type: ads131m02
+cs_pin: H36_combo:PB11
+spi_software_sclk_pin: H36_combo:PA15
+spi_software_mosi_pin: H36_combo:PB7
+spi_software_miso_pin: H36_combo:PA1
+data_ready_pin: H36_combo:PA13
+pwm_clock: static_pwm_clock alps_clk
+gain: 128
+adc_channel: 0
+counts_per_gram: 138        # re-check: the clock/OSR change can change this; re-calibrate
+trigger_force: 200
+```
+
+### Three ways to build it
+
+| | **A. Bodge the ALPS board** | **B. Small custom PCB (PCBWay)** | **C. Full custom toolhead board** |
+|---|---|---|---|
+| What | Hold the ALPS's STM32F072 in **reset** (NRST to GND, which tri-states its pins). Solder 8 thin wires from the ADS131M02's SPI/DRDY/CLKIN nets (or test pads) to the H36 header. | A tiny board: **ADS131M02 + reference parts + load-cell connector + 2×6 header cable to the H36**. It either replaces the ALPS electronics at the load cell, or plugs into the H36 with the bridge wired to it. | Your own STM32 + CAN + TMC2209 + ADS131M02 toolhead board, all 125 °C parts |
+| Effort | An evening or two, once the ALPS board is in hand | **About 1–3 weeks**: KiCad design (a weekend for a simple 2-layer board), PCBWay assembly (about 1–2 weeks), bring-up | Months |
+| Skills | Fine-pitch soldering (0.5 mm pitch), multimeter tracing | KiCad schematic + layout, reading a datasheet | Full board design, power, motor driver layout |
+| Cost | ≈ $0 | ≈ $30–100 for 5 assembled boards | $$ |
+| Reliability | Fragile (wires on a hot, moving toolhead) | **Good**, repeatable | Best |
+| Shareable | Barely | ✅ **Clean open-source release** | ✅ (big project) |
+| Risk | Can damage the ALPS | Low, and the ALPS stays stock if B plugs in at the bridge wires | Higher |
+
+**Is the custom PCB easier? Yes, for anything beyond a quick experiment.** The ADS131M02 needs very little around it:
+- 3.3 V supply with decoupling capacitors
+- An RC anti-alias filter on the bridge inputs
+- Bridge excitation from 3.3 V (ratiometric)
+- An SPI + clock header
+
+The firmware side is already done, since Klipper supports the chip. PCBWay or JLCPCB can source and solder the ADS131M02 (TSSOP-20), so you never hand-solder fine-pitch parts. Doing the bodge first (A) is still worth it: it proves the signal path before you pay for boards.
+
+### Where to put the ADC
+
+The bridge signal is **microvolts**. Digitize it **as close to the load cell as possible**, and send only digital SPI to the H36.
+- **Best:** the ADS131M02 sits **at the load cell** (where the ALPS's own board is now) and runs about 10 cm of SPI to the H36. That's what A does, and what B does if it replaces the ALPS board.
+- **Acceptable:** a short shielded twisted-pair bridge cable (< 10 cm) to a board on the H36 header, kept away from stepper and heater wiring.
+
+### Plan
+
+1. **Buy an ALPS and test it stock**: Klipper firmware over USB per the [setup above](#setup-outline). Confirm load-cell probing and autopa work, and log ALPS board temperature against chamber temperature.
+2. **Take it apart and document it**: board photos, how the bridge connects (connector or soldered), ADS131M02 location, and test pads for SPI, DRDY, CLKIN and NRST. Commit the photos to `docs/hardware/alps/`.
+3. **Prototype A** to confirm the H36 reads the ADC at 6.8 MHz (`LOAD_CELL_DIAGNOSTIC`: sample rate, 0 saturated samples).
+4. **Design B** in KiCad. Release it as a public repo under GPL-3.0 (matching Klipper and Voron) or CERN-OHL-S, the standard open-hardware license. Order it from PCBWay.
 
 ## Sources
 
 - Mellow: [ALPS overview](https://mellow.klipper.cn/en/docs/ProductDoc/ExtensionBoard/fly-alps/) · [ALPS Klipper config (stock firmware, trigger mode)](https://mellow.klipper.cn/en/docs/ProductDoc/ExtensionBoard/fly-alps/klipper/) · [ALPS docs index](https://mellow.klipper.cn/en/docs/category/alps-%E5%8E%8B%E5%8A%9B%E8%B0%83%E5%B9%B3%E6%A8%A1%E5%9D%97-/)
 - autopa: [README](https://github.com/G0BL1N/autopa) · [ALPS.md](https://github.com/G0BL1N/autopa/blob/main/docs/ALPS.md) · [PROBE.md](https://github.com/G0BL1N/autopa/blob/main/docs/PROBE.md)
 - Klipper: [Load cell docs](https://www.klipper3d.org/Load_Cell.html) · [`ads131m0x.py`](https://github.com/Klipper3d/klipper/blob/master/klippy/extras/ads131m0x.py) · [`static_pwm_clock.py`](https://github.com/Klipper3d/klipper/blob/master/klippy/extras/static_pwm_clock.py)
+- FYSETC: [H36 Combo V2 pinout](https://github.com/FYSETC/H36_Combo_V2/blob/main/hardware/H36_V2.0%20PINOUT.pdf) · [H36 schematic](https://github.com/FYSETC/H36_Combo_V2/blob/main/hardware/Schematic_H36%20v2.0.pdf) · [H36 test config](https://github.com/FYSETC/H36_Combo_V2/tree/main/firmware/Klipper)
+- Klipper: [`static_pwm_clock.py`](https://github.com/Klipper3d/klipper/blob/master/klippy/extras/static_pwm_clock.py) · [STM32 hardware PWM pin table](https://github.com/Klipper3d/klipper/blob/master/src/stm32/hard_pwm.c)
 - Kalico: [`load_cell/ads131m0x.py`](https://github.com/KalicoCrew/kalico/blob/main/klippy/extras/load_cell/ads131m0x.py)
