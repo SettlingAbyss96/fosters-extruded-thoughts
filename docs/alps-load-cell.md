@@ -1,5 +1,8 @@
 # Mellow ALPS: signal-only, or real load-cell data?
 
+> [!NOTE]
+> **Status: fallback.** As of 2026-10-01 the lead option is **bd_pressureE + Rapido 2 UHF** ([roadmap](roadmap.md#lead-candidate-bd_pressuree--rapido-2-uhf-pt1000)). This research stays here in case bd_pressure fails the 75 °C heat test.
+
 **Answer: both, depending on firmware.** Out of the box it only sends a trigger signal. **Reflashed with Klipper**, it streams raw load-cell data to Klipper's native `[load_cell_probe]`. That's what autopa (automatic PA) and proper load-cell probing need.
 
 *Researched 2026-10-01.*
