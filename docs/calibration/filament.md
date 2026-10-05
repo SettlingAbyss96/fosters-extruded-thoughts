@@ -11,6 +11,11 @@ of test towers per spool.
 
 The 0.001 g scale (ordered) is what makes most of this practical.
 
+> **Most filaments shouldn't need any of this.** The normal path is borrowing data somebody else
+> already measured and letting the machine check it during regular prints:
+> [library.md](library.md). The tests on this page are for anchors, oddball materials, and
+> whatever the machine flags.
+
 ## What actually varies
 
 | Property | Why it varies | What it changes |
@@ -261,17 +266,19 @@ not a score. Photos go in the repo.
 
 ## Confidence tiers
 
-How far a filament got. Every profile carries its tier, so I know how much to trust it:
+How far a filament got. Every profile carries its tier, so I know how much to trust it. The
+first three cost nothing:
 
-| Tier | Done | Time | Measured | Still inherited |
-|---|---|---|---|---|
-| 0 | Nothing | 0 | Nothing | Everything (family defaults) |
-| 1 | Weigh + ladder | About 20 min + weighing | Area, rotation distance, max flow, temperature | PA, retraction, cooling, shrinkage |
-| 2 | + test part | + 15 min print | Shrinkage, contour offset, flow residual | PA, retraction, cooling |
-| 3 | + pressure sweep | + 5 min | PA vs flow and temperature, ooze, viscosity | Cooling |
-| 4 | + check print vs anchor | + 45 min | Seams, overhangs, looks | Nothing |
+| Tier | How it got there | Effort | What it adds |
+|---|---|---|---|
+| 0 | Family defaults | None | A starting point |
+| 1 | Imported: someone else's data, mapped through the anchors ([library](library.md)) | None | Temps, max flow, flow ratio, density, sometimes PA |
+| 2 | Confirmed in normal prints, no flags | None, just printing | Heater load, slip and part mass agree with the import |
+| 3 | Measured: weigh + ladder + test part | About 35 min | Area, rotation distance, max flow, shrinkage, contour offset, flow residual |
+| 4 | + pressure sweep | + 5 min | PA vs flow and temperature, ooze, viscosity |
+| 5 | + check print vs anchor | + 45 min | Seams, overhangs, looks |
 
-Tier 4 filaments can become anchors.
+Tier 5 filaments can become anchors.
 
 ## How sure is each number
 

@@ -15,6 +15,9 @@ I want to treat this like a control problem instead of a black box:
 Then automate whatever sensors can measure, and keep a human only for the stuff that's actually
 taste (seam placement, how a surface looks).
 
+The research behind all this (material science, control, and stuff borrowed from other
+industries) is in [`docs/research/`](../research/README.md).
+
 **This is big and it's not getting solved in one go.** These pages are the breakdown, not the
 answer. Work in progress.
 
@@ -25,6 +28,7 @@ answer. Work in progress.
 | [Models](models.md) | The physics linking them: flow chain, nozzle pressure, melt capacity, bead shape, dimensions, cooling |
 | [Quality](quality.md) | Each print problem (seams, dimensions, first layer, stringing...) broken into its causes |
 | [Filament](filament.md) | Brand and spool variation, fast tests and proxies, anchors, confidence tiers |
+| [Library](library.md) | Getting a tested library without testing: borrowed data, mapping it to this machine, checking during normal prints |
 
 ## The idea
 
