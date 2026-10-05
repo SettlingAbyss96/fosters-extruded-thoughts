@@ -91,7 +91,7 @@ Full steps: [autopa `docs/ALPS.md`](https://github.com/G0BL1N/autopa/blob/main/d
 ## Still to verify
 
 - [ ] **The HeatCore 4 UHF ALPS uses the same ALPS board as the ALPSv6** that autopa validated: STM32F072 + ADS131M02, with USB-C and BOOT/RESET buttons reachable once installed. The product page lists the same ADC and a USB port, which is promising but not proof.
-- [ ] **Temperature behaviour of the ALPS electronics** in a 75 °C chamber, next to a 350 °C hot zone. Mellow is unlikely to publish a rating, so **buy one and test it**: log the board temperature (thermocouple taped to the PCB) against chamber temperature, and watch for USB dropouts. Tare-on-every-tap cancels slow thermal drift, but the electronics still have a limit. If it fails, use [ALPS on CAN](#alps-on-can-reading-the-ads131m02-from-the-h36).
+- [ ] **Temperature behaviour of the ALPS electronics** in a 70 °C chamber, next to a 350 °C hot zone. Mellow is unlikely to publish a rating, so **buy one and test it**: log the board temperature (thermocouple taped to the PCB) against chamber temperature, and watch for USB dropouts. Tare-on-every-tap cancels slow thermal drift, but the electronics still have a limit. If it fails, use [ALPS on CAN](#alps-on-can-reading-the-ads131m02-from-the-h36).
 - [ ] A **Stealthburner (or other toolhead) mount** for the HeatCore 4 heatsink with the chosen extruder.
 - [ ] Whether autopa works on Kalico, if the rebuild uses Kalico.
 
