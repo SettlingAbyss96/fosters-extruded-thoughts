@@ -9,6 +9,10 @@ because some profile still thinks it's last month.
 Goal: Orca and Kalico act like one system. Pick a filament in Orca, hit print, and the machine
 does the right thing for that material: chamber, fans, soak, temps, PA, speed limits. No retyping.
 
+> This page is the plumbing between Orca and the machine. Still too static: it assumes the numbers
+> in the library are known. Where they come from, and how to measure them instead of tuning them by
+> eye, is the bigger problem: [calibration as a control problem](calibration/README.md).
+
 ## What's wrong right now
 
 Looked through the current config with this in mind. Not great:
@@ -100,7 +104,7 @@ Kalico parses quoted parameters, so preset names with spaces are fine.
 
 Prusa does this with `M862`: the printer checks the G-code was sliced for it. Same idea here:
 
-- `NOZZLE` doesn't match the nozzle in the config: **stop.** A 0.4 slice on a 0.6 nozzle is a wasted print
+- `NOZZLE` doesn't match the nozzle the machine thinks is installed: **stop.** A 0.4 slice on a 0.6 nozzle is a wasted print. The installed nozzle is machine state set by `NOZZLE_SET` (later checked by the pressure sensor), not a line in `printer.cfg`, so a swap is one command, not two config edits
 - `REV` doesn't match the library revision: **warn**, the Orca presets are stale, rerun the install script
 - Filament not in the library: **fall back to the safe mode** for its type (no chamber heat), warn
 - `CHAMBER_TEMP` higher than the material's max: clamp and warn
