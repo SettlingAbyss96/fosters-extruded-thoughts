@@ -24,6 +24,7 @@ answer. Work in progress.
 | [Sensors](sensors.md) | What I have, what's coming, cheap stuff to add, and which hidden states each one can see |
 | [Models](models.md) | The physics linking them: flow chain, nozzle pressure, melt capacity, bead shape, dimensions, cooling |
 | [Quality](quality.md) | Each print problem (seams, dimensions, first layer, stringing...) broken into its causes |
+| [Filament](filament.md) | Brand and spool variation, fast tests and proxies, anchors, confidence tiers |
 
 ## The idea
 
@@ -100,7 +101,7 @@ still in the right order and stored in the right place.
 
 - [ ] Go through [variables](variables.md) and mark what's already measured vs guessed
 - [ ] Nozzle as machine state (`NOZZLE_SET` + `save_variables`) instead of a value in `printer.cfg`
-- [ ] Get a 0.01 g scale. Cheapest sensor on this list and it kills the flow-cube guessing
+- [ ] 0.001 g scale is ordered. What to do with it: [filament](filament.md#to-do)
 - [ ] Design one dimensional test part that separates shrinkage from contour offset ([models](models.md#dimensions))
 - [ ] Pick the storage format for parameters keyed by their dependencies (nozzle × material × temp...)
 - [ ] Figure out which of these the bd_pressureE can identify on its own, before buying it

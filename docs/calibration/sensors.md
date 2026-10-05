@@ -33,7 +33,7 @@ things a real sensor could measure.
 
 | Sensor | Cost | Why |
 |---|---|---|
-| 0.01 g scale | ~$20 | Weigh test prints: actual flow and filament density, no squinting |
+| 0.001 g scale | **Ordered** | Filament area, density, moisture, the flow ladder, part mass ([filament](filament.md#fast-tests)) |
 | Room temp + humidity sensor | ~$5 | The disturbance nobody logs |
 | Humidity sensor in the dry box | ~$5 | Moisture is a huge hidden variable for stringing and seams |
 | IR temperature sensor at the toolhead | ~$15 | Last-layer temperature, hidden right now |

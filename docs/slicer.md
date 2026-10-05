@@ -68,7 +68,8 @@ flowchart LR
 
 ### The library
 
-One entry per material, brands inherit and override. Rough shape:
+One entry per material, brands inherit and override (family → line → color → spool, see
+[filament](calibration/filament.md#library-structure)). Rough shape:
 
 ```toml
 [ABS]

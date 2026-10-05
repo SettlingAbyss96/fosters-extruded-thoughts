@@ -119,8 +119,8 @@ follows from $A$. Not tuned.
 f = \frac{m_{measured}}{\rho\,V_{commanded}}
 ```
 
-$V_{commanded}$ comes from the G-code. A scale replaces the flow cube. Density first: weigh a
-measured length of filament, $\rho = m / (\frac{\pi d_f^2}{4} L)$.
+$V_{commanded}$ comes from the G-code. A scale replaces the flow cube. Density and the real
+filament area come off the scale too ([filament](filament.md#weigh-a-meter-true-cross-section)).
 
 ## Dimensions
 
