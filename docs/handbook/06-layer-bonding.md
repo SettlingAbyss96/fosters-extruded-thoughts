@@ -80,6 +80,10 @@ or three interfaces.** Every weld gets several hot hits, each smaller than the l
 Put together: an interface spends seconds above $T_g$, and most of its useful hot time is in the
 first second or two after the bead lands.
 
+![Interface temperature after deposition for ABS in a 50 and a 70 degree chamber, against Tg](figures/interface-temperature.svg)
+
+*A toy model of the ABS case. The hotter chamber starts the interface 10 K hotter and keeps it above Tg almost 2 seconds longer.*
+
 ## Stage 1: making contact
 
 Two things can bring the surfaces together:
@@ -127,6 +131,10 @@ t_{eq} = \int \frac{dt}{a_T(T(t))}
 Every moment counts, weighted by how fast chains move at that moment's temperature. With the
 universal WLF constants, one second at $T_g + 60$ K counts as much as about 15 minutes at
 $T_g + 30$ K. **The first hot second does nearly all the work.**
+
+![Equivalent weld time accumulated after deposition for the two chamber temperatures](figures/weld-time.svg)
+
+*Same toy model, weighted by the WLF shift factor. The hotter chamber ends up with about 5× more weld time, almost all of it from the first second.*
 
 I find it useful to think of it as a healing number:
 
@@ -231,9 +239,9 @@ Roughly ranked by how solid the evidence is and how cheap it is to try.
 - [Microwave welding](https://www.science.org/doi/10.1126/sciadv.1700262) with carbon nanotube coated filament: 275% stronger welds
 - [In-situ solvent treatment](https://link.springer.com/article/10.1007/s00170-024-14077-7) layer by layer, and [cold plasma](https://link.springer.com/article/10.1007/s40964-025-01509-3) treatment
 
-## For this printer
+## What I'd like to try on this printer
 
-What I'd actually do for structural ABS, ASA and PPA-CF parts:
+For structural ABS, ASA and PPA-CF parts, this is where I'd start:
 
 - 70 °C chamber (it's the plan anyway)
 - Extra-wide inner walls and infill on the 0.6 nozzle, if the tip allows
@@ -242,7 +250,9 @@ What I'd actually do for structural ABS, ASA and PPA-CF parts:
 - Try BrickLayers on a few test parts
 - Anneal the PPA-CF parts (chapter 11)
 
-## What I'd measure
+## What I'd love to measure
+
+None of this is set up yet, but it's the experiment I'm most excited about in the whole handbook:
 
 - Z tensile coupons: ABS at two chamber temperatures, PLA as a control
 - Bonded width from polished cross-sections under a USB microscope

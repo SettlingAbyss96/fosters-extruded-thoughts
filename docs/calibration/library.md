@@ -31,6 +31,8 @@ and whatever the machine flags.
 
 ## The catch: other machines
 
+*The math behind mapping one machine onto another: [handbook chapter 10](../handbook/10-sensing-estimation.md#moving-knowledge-between-machines).*
+
 All of that was measured on somebody else's hotend. Bambu PLA Basic's 21 mm³/s is the Bambu
 hotend with a 0.4, not the Conch with a 0.6. Temperatures mostly transfer. Max flow and PA don't.
 
@@ -66,6 +68,8 @@ passive checks below are for.
 - `PRINT_START` checks the sliced filament against the active spool and complains if they don't match
 
 ## Every print is a test
+
+*The estimation side (observability, recursive least squares, run-to-run): [handbook chapter 10](../handbook/10-sensing-estimation.md#observability).*
 
 The machine already logs enough to check a filament during normal prints. Kalico reports live
 extruder velocity and heater power through Moonraker, so a small logger on the Pi can watch every

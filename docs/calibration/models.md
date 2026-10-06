@@ -6,6 +6,8 @@ tells me.
 
 ## Flow chain
 
+*Longer version: [handbook chapter 4](../handbook/04-extrusion-dynamics.md#slip).*
+
 How much plastic actually comes out per mm of commanded extrusion:
 
 ```math
@@ -24,6 +26,8 @@ is why it changes with every spool and never sticks. Measure each factor on its 
 left is the [bead residual](#bead), which is small and stable.
 
 ## Nozzle pressure
+
+*Longer version, with the power-law math: [handbook chapter 4](../handbook/04-extrusion-dynamics.md#the-nozzles-resistance-for-a-real-melt).*
 
 The nozzle behaves like a capacitor and a resistor. The filament and melt between the gears and
 the tip squish a little (compliance $C$), and the nozzle resists flow (resistance $R$):
@@ -63,6 +67,8 @@ What falls out of that:
 
 ## Ooze and retraction
 
+*Longer version: [handbook chapter 4](../handbook/04-extrusion-dynamics.md#how-much-is-actually-stored).*
+
 When the extruder stops, pressure bleeds off through the nozzle:
 
 ```math
@@ -78,6 +84,8 @@ wet filament.
 - The pressure sensor sees the decay curve directly, so ooze becomes a measurement
 
 ## Melt capacity
+
+*Longer version: [handbook chapter 3](../handbook/03-melting.md#the-graetz-number).*
 
 The hotend can't heat plastic faster than the heater can supply energy:
 
@@ -104,6 +112,8 @@ MPC already models $P_{loss}$, so that's a free, crude flow sensor.
 
 ## Bead
 
+*Longer version: [handbook chapter 5](../handbook/05-laying-a-line.md#the-bead-shape).*
+
 Orca models a line as a rectangle with round ends:
 
 ```math
@@ -123,6 +133,8 @@ $V_{commanded}$ comes from the G-code. A scale replaces the flow cube. Density a
 filament area come off the scale too ([filament](filament.md#weigh-a-meter-true-cross-section)).
 
 ## Dimensions
+
+*Longer version: [handbook chapter 7](../handbook/07-shrink-stress-warp.md#dimensional-accuracy).*
 
 A test part with outside widths and holes at several sizes:
 
@@ -148,6 +160,8 @@ and the chamber changes when it sets, so $s$ is keyed by material **and** chambe
 
 ## Cooling
 
+*How cooling trades against weld strength: [handbook chapter 6](../handbook/06-layer-bonding.md#then-it-cools-fast).*
+
 Heat leaving the last layer:
 
 ```math
@@ -164,10 +178,14 @@ interface hot. A hot chamber is what lets both happen.
 
 ## Z drift and soak
 
+*Two-node chamber model: [handbook chapter 9](../handbook/09-heat-control.md#the-chamber-is-a-small-building).*
+
 Frame drift and the predictive soak are in [slicer.md](../slicer.md#soak-stop-guessing). Chamber
 heat balance is in the [roadmap](../roadmap.md#how-much-heater).
 
 ## Motion
+
+*Longer version: [handbook chapter 8](../handbook/08-motion.md#input-shaping-from-scratch).*
 
 Shaper limits and why they scale with stiffness and mass: [input shaper](../tuning/input-shaper.md).
 The link to everything else: corner quality depends on the shaper's smoothing, the accel, and PA

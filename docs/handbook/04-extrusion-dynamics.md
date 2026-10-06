@@ -111,6 +111,10 @@ is off by just 0.01 s, that's about 10 mm³/s of error. At 150 mm/s the line its
 29 mm³/s, so **a 10 ms PA error is a 30% flow error at the corners.** That's why PA matters more
 the harder you accelerate.
 
+![Flow out of the nozzle for no pressure advance, correct pressure advance and too much pressure advance](figures/pa-step-response.svg)
+
+*Same nozzle, three PA settings. The dashed line is what the slicer asked for.*
+
 ## The nozzle's resistance, for a real melt
 
 So far I assumed $q_{out} = P/R$, a constant resistance. Real melts shear-thin (chapter 2). For a
@@ -152,6 +156,10 @@ printing needs less PA.** That's exactly what people found empirically, and it's
 [adaptive pressure advance](https://github.com/OrcaSlicer/OrcaSlicer/wiki/adaptive_pressure_advance_calib):
 you run at least six PA tests at different flows and accelerations, and it fits a curve
 through them.
+
+![Pressure advance needed vs flow for three power-law indices](figures/pa-vs-flow.svg)
+
+*The more a melt shear-thins (smaller n), the faster the PA it needs drops off with flow.*
 
 Temperature does the same thing through the shift factor from chapter 2. The melt's consistency
 $K$ scales with $a_T$, so
@@ -263,7 +271,9 @@ have a width sensor: `hall_filament_width_sensor` reads the diameter and applies
 sensor to the melt zone. So the "index by filament distance, not time" idea is already in there.
 What it doesn't do: correct for slip, or see ovality with a single-axis sensor.
 
-## What I'd build
+## What I'd like to build next
+
+None of these exist on my machine yet, and some may never happen. They're the gaps I find most exciting, in the order I'd tackle them if time allows:
 
 1. PA as a function of flow and temperature from a two-parameter physical model, fit from a pressure sweep
 2. Pressure-aware retraction and unretraction

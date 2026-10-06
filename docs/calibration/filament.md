@@ -154,6 +154,8 @@ When a filament prints badly, this is the first check, before touching a single 
 
 ### Flow ladder by mass
 
+*What the two knees mean physically: [handbook chapter 3](../handbook/03-melting.md#two-ways-to-hit-the-wall).*
+
 The main one, and it doesn't need the pressure sensor.
 
 The nozzle hovers about 30 mm over a cool bed and extrudes a fixed volume at stepped flow rates,
@@ -219,6 +221,8 @@ Caveats:
 - Undermelted plastic goes matte or rough before it actually slips. Note the first step where the strand changes (camera later)
 
 ### Matching temperature
+
+*Why matching one temperature brings other behavior along with it: [handbook chapter 2](../handbook/02-polymers-101.md#temperature-the-shift-factor).*
 
 Over a 15 °C span the knee vs temperature is close enough to a straight line:
 

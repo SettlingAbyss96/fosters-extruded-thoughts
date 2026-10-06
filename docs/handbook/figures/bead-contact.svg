@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="340" viewBox="0 0 900 340" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="899" height="339" rx="10" fill="white" stroke="#e5e7eb"/>
+<text x="40" y="30" font-size="16" font-weight="600" fill="#111827">Same layer height, wider line: more of each layer is stuck to the next</text>
+<text x="40" y="50" font-size="12.5" fill="#6b7280">Idealized rounded-rectangle beads. Red = bonded contact between layers. White gaps = voids</text>
+<path d="M88.0,120.0 H158.0 A28.0,28.0 0 0 1 158.0,176.0 H88.0 A28.0,28.0 0 0 1 88.0,120.0 Z" fill="#fcd9b6" stroke="#c2410c" stroke-width="1.5"/>
+<path d="M214.0,120.0 H284.0 A28.0,28.0 0 0 1 284.0,176.0 H214.0 A28.0,28.0 0 0 1 214.0,120.0 Z" fill="#fcd9b6" stroke="#c2410c" stroke-width="1.5"/>
+<path d="M340.0,120.0 H410.0 A28.0,28.0 0 0 1 410.0,176.0 H340.0 A28.0,28.0 0 0 1 340.0,120.0 Z" fill="#fcd9b6" stroke="#c2410c" stroke-width="1.5"/>
+<path d="M88.0,176.0 H158.0 A28.0,28.0 0 0 1 158.0,232.0 H88.0 A28.0,28.0 0 0 1 88.0,176.0 Z" fill="#fcd9b6" stroke="#c2410c" stroke-width="1.5"/>
+<path d="M214.0,176.0 H284.0 A28.0,28.0 0 0 1 284.0,232.0 H214.0 A28.0,28.0 0 0 1 214.0,176.0 Z" fill="#fcd9b6" stroke="#c2410c" stroke-width="1.5"/>
+<path d="M340.0,176.0 H410.0 A28.0,28.0 0 0 1 410.0,232.0 H340.0 A28.0,28.0 0 0 1 340.0,176.0 Z" fill="#fcd9b6" stroke="#c2410c" stroke-width="1.5"/>
+<line x1="88.0" y1="176.0" x2="158.0" y2="176.0" stroke="#dc2626" stroke-width="4"/>
+<line x1="214.0" y1="176.0" x2="284.0" y2="176.0" stroke="#dc2626" stroke-width="4"/>
+<line x1="340.0" y1="176.0" x2="410.0" y2="176.0" stroke="#dc2626" stroke-width="4"/>
+<text x="249.0" y="266.0" font-size="14" text-anchor="middle" fill="#111827">0.4 nozzle: three 0.45 mm lines, 0.2 mm layers</text>
+<text x="249.0" y="288.0" font-size="15" font-weight="600" text-anchor="middle" fill="#dc2626">about 56% bonded</text>
+<path d="M528.0,120.0 H808.0 A28.0,28.0 0 0 1 808.0,176.0 H528.0 A28.0,28.0 0 0 1 528.0,120.0 Z" fill="#fcd9b6" stroke="#c2410c" stroke-width="1.5"/>
+<path d="M528.0,176.0 H808.0 A28.0,28.0 0 0 1 808.0,232.0 H528.0 A28.0,28.0 0 0 1 528.0,176.0 Z" fill="#fcd9b6" stroke="#c2410c" stroke-width="1.5"/>
+<line x1="528.0" y1="176.0" x2="808.0" y2="176.0" stroke="#dc2626" stroke-width="4"/>
+<text x="668.0" y="266.0" font-size="14" text-anchor="middle" fill="#111827">Extra wide: one 1.2 mm line, 0.2 mm layers</text>
+<text x="668.0" y="288.0" font-size="15" font-weight="600" text-anchor="middle" fill="#dc2626">about 83% bonded</text>
+</svg>

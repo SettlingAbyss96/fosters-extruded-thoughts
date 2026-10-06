@@ -140,10 +140,12 @@ effects). Printers have "max speed 500 mm/s." What I'd want instead:
 
 All of it measurable with the tools in this handbook.
 
-## Where I'll start
+## Where I'd like to start
+
+If time allows, and assuming the first steps work out:
 
 1. The print logger and the strength profile (software, now)
-2. The pressure sensor and the cool-down sweep (phase 2 in [chapter 12](12-gaps.md#how-id-sequence-it))
+2. The pressure sensor and the cool-down sweep (phase 2 in [chapter 12](12-gaps.md#how-id-like-to-sequence-it))
 3. The thermal module, with weld time planning
 4. The shared database, if the first three work
 

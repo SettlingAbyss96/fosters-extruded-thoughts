@@ -107,7 +107,9 @@ These are my own ideas. I can't be sure nobody has done them, only that I haven'
 - **Calibration transfer for vendor filament libraries,** using anchors measured on both machines ([library.md](../calibration/library.md))
 - **Anchors as a community round robin,** so filament data from different printers can be compared (chapter 13)
 
-## How I'd sequence it
+## How I'd like to sequence it
+
+If time allows. Each phase depends on the one before it working out:
 
 | Phase | When | What |
 |---|---|---|

@@ -93,7 +93,7 @@ Full steps: [autopa `docs/ALPS.md`](https://github.com/G0BL1N/autopa/blob/main/d
 - [ ] **The HeatCore 4 UHF ALPS uses the same ALPS board as the ALPSv6** that autopa validated: STM32F072 + ADS131M02, with USB-C and BOOT/RESET buttons reachable once installed. The product page lists the same ADC and a USB port, which is promising but not proof.
 - [ ] **Temperature behaviour of the ALPS electronics** in a 70 °C chamber, next to a 350 °C hot zone. Mellow is unlikely to publish a rating, so **buy one and test it**: log the board temperature (thermocouple taped to the PCB) against chamber temperature, and watch for USB dropouts. Tare-on-every-tap cancels slow thermal drift, but the electronics still have a limit. If it fails, use [ALPS on CAN](#alps-on-can-reading-the-ads131m02-from-the-h36).
 - [ ] A **Stealthburner (or other toolhead) mount** for the HeatCore 4 heatsink with the chosen extruder.
-- [ ] Whether autopa works on Kalico, if the rebuild uses Kalico.
+- [ ] Whether autopa works on Kalico. The rebuild runs Kalico, so this matters. Kalico's load-cell code also has its own tap analysis and tap quality classifier.
 
 ## ALPS on CAN: reading the ADS131M02 from the H36
 
@@ -173,6 +173,17 @@ The bridge signal is **microvolts**. Digitize it **as close to the load cell as 
 2. **Take it apart and document it**: board photos, how the bridge connects (connector or soldered), ADS131M02 location, and test pads for SPI, DRDY, CLKIN and NRST. Commit the photos to `docs/hardware/alps/`.
 3. **Prototype A** to confirm the H36 reads the ADC at 6.8 MHz (`LOAD_CELL_DIAGNOSTIC`: sample rate, 0 saturated samples).
 4. **Design B** in KiCad. Release it as a public repo under GPL-3.0 (matching Klipper and Voron) or CERN-OHL-S, the standard open-hardware license. Order it from PCBWay.
+
+## Beyond probing
+
+The raw force stream is the real reason to want the Klipper-firmware mode. Probing and PA are just
+the start:
+
+- [Read et al. (2024)](https://pmc.ncbi.nlm.nih.gov/articles/PMC11636983/) put a load cell between the drive gears and the hotend and picked working print settings for filaments nobody had a profile for, from pressure vs flow vs temperature
+- [ETH Zurich](https://arxiv.org/abs/2403.16042) closed a loop on extrusion force and held line width steady while the layer height was varied from 20% to 200%
+- The same signal shows clogs, slip, and wet filament (it gets runnier)
+
+All of that is in the [handbook's gap list](handbook/12-gaps.md#the-big-table), rows 6 to 8, 26 and 27.
 
 ## Sources
 

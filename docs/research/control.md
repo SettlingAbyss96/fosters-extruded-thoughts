@@ -97,7 +97,9 @@ the phone-camera calibration is the cheapest possible path to the same idea.
 
 None of it is magic. It's the same sensors and models as above, packaged.
 
-## What I'm taking
+## What I'd love to borrow
+
+Ideas worth stealing, if time allows. The full list of gaps is in the [handbook](../handbook/12-gaps.md):
 
 | Idea | Where it goes |
 |---|---|

@@ -13,6 +13,8 @@ flowchart LR
 
 ## 1. Melt viscosity
 
+*Long version: [handbook chapter 2](../handbook/02-polymers-101.md).*
+
 **Polymer melts get runnier the faster they flow** (shear thinning). A common model is the Cross
 model:
 
@@ -57,6 +59,8 @@ For this printer:
 
 ## 2. Melting: how fast the hotend can go
 
+*Long version: [handbook chapter 3](../handbook/03-melting.md).*
+
 [Go et al. 2017](https://www.sciencedirect.com/science/article/abs/pii/S2214860416302834) broke
 FFF speed into three limits: how hard the extruder can push, how fast heat gets into the
 filament, and how fast the gantry moves. Melting turned out to be the limit in a lot of machines.
@@ -91,6 +95,8 @@ the usual limits with a screw feed and laser heating. Different machine, same th
 
 ## 3. Flow through the nozzle (where PA comes from)
 
+*Long version: [handbook chapter 4](../handbook/04-extrusion-dynamics.md).*
+
 [Bellini, Güçeri & Bertoldi 2004](https://orbit.dtu.dk/en/publications/liquefier-dynamics-in-fused-deposition/)
 was the first to treat the liquefier as a dynamic system with a lag between pushing filament and
 plastic coming out, the thing pressure advance compensates for.
@@ -106,6 +112,8 @@ which is why PA is per material and doesn't transfer between families.
 
 ## 4. The bead
 
+*Long version: [handbook chapter 5](../handbook/05-laying-a-line.md).*
+
 [Comminal et al. 2018](https://doi.org/10.1016/j.addma.2017.12.013) simulated how the strand lands.
 Two numbers decide its shape: the gap between the nozzle and the layer below, and the ratio of
 print speed to flow speed in the nozzle. Fast with a big gap gives an almost round strand, slow
@@ -119,6 +127,8 @@ For this printer:
 - The first layer is this effect with a probe-set gap
 
 ## 5. Layers welding together
+
+*Long version, including where the research disagrees: [handbook chapter 6](../handbook/06-layer-bonding.md).*
 
 How strong a part is across layers comes down to the weld between them. Two steps:
 
@@ -165,6 +175,8 @@ For this printer:
 - A hot chamber crystallizes more during printing. Less annealing shrink, but maybe weaker welds since crystals form before the chains cross. Something to test, not assume
 
 ## 7. Shrinkage, stress, warping
+
+*Long version: [handbook chapter 7](../handbook/07-shrink-stress-warp.md).*
 
 Each new layer goes down hot on cooler layers. It wants to shrink as it cools, the layer under it
 says no, and stress builds up layer by layer. It comes out as warp, curl, or layers splitting.

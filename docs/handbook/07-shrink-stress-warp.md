@@ -67,6 +67,10 @@ stack are similar in thickness, and the bed is holding the part down, so don't t
 literally. But the shape of it is right: **warp gets decided in the first few millimeters.** That's
 why bed adhesion and a hot bed matter so much.
 
+![Share of the bending tendency contributed by each of the first ten layers, with the running total](figures/stoney-layers.svg)
+
+*The toy model's 1/m² weighting. The first three layers carry most of it.*
+
 [Armillotta et al.](https://www.semanticscholar.org/paper/Warpage-of-FDM-parts:-Experimental-tests-and-model-Armillotta-Bellotti/9ee2ce3b84cf9620980c53c3bcd8544d8db7b4b5)
 built a better warp model for ABS blocks. They found the worst warp at medium part heights, with heat
 from the newest layer spreading the stress over several layers below.
@@ -164,7 +168,9 @@ end up with locked-in stress.
 **Theory, low risk:** a controlled chamber cool-down for big ABS, ASA and PPA parts. Ramp the chamber
 down at 1 to 2 K/min instead of shutting everything off. It's just software on this printer.
 
-## What I'd do on this printer
+## What I'd like to try on this printer
+
+Small stuff, mostly software, if time allows:
 
 - A slow cool-down ramp at the end of hot-chamber prints
 - Separate print shrink and annealing shrink for PPA-CF in the library, and measure both once

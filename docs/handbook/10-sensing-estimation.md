@@ -179,7 +179,9 @@ collapses to one factor, estimated in log space:
 
 That's how the Bambu library maps onto this printer ([library.md](../calibration/library.md#the-catch-other-machines)).
 
-## What I'd implement first
+## What I'd like to implement first
+
+Nothing here exists yet. If I get to it, this is the order:
 
 1. A logger on the Pi with recursive least squares on heater power vs flow, per print
 2. CUSUM on the anchor's numbers, for machine health

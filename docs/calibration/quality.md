@@ -6,6 +6,8 @@ Each thing that goes wrong on a print, split into what actually causes it. Order
 
 ## Seams
 
+*Longer version: [handbook chapter 4](../handbook/04-extrusion-dynamics.md#seams-are-pressure-transients).*
+
 A seam is a **pressure transient.** The loop ends, the nozzle has to go to zero flow, travel, then
 come back to exactly the right flow at the start of the next loop. Any error in that pressure state
 shows up right there.
@@ -60,6 +62,8 @@ can measure on every loop, not judge from a photo.
 
 ## Ringing / ghosting
 
+*Physics: [handbook chapter 8](../handbook/08-motion.md#resonance-and-ringing).*
+
 | Cause | Why | Measured by |
 |---|---|---|
 | Shaper | Wrong or missing frequency | Accelerometer |
@@ -80,6 +84,8 @@ can measure on every loop, not judge from a photo.
 
 ## Under-extrusion at speed
 
+*Physics: [handbook chapter 3](../handbook/03-melting.md#two-ways-to-hit-the-wall).*
+
 | Cause | Why | Measured by |
 |---|---|---|
 | Past max flow | Hotend can't melt it fast enough | Pressure knee, heater pegged |
@@ -98,6 +104,8 @@ can measure on every loop, not judge from a photo.
 
 ## Warping, curl, layer splits
 
+*Physics: [handbook chapter 7](../handbook/07-shrink-stress-warp.md#stress-builds-up-layer-by-layer).*
+
 | Cause | Why | Measured by |
 |---|---|---|
 | Chamber temperature and gradient | Uneven shrink | Chamber sensors (3 planned) |
@@ -107,6 +115,8 @@ can measure on every loop, not judge from a photo.
 | Part geometry | Long thin stuff curls | Known |
 
 ## Layer adhesion / strength
+
+*The full story, including where the research disagrees: [handbook chapter 6](../handbook/06-layer-bonding.md).*
 
 | Cause | Why | Measured by |
 |---|---|---|

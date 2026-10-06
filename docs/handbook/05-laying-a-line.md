@@ -79,6 +79,14 @@ Real beads flow into the corners somewhat, so measured contact comes out higher 
 trend is the point. **The ratio $h/w$ decides how much of each layer is actually stuck to the next
 one.** Thick layers on narrow lines leave less than half the cross-section bonded.
 
+![Cross-sections of stacked beads: three normal lines vs one extra-wide line, with bonded contact marked](figures/bead-contact.svg)
+
+*Same layer height, one wide line instead of three narrow ones. The red is where layers actually touch.*
+
+![Bonded fraction between layers vs line width over layer height](figures/contact-fraction.svg)
+
+*The idealized curve, with a few real setups on it.*
+
 ## Extra-wide lines
 
 This is one of my favorite findings in the whole literature, because it's so simple.
@@ -112,7 +120,9 @@ vs flow limit" instead of a pile of separate width settings. That's a theme in [
 - **Wall/infill overlap** pushes the infill into the walls so they bond. It's fixing the same corner voids from above, sideways
 - **Ironing** runs the hot nozzle back over the top surface with a trickle of flow to flatten it. It's squish applied after the fact
 
-## What I'd test
+## What I'd love to test
+
+Not started yet. If time allows:
 
 - Z-direction tensile coupons at three $h/w$ ratios on the 0.6 nozzle, including an extra-wide case
 - Cut and polish the coupons, measure the actual bonded width under a USB microscope, compare to $1 - h/w$

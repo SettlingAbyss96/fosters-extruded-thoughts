@@ -103,6 +103,10 @@ t_2 = \frac{\pi}{\omega_d}, \qquad K = e^{-\zeta\pi/\sqrt{1 - \zeta^2}}, \qquad 
 Every move gets convolved with those two hits. The machine now takes half a period longer to
 finish each acceleration change, and in exchange the ringing at $f_0$ is gone.
 
+![Two impulse responses half a period apart cancelling each other out](figures/input-shaping.svg)
+
+*The first hit rings, the second rings exactly out of phase, and after the second hit the sum is flat.*
+
 **How well it works off-frequency.** Singer and Seering's residual vibration for a shaper with hits
 $A_i$ at times $t_i$ (last one at $t_N$):
 

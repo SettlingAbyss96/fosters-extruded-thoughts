@@ -84,6 +84,10 @@ tens of minutes to hours. **That's why the chamber air hits its target quickly w
 drifting, and why Z keeps creeping for a long time after "the chamber is at temperature."** The slow
 time constant is the one that matters for precision.
 
+![Chamber air and frame temperature after the heater turns on, from a two-node model](figures/chamber-two-node.svg)
+
+*Made-up but plausible numbers. The air reaches 70 °C in about 9 minutes, the frame is still climbing after two and a half hours.*
+
 Building engineers identify exactly this kind of two-node RC model from logged data
 ([Bacher & Madsen 2011](https://doi.org/10.1016/j.enbuild.2011.02.005)). Log a heat-up and a
 cool-down, fit the model, and the chamber is characterized.

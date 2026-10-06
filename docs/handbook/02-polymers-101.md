@@ -114,6 +114,10 @@ standard weight) is measured at something like 10 per second. **MFI is measured 
 slower than you print.** Two filaments with the same MFI can print differently if they shear-thin
 differently. That's why I treat datasheet MFI as a rough hint and nothing more.
 
+![Viscosity vs shear rate for two made-up filaments that match at the MFI shear rate and differ at printing shear rates](figures/shear-thinning.svg)
+
+*Two made-up filaments that would get the same MFI, and end up 37% apart in the nozzle.*
+
 ## Temperature: the shift factor
 
 Heat makes melts runnier, and the way it does it is the single most useful idea in this handbook.
@@ -145,6 +149,10 @@ but the universal ones give a feel for the size of it:
 Read that table twice. A few tens of degrees near $T_g$ changes how fast the chains move by
 **factors of millions.** That's why layer bonding is so sensitive to temperature (chapter 6) and
 why warping cares so much about the chamber (chapter 7).
+
+![The WLF shift factor: how much faster chains move at each temperature above Tg](figures/wlf-shift.svg)
+
+*The same table as a curve. It flattens out, but near the top every 10 K still multiplies chain motion by several times.*
 
 And here's the part I find beautiful: **one shift factor $a_T$ rescales everything at once.**
 Viscosity, relaxation time, how fast chains diffuse across a weld. They all shift by the same

@@ -52,6 +52,10 @@ For a 30 mm melt zone and 1.75 mm filament ($A_f \approx 2.4$ mm²):
 Somewhere around 20 mm³/s the middle of the filament stops getting enough time. That's why normal
 hotends top out in the 15 to 30 mm³/s range, and why it's a heat problem, not a motor problem.
 
+![Time the plastic spends in the hot zone vs flow, for three melt zone lengths, against the time the core needs](figures/melt-time.svg)
+
+*Where each curve drops into the shaded band is roughly where that melt zone runs out of time.*
+
 ## The Graetz number
 
 Put those two times together. The Fourier number (how far the heat got) is
@@ -158,7 +162,9 @@ If $\rho$ and $c$ are known, the slope tells me $X$: how crystalline the filamen
 That varies by brand (PLA especially) and changes how it melts and prints. A printer is already a
 crude differential scanning calorimeter. I haven't seen anyone use it that way.
 
-## What I'd measure first
+## What I'd love to measure first
+
+None of this is set up yet. These are the experiments I'm most curious about, if time allows:
 
 - The flow ladder with heater power and block temperature logged at each step: which wall comes first, and where
 - The same ladder on two hotends with the same anchor filament: how much a longer melt zone actually buys

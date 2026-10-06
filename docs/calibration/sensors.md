@@ -58,6 +58,8 @@ things a real sensor could measure.
 
 ## What can see what
 
+*What "observable" means formally, and why the pressure sensor matters so much: [handbook chapter 10](../handbook/10-sensing-estimation.md#observability).*
+
 Rows are things I want to know. ● can measure it directly, ○ indirectly or crudely.
 
 | Want to know | Accel | Probe / pin | Thermistors | Heater power | Buffer | Pressure / load cell | BDwidth | Scale | Calipers | Camera |

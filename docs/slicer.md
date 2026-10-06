@@ -124,6 +124,8 @@ Everything after that is the existing sequence.
 
 ## Chamber modes
 
+*Why the chamber matters for strength and warp: [handbook chapter 6](handbook/06-layer-bonding.md) and [chapter 7](handbook/07-shrink-stress-warp.md#why-hot-chambers-fix-warping).*
+
 The machine picks a mode from the material. Fans, heater, soak and (later) shaper and Z
 compensation all key off the mode, so there's one switch instead of ten.
 
@@ -174,6 +176,8 @@ estimates get way more accurate when its limits match the machine.
 
 ### The hotend is the real speed limit
 
+*Where max flow comes from: [handbook chapter 3](handbook/03-melting.md#the-graetz-number).*
+
 Max print speed for a line is set by how fast the hotend can melt:
 
 ```math
@@ -193,6 +197,8 @@ it doesn't matter.
 
 ## Hotend: MPC with filament feedforward
 
+*Longer version: [handbook chapter 9](handbook/09-heat-control.md#mpc-the-hotend-as-a-model).*
+
 Kalico has **MPC** (model predictive control) for heaters. It models the heater block, sensor,
 ambient and the filament, and it knows the extrusion rate from the planned moves. Power needed to
 heat the plastic going through:
@@ -210,6 +216,8 @@ Density and heat capacity per material come from the library (`MPC_SET` in `PRIN
 Needs the Conch's heater wattage first.
 
 ## Soak: stop guessing
+
+*Why the frame lags the air: [handbook chapter 9](handbook/09-heat-control.md#the-chamber-is-a-small-building).*
 
 Fixed soak times are either too long (waste) or too short (Z drifts during the first layers). What
 actually matters is how much the frame still has to move. The frame sensor warms like
@@ -243,6 +251,8 @@ Too much for a Jinja macro. Small Kalico plugin, same style as the buffer one, t
 `PRINT_START` and prints an ETA. $\varepsilon$ comes from the precision tolerances once I set them.
 
 ## Pressure advance, retraction, shrinkage
+
+*Why PA changes with flow and temperature: [handbook chapter 4](handbook/04-extrusion-dynamics.md#why-pa-changes-with-flow-and-temperature).*
 
 - **PA** lives in the library per filament × nozzle, applied by `PRINT_START`. Orca's PA option stays off so there's one source. Once bd_pressure is on the toolhead, its `PA_CALIBRATE` results get written back into the library. Machine measures, library updates, slicer regenerates
 - **Retraction** goes to firmware retraction (`[firmware_retraction]`, Orca "use firmware retraction"). Tuned on the machine, applies to every slice, `SET_RETRACTION` per filament

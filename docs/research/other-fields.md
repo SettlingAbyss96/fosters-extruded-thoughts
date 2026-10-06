@@ -36,6 +36,8 @@ same filament path could add.
 
 ## Semiconductor fabs: run-to-run control and SPC
 
+*The math: [handbook chapter 10](../handbook/10-sensing-estimation.md#learning-across-prints).*
+
 Fabs adjust a recipe between runs based on measurements of the last run.
 Sachs, Hu & Ingolfsson (1995) built the standard version: EWMA updates, a double EWMA to follow
 slow drift, and SPC to decide whether a measurement is worth reacting to. Fabs also do "virtual
@@ -75,6 +77,8 @@ factor). If a shared database ever happens, matrix factorization is how it gets 
 ([library](../calibration/library.md#later-a-shared-library)).
 
 ## Statistics
+
+*The math: [handbook chapter 10](../handbook/10-sensing-estimation.md#libraries-are-hierarchies).*
 
 **Hierarchical models** (Gelman et al., *Bayesian Data Analysis*). Family → line → color → spool is
 textbook partial pooling. A line's estimate is pulled toward its family when there's little data,
@@ -118,6 +122,8 @@ That's how the weigh-a-meter error budget in
 
 ## Machine tools: thermal error compensation
 
+*Applied to this printer: [handbook chapter 9](../handbook/09-heat-control.md#the-frame-and-z-drift).*
+
 [Mayr et al. 2012](https://www.researchgate.net/publication/256673861_Thermal_issues_in_machine_tools)
 (CIRP keynote): thermal errors are 60 to 75% of all geometric error in machine tools, and the
 usual fix is a few temperature sensors plus a fitted model.
@@ -132,6 +138,8 @@ with frame, chamber top, chamber bottom and bed as inputs, fitted from logged pr
 different temperatures. QGL and autoz already log what's needed.
 
 ## Buildings and HVAC
+
+*Applied to this printer: [handbook chapter 9](../handbook/09-heat-control.md#the-chamber-is-a-small-building).*
 
 - **Grey-box RC models** from logged data ([Bacher & Madsen 2011](https://doi.org/10.1016/j.enbuild.2011.02.005)). The chamber is a small building: identify its model from heat-up and cool-down logs, then control it with feedforward from the model
 - **Displacement ventilation** ([REHVA Guidebook No. 1](https://www.dinmedia.de/en/publication/rehva-guidebook-no-1/104774508), Skistad 2002): supply air low and slow, take it out high, let buoyancy do the work. Comfort limits are around 0.15 to 0.25 m/s at floor level, and diffusers are kept to about 0.2 m/s face velocity
