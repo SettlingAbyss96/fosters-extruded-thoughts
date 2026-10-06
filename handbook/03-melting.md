@@ -93,7 +93,8 @@ melt zone or a different material changes max flow before buying anything.
 
 The Graetz number says whether the core gets hot in time. The full solution says how hot every part
 of it gets, and that's what the nozzle actually receives. Treat the filament (radius $`R`$) as a plug
-moving through a bore whose wall sits at $`T_w`$, and let $`\theta = (T_w - T)/(T_w - T_{in})`$, so 1
+moving through a bore whose wall sits at $`T_w`$ (a 1.75 mm bore, so the filament touches the wall;
+real bores are bigger, see "The bore isn't 1.75 mm"), and let $`\theta = (T_w - T)/(T_w - T_{in})`$, so 1
 is still cold and 0 is at wall temperature. The classic solution is a Bessel series:
 
 ```math
@@ -119,6 +120,10 @@ $`Gz^{\ast}`$ near 10. Above it the melt is close to uniform. Below it you don't
 a stiff core inside a runny sleeve. Two things push the whole table toward the cold end: latent heat
 in semi-crystalline plastics (effectively $`T_{in}`$ drops by $`X\,\Delta H_m/c`$), and a wall that
 isn't really at the setpoint (the heat path below).
+
+![Temperature across the bore at the exit of the melt zone, for four Fourier numbers](figures/melt-profile.svg)
+
+*At Fo = 0.25 the core is 75 K below the wall. At 0.13 it's still sitting near the glass transition.*
 
 **What leaves the nozzle (theory).** Laminar flow keeps streamlines in order through the cone, so
 the extrudate should come out with the hottest plastic on the outside and the coolest in the middle.
@@ -200,19 +205,103 @@ got **73% stronger** PC Blend layers with brass than steel at the same 275 °C, 
 Same setpoint, cooler melt, weaker welds (chapter 6).
 
 Two things follow. **Matching max flow doesn't mean matching melt temperature:** a flow test shows
-when the extruder gives up, not how hot the plastic was when it got through. And **the thread joint
-matters:** dry threads are mostly air gaps, and a thin layer of real high-temperature paste like
-[Slice's boron nitride paste](https://www.sliceengineering.com/products/boron-nitride-paste) makes
-the joint close to perfect. Regular CPU paste is made for 150 to 180 °C and bakes out at ABS
+when the extruder gives up, not how hot the plastic was when it got through. And the thread joint
+matters less than I first thought (next section), but a real high-temperature paste like
+[Slice's boron nitride paste](https://www.sliceengineering.com/products/boron-nitride-paste) still
+earns its place on the heater cartridge and thermistor, where contact decides how fast and how
+honestly the controller sees the block. Regular CPU paste is made for 150 to 180 °C and bakes out at ABS
 temperatures, metal-filled pastes don't belong near the thermistor or heater, and liquid metal
 attacks aluminum blocks.
-
-**Theory:** the nozzle's flat tip presses each bead onto the layer below, and a steel tip runs
-coldest right there. Part of steel's weld penalty might come from the tip, not just the melt.
 
 Orca and Bambu Studio ask for your nozzle material, but as far as I can tell only to warn about
 abrasive filament. Nothing offsets the temperature. After a nozzle swap, recalibrate MPC (chapter 9)
 and test hotter.
+
+## Where the heat path actually bites
+
+There are two places heat can get stuck, and they behave completely differently.
+
+**Inside the block,** heat goes radially through the threads and the nozzle wall into the plastic.
+That makes the wall a convective boundary, and the eigenvalues from "Inside the melt zone" become the
+roots of $`\lambda J_1(\lambda) = Bi\,J_0(\lambda)`$, where $`Bi = hR/k_p`$ compares the wall's conductance
+to the plastic's. Plastic conducts about 0.17 W/m·K, over a hundred times worse than even steel, so
+$`Bi`$ is huge and barely matters:
+
+| Wall | $`Bi`$ | Melting rate vs a perfect wall |
+|---|---|---|
+| Brass nozzle | about 540 | 99.6% |
+| Hardened steel nozzle | about 120 | 98.3% |
+| Dry threads, poor contact | about 46 | 95.8% |
+| Steel and a poor dry joint | about 33 | 94% |
+
+The plastic is its own bottleneck. Worst case, you'd want about 6% more melt zone. I didn't expect
+that. The clearance around the filament matters far more (two sections down).
+
+**Below the block,** the cone and tip stick out into the part fan. That's a fin: heat comes down from
+the block and the fan pulls it off the sides. For a stick-out $`L_f`$ of radius $`r_f`$:
+
+```math
+\Delta T_{tip} = (T_{block} - T_{air})\left(1 - \frac{1}{\cosh(m L_f)}\right), \qquad m = \sqrt{\frac{2h}{k\,r_f}}
+```
+
+For 4 mm of stick-out, $`r_f = 2`$ mm and a 250 °C block:
+
+| Tip cooling | Copper | Brass | Tungsten carbide | Hardened steel |
+|---|---|---|---|---|
+| Silicone sock ($`h \approx 25`$) | 0.1 K | 0.4 K | 0.5 K | 1.7 K |
+| Fan, moderate ($`h \approx 200`$) | 1.0 K | 2.9 K | 3.7 K | 12.8 K |
+| Fan, hard ($`h \approx 500`$) | 2.4 K | 7.1 K | 9.0 K | 29.6 K |
+
+![How far the nozzle tip drops below the block, against cooling on the tip, for four nozzle materials](figures/tip-fin.svg)
+
+*Under a sock, nothing matters much. Under a hard fan, steel's tip drops four times as far as brass's.*
+
+The melt also draws its last heat through that stretch: $`L_f/(k\pi r_f^2)`$ is about 2.8 K/W in brass
+and 12.7 K/W in steel, so every 2 W the plastic still needs costs 5.5 K or 25 K. The $`h`$ values are
+rough guesses, but the ratios aren't. **Steel's penalty lives at the tip:** the cone, the orifice and
+the flat land that presses the bead down, which is right where the weld gets made. It also means a
+silicone sock does more for a steel nozzle than any paste.
+
+## The bore isn't 1.75 mm
+
+All the math above assumes the filament fills the bore. It doesn't. All-metal heatbreaks and nozzle
+inlets for 1.75 mm filament are nominally about 2 mm, at least the V6-style parts and MK8-style
+nozzles. Bambu, Revo, Dragon and Rapido don't publish their bores, so it's worth checking yours with
+gauge pins. That clearance fills with melt, and it does three things.
+
+**It insulates.** The film is plastic, the same weak conductor as the core, in series with it. For a
+concentric film the Biot number depends only on the geometry, not the material:
+
+```math
+Bi = \frac{1}{\ln(R_{bore}/R_f)}
+```
+
+| Bore | Gap per side | $`Bi`$ | Melting rate | Melt zone needed to match |
+|---|---|---|---|---|
+| 1.80 mm | 25 µm | 36 | 94% | 1.06× |
+| 1.90 mm | 75 µm | 12 | 85% | 1.18× |
+| 2.00 mm | 125 µm | 7.5 | 77% | 1.30× |
+| 2.10 mm | 175 µm | 5.5 | 71% | 1.42× |
+
+A 2 mm bore costs about as much as 30% of melt zone length, which dwarfs the nozzle material inside
+the block. In this model the knee for a 20 mm zone drops from about 17 to 13 mm³/s for ABS. The
+filament usually rides against one side rather than sitting centered, so the real penalty should be
+somewhat smaller than the concentric number.
+
+**It adds slow volume.** A 2 mm bore holds about 30% more melt than the filament itself, and all of it
+is the slow layer at the wall, which is exactly what makes purging take a while (below).
+
+**It leaks backward.** Pressure pushes melt up the gap toward the cold zone, and flow through a thin
+annular gap of width $`\delta`$ goes as its cube:
+
+```math
+q_{back} \approx \frac{\pi D\,\delta^3}{12\,\eta}\,\frac{dP}{dz}
+```
+
+A 1.9 mm bore leaks about a fifth of what a 2.0 mm one does. That backflow freezing in the heatbreak
+is the classic jam. Going tighter isn't free either: filament tolerance (often ±0.05 mm), ovality and
+thermal swelling (about 0.016 mm at 100 K above room) all eat the clearance. 2 mm is where the
+published parts land, and it costs real melting capacity.
 
 ## Two ways to hit the wall
 
@@ -246,12 +335,47 @@ If $`\rho`$ and $`c`$ are known, the slope tells me $`X`$: how crystalline the f
 That varies by brand (PLA especially) and changes how it melts and prints. A printer is already a
 crude differential scanning calorimeter. I haven't seen anyone use it that way.
 
+## How long plastic stays in
+
+Not everything leaves at the same time. Once it's molten, plastic sticks to the wall, so the layer
+next to the wall barely moves while the middle runs ahead. For a power-law melt, with $`\xi = r/R`$:
+
+```math
+u(\xi) = \bar u\,\frac{3n+1}{n+1}\left(1 - \xi^{(n+1)/n}\right)
+```
+
+The first new plastic shows up after pushing $`(n+1)/(3n+1)`$ of the zone's volume $`V_z`$ (0.64 for
+$`n = 0.4`$), and the old plastic tails off slowly. For a Newtonian melt the old fraction in what comes
+out after pushing $`V`$ is exactly
+
+```math
+c_{old} = \left(\frac{V_z}{2V}\right)^2, \qquad V \ge V_z/2
+```
+
+and $`n = 0.4`$ is close:
+
+| Volume pushed | 1 $`V_z`$ | 2 $`V_z`$ | 3 $`V_z`$ | 5 $`V_z`$ |
+|---|---|---|---|---|
+| Old plastic in the outflow | 24% | 5% | 2.2% | 0.8% |
+
+![Fraction of old plastic in the outflow against volume pushed through, Newtonian and shear-thinning](figures/washout.svg)
+
+*Every extra zone volume buys less. Shear thinning flattens the profile and helps a little.*
+
+Getting under 2% takes about 3.2 zone volumes: roughly 75 mm³ for a 10 mm melt zone with a 1.75 mm
+bore, 230 mm³ for 30 mm. A real 2 mm bore adds about 30%, all of it the slow kind. That's the same order as the flush volumes slicers use for color changes,
+and it scales with the melt zone, so a long high-flow hotend pays for its flow on every swap. Dead
+pockets, like a gap between the nozzle and the heat break, add an even longer tail. That slow layer at
+the wall also sits hot far longer than the average transit time, which is my guess for where
+discolored, degraded plastic comes from.
+
 ## What I'd love to measure first
 
 None of this is set up yet. These are the experiments I'm most curious about, if time allows:
 
 - The flow ladder with heater power and block temperature logged at each step: which wall comes first, and where
 - The same ladder on two hotends with the same anchor filament: how much a longer melt zone actually buys, and whether the pressure slope climbs past $`q^{0.4}`$ near $`Fo \approx 0.3`$ like the model says
+- A thermal camera on the nozzle tip with and without the silicone sock, brass against steel, to check the fin numbers
 - Heater power vs flow during normal prints, against the energy equation: does the slope match the material?
 - Brass, tungsten carbide and hardened steel nozzles in the same hotend, each with and without boron nitride paste: the flow ladder plus Z coupons at the same setpoint, to see how much is the melt and how much is the joint
 

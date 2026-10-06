@@ -198,15 +198,16 @@ the hotend. For ABS (Seppala's constants from chapter 6, $`n = 0.4`$, 250 °C se
 |---|---|---|
 | Melt stays at setpoint | none | 0.38× |
 | Good brass setup | about 10 K | 0.55× |
-| Steel nozzle or dry thread joint | about 30 K | 1.34× |
+| Steel nozzle under a hard part fan | about 30 K | 1.34× |
+
+![PA needed against flow for three hotends, relative to 5 mm³/s](figures/pa-flip.svg)
+
+*The steel curve bottoms out near 10 mm³/s and then climbs.*
 
 **The trend can flip.** An adaptive PA curve belongs to the filament plus the nozzle, the paste and
 the heater, so copying one to a different hotend can compensate in the wrong direction.
 
-It also lags. PA acts in milliseconds, but the melt follows flow over a few seconds (the heat-soak
-time from chapter 3), so the PA you need depends on the last few seconds of printing. Fast infill
-straight into a slow outer wall means the wall starts with cold melt that no steady-state
-calibration expected (theory).
+It also lags: PA acts in milliseconds, the melt over seconds. Exactly how is in "Melt age" below.
 
 And it changes how much plastic lands, not just the corners. During a ramp the output is off by
 $`(\tau - K)\,\dot q`$. At 5,000 mm/s² on a 0.65 × 0.3 mm line, a PA tuned at 40 ms when the hot,
@@ -242,6 +243,10 @@ m = \frac{d\ln P}{d\ln q} = n + \frac{d\ln a_T}{dT}\,\frac{d\bar T}{d\ln q}, \qq
 |---|---|---|---|---|
 | $`m`$ (ABS, $`n = 0.4`$) | 0.51 | 1.4 | 3.3 | 5.0 |
 
+![Pressure against flow for three melt zone lengths, with the fully melted line for reference](figures/pressure-wall.svg)
+
+*Every curve starts on the fully melted line and peels off once the core stops keeping up. Shorter zones peel off earlier.*
+
 That's the max flow wall, derived instead of observed. Pressure that grows like $`q^{0.4}`$ in a
 comfortable melt zone grows like $`q^3`$ to $`q^5`$ near the knee, which is the pressure spike from
 chapter 3's "Two ways to hit the wall".
@@ -251,13 +256,49 @@ climbs much faster than pressure near the limit. A longer melt zone raises $`Fo`
 so it should need less PA at high flow and give a flatter PA vs flow curve, while a short one bends
 upward near its limit (a prediction, not a measurement). It's the same flip as the last section,
 coming from the melt zone instead of the heat path, and the two add. A longer zone also adds a
-little compliance, but melt at about 1 GPa stores only about 0.03 mm³ per mm of bore at 10 MPa,
+little compliance, but melt at about 1 GPa stores only about 0.024 mm³ per mm of 1.75 mm bore at 10 MPa,
 small next to the gears.
 
 One partial self-correction: pushing melt through a pressure drop heats it by about
 $`\Delta P/(\rho c)`$, roughly 5 K per 10 MPa. A stiff melt at high pressure warms itself a little on
 the way out.
 
+
+## Melt age
+
+Plug flow has a property that makes the dynamics exact. Each slice of filament only exchanges heat
+with the wall, not with its neighbors, so its temperature depends only on how long it's been in the
+hot zone, its age $`a`$, not on how the speed changed along the way:
+
+```math
+\bar\theta_{exit} = \sum_k \frac{4}{\lambda_k^2}\,e^{-\lambda_k^2 \alpha a/R^2}, \qquad \int_{t-a}^{t} q(s)\,ds = V_z
+```
+
+The second equation says the slice leaving now entered when the extruder was one melt zone of filament
+behind. So the age at the nozzle is just the time since the extruder position was one melt zone
+length back, which the firmware already knows (ignoring retractions). Linearized, it's a moving
+average of flow over the last transit time:
+
+```math
+\delta a(t) = -\frac{1}{q_0}\int_{t-a_0}^{t} \delta q(s)\,ds
+```
+
+A box filter, not a first-order lag. And it's lopsided. Step from 5 to 20 mm³/s on a 20 mm zone:
+nothing happens, then the melt cools over 2.4 s (the new, short transit), ending 32 °C colder and 5×
+stiffer, most of it in the last second. Step back down and the recovery takes 9.6 s (the new, long
+transit). **Speeding up hits within one fast transit, slowing down recovers over one slow transit.**
+So fast infill straight into a slow outer wall means the first several seconds of the wall run on
+melt up to 5× stiffer than steady state, with PA too low on the most visible line on the part. That's
+a prediction, and a pressure trace would confirm it or kill it.
+
+![Melt temperature leaving a 20 mm zone after a step up and a step down in flow](figures/melt-age-step.svg)
+
+*Speeding up: the old, well-heated plastic leaves first, then the temperature falls off a cliff.
+Slowing down: a slow climb over the long new transit.*
+
+It's also what per-move PA should run on: age from the extruder history, melt temperature from the
+series (plus the wall temperature MPC already estimates), PA from $`\tau_{eff}`$ above. Every input
+already exists in Kalico.
 ## Where the spring is
 
 What actually makes up $`C`$? My list, roughly in order of how much I suspect each one matters on a
@@ -297,14 +338,26 @@ with chapter 3's series:
 ```
 
 The sum of $`4/\lambda_k^4`$ is exactly 1/8, which gives the clean limit. For ABS ($`\beta_v`$ about
-4 × 10⁻⁴ /K, averaged over glass and melt) at 10 mm³/s that's about 0.75 to 0.95 mm³ for melt zones
-from 10 to 30 mm, or 0.3 to 0.4 mm of filament. That's more than the 0.4 mm³ of pressure at the same
-flow, and it plays out over the core's thermal time, $`R^2/(\lambda_1^2\alpha) \approx 1.7`$ s, not PA's
-tens of milliseconds. It scales with the flow you were just printing at, and grows a bit with melt
-zone length (a longer zone keeps more of the deficit inside instead of sending it out cold). So short
-travels are a pressure problem, and long travels after fast sections are a thermal one (theory, but
-the size lines up with real retraction lengths). Gravity, steam from wet filament and the meniscus
-at the tip add the rest. And with PA on, most of the pressure is already gone by the time the move
+4 × 10⁻⁴ /K, averaged over glass and melt) at 10 mm³/s that's 0.75 to 0.95 mm³ for melt zones from
+10 to 30 mm, or 0.3 to 0.4 mm of filament, more than the 0.4 mm³ of pressure. It scales with the flow
+just before the stop and grows a bit with zone length. And it arrives slowly, mode by mode, each with
+its own time $`\tau_k = R^2/(\lambda_k^2\alpha)`$ (1.65, 0.31, 0.13 s...):
+
+```math
+\Delta V_{th}(t) = \beta_v\,(T_w - T_{in})\,\frac{R^2 q}{\alpha}\sum_k \frac{4}{\lambda_k^4}\left(1 - e^{-\lambda_k^2 Fo_L}\right)\left(1 - e^{-t/\tau_k}\right)
+```
+
+![Ooze after a stop against time, split into the pressure part and the thermal part](figures/ooze-time.svg)
+
+*The pressure part is over before a short travel ends. The heat part is still going at the end of a long one.*
+
+At 10 mm³/s on a 20 mm zone, the pressure part is gone in about 0.1 s, while the thermal part is 13%
+done at 0.2 s, half at 1 s and 95% at 5 s. Short travels are a pressure problem, long travels after
+fast sections are a thermal one (theory, but the size lines up with real retraction lengths). It also
+explains seam blobs: with a retraction in place, that expansion fills the gap instead of oozing, so a
+full unretract after a long travel over-primes. The restart should shrink by
+$`\Delta V_{th}(t_{travel})/A_f`$. Slicers use a constant "extra length on restart". Gravity, steam
+from wet filament and the meniscus at the tip add the rest. And with PA on, most of the pressure is already gone by the time the move
 ends. **If you tuned retraction without PA, your retraction is doing PA's job.**
 That's why the order is PA first, retraction second.
 
@@ -367,8 +420,8 @@ What it doesn't do: correct for slip, or see ovality with a single-axis sensor.
 
 None of these exist on my machine yet, and some may never happen. They're the gaps I find most exciting, in the order I'd tackle them if time allows:
 
-1. PA as a function of flow and temperature from a two-parameter physical model, fit from a pressure sweep, then driven by an estimated melt temperature that follows the flow history
-2. Pressure-aware retraction and unretraction, plus a thermal term that tracks the flow just before the stop
+1. PA as a function of flow and temperature from a two-parameter physical model, fit from a pressure sweep, then driven by the melt age at the nozzle
+2. Pressure-aware retraction and unretraction, plus a thermal term from the flow before the stop and a restart that shrinks with travel time
 3. Slip compensation from an encoder
 4. Melt temperature control instead of block temperature (chapter 3)
 5. Closed-loop extrusion force, like the [ETH Zurich work](https://arxiv.org/abs/2403.16042), which used force to hold line width (chapter 5)

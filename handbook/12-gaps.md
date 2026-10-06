@@ -104,6 +104,8 @@ These are my own ideas. I can't be sure nobody has done them, only that I haven'
 - **The pressure sensor as a melt thermometer.** Pressure at a known flow gives viscosity, viscosity gives an effective melt temperature (chapter 3)
 - **A healing number as a slicer constraint.** Plan layer time, fan and chamber to hit a target weld time for each layer (chapter 6)
 - **PA from two physical parameters** instead of a test grid (chapter 4)
+- **Melt age as a firmware variable.** The age of the plastic at the nozzle falls out of the extruder history, and it sets the melt temperature, PA and how much the melt will expand at the next stop (chapter 4)
+- **Restart length that depends on what came before,** shrinking with the flow before the stop and the travel time, to kill seam blobs (chapter 4)
 - **Calibration transfer for vendor filament libraries,** using anchors measured on both machines ([library.md](../calibration/library.md))
 - **Anchors as a community round robin,** so filament data from different printers can be compared (chapter 13)
 

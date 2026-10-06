@@ -360,7 +360,10 @@ def interface_temp():
         p.line([(t, ch + (t0 - ch) * math.exp(-t / tau)) for t in linspace(0, 10)], col, lab)
         t_above = tau * math.log((t0 - ch) / (tg - ch))
         p.point(t_above, tg, col)
-        p.text(t_above, tg, f"{t_above:.1f} s above Tg", color=col, dx=6, dy=-10 if ch == 70 else 20)
+        if ch == 70:
+            p.text(t_above, tg, f"{t_above:.1f} s above Tg", color=col, dx=6, dy=-10)
+        else:
+            p.text(t_above, tg, f"{t_above:.1f} s above Tg", color=col, anchor="end", dx=-6, dy=20)
     p.legend("tr")
     save("interface-temperature.svg", p.svg())
 
@@ -436,14 +439,14 @@ def input_shaping():
 
     ts = linspace(0, 0.1, 1001)
     p = Plot("How a ZV shaper cancels ringing", "Time (ms)", "Toolhead ringing (relative)",
-             (0, 100), (-1.0, 1.0), subtitle=f"40 Hz resonance, damping 0.07. Second hit {t2 * 1000:.1f} ms later, {a2:.2f} vs {a1:.2f} in size")
+             (0, 100), (-1.3, 1.0), subtitle=f"40 Hz resonance, damping 0.07. Second hit {t2 * 1000:.1f} ms later, {a2:.2f} vs {a1:.2f} in size")
     p.axes([0, 20, 40, 60, 80, 100], [-1, -0.5, 0, 0.5, 1])
     p.line([(t * 1000, ring(t, 1.0, 0)) for t in ts], GRAY, "One sharp move", width=2, dash="6 4")
     p.line([(t * 1000, ring(t, a1, 0)) for t in ts], BLUE, "First hit", width=2)
     p.line([(t * 1000, ring(t, a2, t2)) for t in ts], ORANGE, "Second hit, half a period later", width=2)
     p.line([(t * 1000, ring(t, a1, 0) + ring(t, a2, t2)) for t in ts], GREEN, "Sum: silent after the second hit", width=3.2)
     p.vline(t2 * 1000, INK, "second hit", label_y=-0.85)
-    p.legend("tr")
+    p.legend("br")
     save("input-shaping.svg", p.svg())
 
 
@@ -472,9 +475,199 @@ def chamber_two_node():
     p.line(air, BLUE, "Chamber air")
     p.line(frame, ORANGE, "Frame and panels")
     p.text(reached, target, f"air at target in about {reached:.0f} min", dx=8, dy=24)
-    p.text(150, frame[150][1], "frame still climbing after 2.5 h", dx=-10, dy=30, anchor="end")
+    p.text(150, frame[150][1], "frame still climbing after 2.5 h", dx=-10, dy=44, anchor="end")
     p.legend("br")
     save("chamber-two-node.svg", p.svg())
+
+
+# Chapters 3 and 4: the melt zone model
+# Plug flow through a bore whose wall sits at the setpoint. Same numbers as the chapters:
+# ABS, alpha = 0.08 mm²/s, wall 250 °C, filament entering at 50 °C, Seppala's WLF fit.
+ALPHA, T_WALL, T_IN, N_POW, R_FIL, A_FIL = 0.08, 250.0, 50.0, 0.4, 0.875, 2.405
+
+
+def bessel(x, order):
+    s, t, k = 0.0, 1.0 if order == 0 else x / 2, 0
+    while abs(t) > 1e-17 or k < 5:
+        s += t
+        k += 1
+        t *= -(x * x / 4) / (k * (k + order))
+    return s
+
+
+def _j0_zero(k):
+    a, b = (k - 0.25) * math.pi - 0.6, (k - 0.25) * math.pi + 0.6
+    fa = bessel(a, 0)
+    for _ in range(80):
+        m = (a + b) / 2
+        if (bessel(m, 0) > 0) == (fa > 0):
+            a = m
+        else:
+            b = m
+    return (a + b) / 2
+
+
+ZEROS = [_j0_zero(k) for k in range(1, 9)]
+ZEROS += [(k - 0.25) * math.pi + 1 / (8 * (k - 0.25) * math.pi) for k in range(9, 400)]
+
+
+def log_aT(T):
+    return -4.65 * (T - 230.0) / (200.9 + T - 230.0)
+
+
+def theta_mean(Fo):
+    return sum(4 / l ** 2 * math.exp(-l * l * Fo) for l in ZEROS)
+
+
+def theta_at(xi, Fo):
+    return sum(2 / (l * bessel(l, 1)) * bessel(l * xi, 0) * math.exp(-l * l * Fo) for l in ZEROS[:8])
+
+
+def pa_ratio(q, drop25):
+    beta = drop25 / 25
+    return (q / 5) ** (N_POW - 1) * 10 ** (log_aT(T_WALL - beta * q) - log_aT(T_WALL - beta * 5))
+
+
+def p_rel(q, L):
+    t_mean = T_WALL - (T_WALL - T_IN) * theta_mean(math.pi * ALPHA * L / q)
+    return (q / 2) ** N_POW * 10 ** (log_aT(t_mean) - log_aT(T_WALL))
+
+
+def step_temp(t, q1, q2, L=20.0):
+    v = L * A_FIL
+    t1, t2 = v / q1, v / q2
+    age = t1 if t < 0 else (t1 - t * (q2 / q1 - 1) if t < t2 else t2)
+    return T_WALL - (T_WALL - T_IN) * theta_mean(ALPHA * age / R_FIL ** 2)
+
+
+def ooze_parts(t, q=10.0, L=20.0, tau=0.04, beta_v=4e-4):
+    fo_l = math.pi * ALPHA * L / q
+    elastic = tau * q * (1 - math.exp(-t / tau))
+    thermal = beta_v * (T_WALL - T_IN) * R_FIL ** 2 * q / ALPHA * sum(
+        4 / l ** 4 * (1 - math.exp(-l * l * fo_l)) * (1 - math.exp(-l * l * ALPHA * t / R_FIL ** 2)) for l in ZEROS)
+    return elastic / A_FIL, thermal / A_FIL
+
+
+def tip_drop(h, k, length=4e-3, radius=2e-3, t_block=250.0, t_air=40.0):
+    m = math.sqrt(2 * h / (k * radius))
+    return (t_block - t_air) * (1 - 1 / math.cosh(m * length))
+
+
+def old_fraction(v_ratio, n):
+    p = (n + 1) / n
+    u_max = (3 * n + 1) / (n + 1)
+    if 1 / v_ratio >= u_max:
+        return 1.0
+    xi_c = (1 - (1 / v_ratio) / u_max) ** (1 / p)
+    flux = lambda x: x * x / 2 - x ** (p + 2) / (p + 2)
+    return (flux(1) - flux(xi_c)) / flux(1)
+
+
+def melt_profile():
+    p = Plot("What actually reaches the nozzle", "Position across the bore (0 = center, 1 = wall)",
+             "Temperature (°C)", (0, 1), (80, 260),
+             subtitle="ABS, wall at 250 °C, filament in at 50 °C. Same Fo, same profile: only L/Q matters")
+    p.axes([0, 0.2, 0.4, 0.6, 0.8, 1], [80, 120, 160, 200, 240])
+    p.hline(105, GRAY)
+    p.text(0.4, 105, "glass transition, 105 °C", color=GRAY, dy=16)
+    xs = linspace(0, 1, 120)
+    for fo, col, lab in [(1.0, GREEN, "Fo = 1.0  (20 mm at 5 mm³/s)"), (0.5, BLUE, "Fo = 0.5  (20 mm at 10 mm³/s)"),
+                         (0.25, ORANGE, "Fo = 0.25 (10 mm at 10 mm³/s)"), (0.13, RED, "Fo = 0.13 (10 mm at 20 mm³/s)")]:
+        p.line([(x, T_WALL - (T_WALL - T_IN) * theta_at(x, fo)) for x in xs], col, lab)
+    p.legend("br")
+    save("melt-profile.svg", p.svg())
+
+
+def tip_fin():
+    p = Plot("Steel's penalty lives at the tip", "Cooling on the tip, h (W/m²K, log scale)",
+             "Tip colder than the block (K)", (10, 1000), (0, 60), xlog=True,
+             subtitle="4 mm of nozzle below a 250 °C block, 2 mm radius, air at 40 °C. Fin model, before any melt flows")
+    p.band_x(15, 40, GRAY)
+    p.band_x(150, 600, GRAY)
+    p.axes([10, 30, 100, 300, 1000], [0, 10, 20, 30, 40, 50, 60], ["10", "30", "100", "300", "1,000"])
+    p.text(24.5, 30, "silicone sock", color=GRAY, anchor="middle")
+    p.text(300, 30, "part fan", color=GRAY, anchor="middle")
+    hs = logspace(10, 1000)
+    for name, k, col in [("Hardened steel", 25, RED), ("Tungsten carbide", 90, PURPLE),
+                         ("Brass", 115, BLUE), ("Copper", 350, ORANGE)]:
+        p.line([(h, tip_drop(h, k)) for h in hs], col, name)
+    p.legend("tl")
+    save("tip-fin.svg", p.svg())
+
+
+def washout():
+    p = Plot("The old color tails off slowly", "Volume pushed through, in melt zone volumes",
+             "Old plastic in what comes out (%, log scale)", (0, 8), (0.1, 100), ylog=True,
+             subtitle="Plastic at the wall barely moves, so the last of the old color takes a while to leave")
+    p.axes([0, 1, 2, 3, 4, 5, 6, 7, 8], [0.1, 1, 10, 100], ylabels=["0.1", "1", "10", "100"])
+    p.hline(2, ORANGE, "2%")
+    p.vline(3.2, ORANGE, "about 3.2 zone volumes", label_y=20)
+    vs = linspace(0.3, 8, 400)
+    p.line([(v, 100 * old_fraction(v, 1.0)) for v in vs], GRAY, "Newtonian", dash="6 4")
+    p.line([(v, 100 * old_fraction(v, 0.4)) for v in vs], BLUE, "Shear-thinning melt, n = 0.4")
+    p.legend("tr")
+    save("washout.svg", p.svg())
+
+
+def pa_flip():
+    p = Plot("Same filament, opposite trends", "Flow (mm³/s)", "PA needed, relative to 5 mm³/s", (5, 30), (0, 2),
+             subtitle="ABS at a 250 °C setpoint: shear thinning lowers PA, a cooler melt raises it")
+    p.axes([5, 10, 15, 20, 25, 30], [0, 0.5, 1, 1.5, 2], ylabels=["0", "0.5×", "1×", "1.5×", "2×"])
+    p.hline(1, GRAY, "tuned at 5 mm³/s")
+    qs = linspace(5, 30)
+    for drop, col, lab in [(0, GRAY, "Melt stays at the setpoint"), (10, BLUE, "Good brass setup (10 K cooler at 25)"),
+                           (30, RED, "Steel under a hard fan (30 K cooler at 25)")]:
+        p.line([(q, pa_ratio(q, drop)) for q in qs], col, lab)
+        v = pa_ratio(25, drop)
+        p.point(25, v, col)
+        if drop == 30:
+            p.text(25, v, f"{v:.2f}×", color=col, anchor="end", dx=-8, dy=-8)
+        else:
+            p.text(25, v, f"{v:.2f}×", color=col, dx=8, dy=16 if drop == 0 else -8)
+    p.legend("tl")
+    save("pa-flip.svg", p.svg())
+
+
+def pressure_wall():
+    p = Plot("The max flow wall, from the model", "Flow (mm³/s, log scale)",
+             "Pressure, relative (log scale)", (2, 40), (1, 1000), xlog=True, ylog=True,
+             subtitle="ABS, wall at 250 °C, relative to fully melted flow at 2 mm³/s. Curves stop where the core goes solid")
+    p.axes([2, 5, 10, 20, 40], [1, 10, 100, 1000], ylabels=["1", "10", "100", "1,000"])
+    qs = logspace(2, 40)
+    p.line([(q, (q / 2) ** N_POW) for q in qs], GRAY, "Fully melted (goes as flow^0.4)", dash="6 4")
+    for L, col in [(30, GREEN), (20, ORANGE), (10, RED)]:
+        p.line([(q, p_rel(q, L)) for q in qs if math.pi * ALPHA * L / q >= 0.12], col, f"{L} mm melt zone")
+    p.text(14, p_rel(14, 10), "slope 3 to 5 near the wall", color=RED, anchor="end", dx=-10, dy=-4)
+    p.legend("tl")
+    save("pressure-wall.svg", p.svg())
+
+
+def melt_age_step():
+    p = Plot("Speeding up hits fast, slowing down recovers slowly", "Time after the speed change (s)",
+             "Melt temperature leaving the zone (°C)", (-1, 12), (210, 255),
+             subtitle="20 mm melt zone, ABS. The exit temperature only depends on how long the plastic was in the zone")
+    p.axes([0, 2, 4, 6, 8, 10, 12], [210, 220, 230, 240, 250])
+    p.vline(0, GRAY, "speed changes")
+    ts = linspace(-1, 12, 700)
+    p.line([(t, step_temp(t, 5, 20)) for t in ts], RED)
+    p.line([(t, step_temp(t, 20, 5)) for t in ts], BLUE)
+    p.text(3, 217.6, "5 → 20 mm³/s: cools within 2.4 s", color=RED, dy=-8)
+    p.text(6, step_temp(6, 20, 5), "20 → 5 mm³/s: takes 9.6 s to recover", color=BLUE, dy=24)
+    save("melt-age-step.svg", p.svg())
+
+
+def ooze_time():
+    p = Plot("Ooze runs on two clocks", "Time after the extruder stops (s, log scale)",
+             "Ooze (mm of filament)", (0.01, 10), (0, 0.6), xlog=True,
+             subtitle="ABS at 10 mm³/s into a 20 mm melt zone. Pressure is gone in 0.1 s, heat keeps pushing for seconds")
+    p.axes([0.01, 0.1, 1, 10], [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6], ["0.01", "0.1", "1", "10"])
+    ts = logspace(0.01, 10)
+    parts = [(t, *ooze_parts(t)) for t in ts]
+    p.line([(t, e) for t, e, _ in parts], BLUE, "Pressure (elastic)")
+    p.line([(t, h) for t, _, h in parts], ORANGE, "Heat (thermal expansion)")
+    p.line([(t, e + h) for t, e, h in parts], GREEN, "Total", width=3.2)
+    p.legend("tl")
+    save("ooze-time.svg", p.svg())
 
 
 if __name__ == "__main__":
@@ -490,3 +683,10 @@ if __name__ == "__main__":
     stoney_layers()
     input_shaping()
     chamber_two_node()
+    melt_profile()
+    tip_fin()
+    washout()
+    pa_flip()
+    pressure_wall()
+    melt_age_step()
+    ooze_time()
