@@ -132,14 +132,10 @@ Every moment counts, weighted by how fast chains move at that moment's temperatu
 universal WLF constants, one second at $`T_g + 60`$ K counts as much as about 15 minutes at
 $`T_g + 30`$ K. **The first hot second does nearly all the work.**
 
-Seppala didn't use the universal constants, though. They measured their own ABS and got
-$`C_1 = 4.65`$, $`C_2 = 200.9`$ K with $`T_{ref} = 230`$ °C. Those are gentler. Take an interface at
-170 vs 180 °C: the universal constants say those ten kelvin are worth about 4× more weld time per
-second, Seppala's say about 2.7×. I don't fully trust either one down there, since their fit was
-made near melt temperatures and I'm extrapolating 60 K below it. The direction isn't in doubt. In
-their prints the weld zone fell below $`T_g`$ within about 2 s, fracture energy kept climbing with
-weld time, and it never got past 70% of bulk ABS. They suspect degradation at the hot end capped it,
-which is a polite way of saying you can't just keep turning the nozzle up.
+Seppala's own ABS fit ($`C_1 = 4.65`$, $`C_2 = 200.9`$ K, $`T_{ref} = 230`$ °C) is gentler than the
+universal constants: ten kelvin around a 170 °C interface buys about 2.7× more weld time per second
+instead of 4×. Their welds fell below $`T_g`$ within about 2 s and never got past 70% of bulk ABS,
+probably capped by degradation at the hot end.
 
 ![Equivalent weld time accumulated after deposition for the two chamber temperatures](figures/weld-time.svg)
 
@@ -158,7 +154,7 @@ you're fully healed.**
 
 ## Stage 3: what else gets in the way
 
-- **Flow-induced alignment.** Squeezing through the nozzle stretches chains near the bead surface. [McIlroy & Olmsted (2017)](https://www.sciencedirect.com/science/article/abs/pii/S0032386117306213) showed it partly untangles them. [Cunha & Robbins (2020)](https://arxiv.org/abs/2006.15742) simulated it and found diffusion across the interface isn't actually slowed, but the stretched material right next to the weld stays weaker until it relaxes. Unaligned welds were at full strength after about one disentanglement time, aligned ones needed about four. **My read (theory):** for PLA that's irrelevant, everything relaxes in milliseconds that far above $`T_g`$. For ABS or PC in a cool box, it means the healing number below needs to clear something like 4, not 1, before the weld region is really done
+- **Flow-induced alignment.** Squeezing through the nozzle stretches chains near the bead surface. [McIlroy & Olmsted (2017)](https://www.sciencedirect.com/science/article/abs/pii/S0032386117306213) showed it partly untangles them. [Cunha & Robbins (2020)](https://arxiv.org/abs/2006.15742) simulated it and found diffusion across the interface isn't actually slowed, but the stretched material right next to the weld stays weaker until it relaxes. (about four disentanglement times instead of one). **Theory:** irrelevant for PLA, but for ABS or PC in a cool box the healing number below probably needs to clear about 4, not 1
 - **Crystallization racing diffusion.** In semi-crystalline plastics (nylon, PPA, PLA), once crystals form at the interface, chains stop crossing. [Costanzo et al. (2020)](https://doi.org/10.3390/polym12122980) studied exactly this for polyamides
 - **Voids and notches.** The groove between stacked beads (chapter 5) is a notch, and stress concentrates there
 - **Residual stress** (chapter 7) pre-loads the weld before you ever pull on it
@@ -179,7 +175,7 @@ This is where it gets interesting, because the research looks like it disagrees.
 **Camp two: geometry dominates.**
 
 - [Allum, Moetazedian, Gleadall & Silberschmidt (2020)](https://www.sciencedirect.com/science/article/abs/pii/S2214860420306692): in PLA, the interface has the strength of the bulk filament. The anisotropy comes from the shape of the extruded lines and strain concentrating at the interface, not incomplete bonding. Print speed and layer time didn't change bond strength
-- [Moetazedian et al. (2023)](https://pmc.ncbi.nlm.nih.gov/articles/PMC10280202/): PLA bond strength stayed at bulk strength across a 60 °C nozzle temperature span, a 16× speed range and an 8× layer time range. They recommend refocusing interlayer work on extrusion geometry. Three details I love. The bonded width was only 75 to 78% of the line width, so they divided by what actually bonded, which is the honest way to do it. The one condition that lost strength was the *slowest*, 250 mm/min: the bead skinned over before it could spread, and the bond angle went from about 95° at the fast end to about 56°. So "print slower for better layer adhesion" can be flat backwards. And strength isn't toughness: the bonds hit bulk strength but broke at about half the bulk strain (0.023 to 0.028 vs 0.051), which I read as the groove concentrating strain
+- [Moetazedian et al. (2023)](https://pmc.ncbi.nlm.nih.gov/articles/PMC10280202/): PLA bond strength stayed at bulk strength across a 60 °C nozzle temperature span, a 16× speed range and an 8× layer time range. They recommend refocusing interlayer work on extrusion geometry.. The bonded width was only 75 to 78% of the line width, and the one condition that lost strength was the *slowest* (250 mm/min), where the bead skinned over before it could spread. So "print slower for better adhesion" can be backwards. The bonds also broke at about half the bulk strain, so strength isn't toughness
 - [Allum et al.](https://www.sciencedirect.com/science/article/pii/S2214860422007230) extra-wide lines: 40 to 48% stronger purely from more contact area
 
 **My reconciliation (theory):** it's the healing number. PLA has $`T_g`$ around 60 °C and gets printed
@@ -237,24 +233,14 @@ Roughly ranked by how solid the evidence is and how cheap it is to try.
 4. **Layer time in a window.** Too short and the layer sags, too long and it's cold when the next one lands. Slicers enforce a minimum layer time but nothing like a maximum
 5. **Local preheat** of the old layer just ahead of the nozzle (IR or laser, Ravi 2016 and Kishore 2017)
 
-I listed the chamber first because it's the one I'm building, but I should be honest about the
-order. [Basgul, Thieringer & Kurtz (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8827803/) ran a
-healing model (checked against IR video, no tensile tests) on a printed PEEK cube and swept nozzle,
-bed and chamber. Dropping the nozzle 20 °C, from 485 to 465, took the unhealed interfaces from 30
-to 40 of 49, and at 445 °C and below not a single one fully healed. Raising the chamber a huge
-160 °C, from 80 to 240, lifted average healing by 18% and **did nothing for the weakest
-interface**, the one down by the bed. PEEK isn't ABS, but the physics is the same: the weld happens
-in the first hot second, and the nozzle owns that second. The contact temperature formula says a
-degree on the old layer counts the same as a degree on the nozzle, and it does. The catch is that
-ten degrees of chamber air don't become ten degrees on the layer surface once the fan is running
-and the layer time is long. So for weld strength it's nozzle first, chamber second, and the
-chamber's bigger job is warp and stress (chapter 7).
-
-One catch with "nozzle first": the nozzle temperature you set isn't the one the plastic gets. A
-hardened steel nozzle, a dry thread joint or a lot of flow can take tens of degrees off before the
-plastic ever leaves. Community tests have seen brass give 73% stronger layers than steel at the same
-setpoint ([chapter 3](03-melting.md#the-nozzle-is-part-of-the-heat-path)). So "nozzle first" really
-means *melt* first, and the hotend hardware decides how far apart those two are.
+Honestly, the chamber is first on that list because it's what I'm building.
+[Basgul et al. (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8827803/) modeled PEEK healing while
+sweeping nozzle, bed and chamber. 20 °C less at the nozzle took the unhealed interfaces from 30 to
+40 of 49, while a chamber 160 °C hotter raised average healing 18% and **did nothing for the weakest
+interface**. Chamber air just doesn't turn into layer surface temperature once the fan runs and the
+layer time is long. So for weld strength it's the nozzle first, and the chamber's bigger job is warp
+and stress (chapter 7). And "nozzle" really means melt: a steel nozzle or a dry thread joint can take
+tens of degrees off before the plastic leaves ([chapter 3](03-melting.md#the-nozzle-is-part-of-the-heat-path)).
 
 **After the print:**
 

@@ -138,77 +138,45 @@ hold the melt where I want it.
 
 ## The nozzle is part of the heat path
 
-Here's something the slicer pretends doesn't exist. The thermistor sits in the block. The plastic
-is in the nozzle. Between the two, heat has to cross the thread joint and then conduct down the
-nozzle wall, and both of those are thermal resistances. Anyone who's cooled a CPU knows this
-picture, it's the same stack-up running backwards:
+The thermistor sits in the block, the plastic is in the nozzle. In between, heat has to cross the
+thread joint and the nozzle wall, and each one is a thermal resistance:
 
 ```math
 T_{melt} \approx T_{block} - P_{fil}\left(R_{contact} + R_{nozzle}\right), \qquad R_{nozzle} \approx \frac{L}{k\,A}
 ```
 
-$`P_{fil}`$ is the power going into the plastic (the energy bookkeeping above: about 7 W for ABS at
-15 mm³/s), $`L`$ and $`A`$ are the length and cross-section the heat travels through, and $`k`$ is
-the nozzle material's conductivity. And $`k`$ is all over the place:
+$`P_{fil}`$ is the power going into the plastic (about 7 W for ABS at 15 mm³/s, from the bookkeeping
+above), and $`k`$ is the nozzle's conductivity:
 
-| Nozzle material | $`k`$ (rough, W/m·K) | Notes |
-|---|---|---|
-| Copper alloys (plated copper, CuCrZr) | 300 to 390 | The best conductors, soft, usually plated |
-| Silicon carbide | 120 to 200 | Varies a lot with grade |
-| Brass | about 115 | The baseline everyone tuned their profiles on |
-| Tungsten carbide | about 80 to 110 | Hard and still conducts well |
-| Ruby (sapphire tip) | about 35 to 40 | Only the tip, the body is usually brass |
-| Hardened tool steel | about 20 to 30 | Stainless is worse, around 16 |
+| Nozzle | $`k`$ (rough, W/m·K) |
+|---|---|
+| Copper alloys | 300 to 390 |
+| Silicon carbide | 120 to 200 |
+| Brass | about 115 |
+| Tungsten carbide | 80 to 110 |
+| Ruby tip (brass body) | 35 to 40 |
+| Hardened steel | 20 to 30 |
 
-Hardened steel conducts four to five times worse than brass, so whatever temperature drop brass has
-across the nozzle, steel has four or five times that, at the same flow. My lumped estimate puts
-brass at maybe 10 K at ABS flows and steel at several times that. Treat those absolute numbers
-loosely (the heat really goes in along the whole bore, not through one tidy rod), but the ratio is
-just the ratio of $`k`$, and it doesn't care how good my geometry is.
+Steel conducts four to five times worse than brass, so at the same flow its temperature drop is four
+to five times bigger. The community tests agree. [CNC Kitchen](https://www.cnckitchen.com/blog/prusament-pc-blend-review)
+got **73% stronger** PC Blend layers with brass than steel at the same 275 °C, and
+[MyTechFun](https://mytechfun.com/video/308) saw steel give about a third of brass's layer adhesion.
+Same setpoint, cooler melt, weaker welds (chapter 6).
 
-And the community testing lines up with it. [CNC Kitchen](https://www.cnckitchen.com/blog/prusament-pc-blend-review)
-printed PC Blend layer adhesion samples at the same 275 °C, swapped between a steel and a brass
-nozzle back to back, and brass came out **73% stronger**. [MyTechFun](https://mytechfun.com/video/308)
-saw hardened steel give about a third of brass's layer adhesion at the same temperature. Same
-setpoint, same plastic, very different welds. That's chapter 6 in action: the weld lives on the
-first hot second, and a cooler melt simply has less of it.
+Two things follow. **Matching max flow doesn't mean matching melt temperature:** a flow test shows
+when the extruder gives up, not how hot the plastic was when it got through. And **the thread joint
+matters:** dry threads are mostly air gaps, and a thin layer of real high-temperature paste like
+[Slice's boron nitride paste](https://www.sliceengineering.com/products/boron-nitride-paste) makes
+the joint close to perfect. Regular CPU paste is made for 150 to 180 °C and bakes out at ABS
+temperatures, metal-filled pastes don't belong near the thermistor or heater, and liquid metal
+attacks aluminum blocks.
 
-**Matching flow doesn't mean matching melt.** This is the part that I think trips people up. Two
-hotends can hit the same max volumetric flow and still deliver plastic at different temperatures.
-A max flow test only tells you when the extruder can't push anymore, or when the core is too thick
-to get through. It says nothing about whether the plastic that did get through came out at 245 or
-225 °C. Your Z strength cares a lot about that difference. Your flow test doesn't see it.
+**Theory:** the nozzle's flat tip presses each bead onto the layer below, and a steel tip runs
+coldest right there. Part of steel's weld penalty might come from the tip, not just the melt.
 
-**The thread joint is the other resistance.** Dry threads touch at the tips of the surface
-roughness and trap air everywhere else. Contact conductance for a joint like that spans an order of
-magnitude depending on finish and torque, so $`R_{contact}`$ can be anywhere from negligible to as
-big as the nozzle wall itself. A thin layer of real high-temperature paste fills the gaps: 20 µm of
-something at 3 W/m·K is about 0.07 K/W over the thread area, basically nothing.
-
-That's why [Slice Engineering's boron nitride paste](https://www.sliceengineering.com/products/boron-nitride-paste)
-exists. It's rated far beyond hotend temperatures, it isn't electrically conductive (so it can go
-on the thermistor and heater cartridge too), and it doubles as an anti-seize on the threads. I'd
-take its headline conductivity with a grain of salt, a filled paste isn't the filler, but even a
-few W/m·K in a thin layer is plenty. What I'd avoid:
-
-- **Regular CPU paste.** It's made for maybe 150 to 180 °C. At ABS temperatures the oil bakes out,
-  it dries, cracks and smells, and then it's a worse interface than nothing, sitting where you
-  can't see it
-- **Silver or metal-filled pastes** near the thermistor or heater, since they conduct electricity
-- **Liquid metal, ever, on an aluminum block.** Gallium attacks aluminum and makes it brittle
-
-**The tip is a heater too (theory).** The flat land at the end of the nozzle rides on the bead it
-just laid down, pressing it onto the layer below. A conductive tip stays close to block temperature
-right there. A steel tip is the far, cold end of a long, poor conductor, with the part fan blowing
-on it. I'd bet part of the steel nozzle's weld penalty comes from the land, not just the melt
-temperature, but I haven't seen anyone separate those two.
-
-**Where this leaves a gap.** Orca and Bambu Studio both ask for your nozzle type and hardness. As
-far as I can tell, that's only used to warn you about abrasive filaments. Nothing offsets the
-temperature, nothing changes the flow model, and every filament profile assumes the brass nozzle it
-was tuned on. If you swap nozzle materials, recalibrate MPC at least (chapter 9), because the block
-now sees a different load. And then, honestly, bump the temperature and test, until something
-smarter exists.
+Orca and Bambu Studio ask for your nozzle material, but as far as I can tell only to warn about
+abrasive filament. Nothing offsets the temperature. After a nozzle swap, recalibrate MPC (chapter 9)
+and test hotter.
 
 ## Two ways to hit the wall
 
