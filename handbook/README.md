@@ -29,6 +29,7 @@ or a real test showed, I say so. When I'm guessing, I'll tell you I'm guessing.
 | 11 | [Materials in practice](11-materials.md) | 2 to 3 | PLA, PETG, ABS/ASA, PC, nylon, PPA-CF, TPU: what matters and what most people skip |
 | 12 | [The gaps](12-gaps.md) | 2 to 3 | What research proved that nobody has built into slicers or firmware yet |
 | 13 | [Where this goes](13-where-this-goes.md) | 2 | Theorizing: the printer as a lab instrument, and new domains |
+| 14 | [Bringing everything together](14-bringing-everything-together.md) | 4+ | Every chapter at once: the coupling map, one toy model of the whole printer, its sensitivities and dynamics |
 
 | Level | Means |
 |---|---|

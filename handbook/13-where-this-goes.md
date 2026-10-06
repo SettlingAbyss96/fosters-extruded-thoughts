@@ -1,6 +1,6 @@
 # 13. Where this goes
 
-*Level 2. Theorizing. Nothing here is built yet.*
+*Level 2. Theorizing.*
 
 This is the part where I think out loud. Some of it I'm fairly sure will work. Some is a long shot.
 All of it falls out of the earlier chapters if you follow them far enough.
@@ -150,3 +150,6 @@ If time allows, and assuming the first steps work out:
 4. The shared database, if the first three work
 
 If you're reading this and you've built any of it, I'd love to know.
+
+Next: [Bringing everything together](14-bringing-everything-together.md), because all of this is one
+machine, and it's time to look at it that way.

@@ -37,8 +37,8 @@ def fmt(v):
 
 class Plot:
     def __init__(self, title, xlabel, ylabel, xlim, ylim, xlog=False, ylog=False,
-                 w=760, h=430, ml=78, mr=28, mt=60, mb=64, subtitle=None):
-        self.title, self.subtitle = title, subtitle
+                 w=760, h=430, ml=78, mr=28, mt=60, mb=64, subtitle=None, title_x=None):
+        self.title, self.subtitle, self.title_x = title, subtitle, title_x
         self.xlabel, self.ylabel = xlabel, ylabel
         self.xlim, self.ylim = xlim, ylim
         self.xlog, self.ylog = xlog, ylog
@@ -145,12 +145,16 @@ class Plot:
             self.items.append(f'<line x1="{x + 10:.1f}" y1="{yy - 4:.1f}" x2="{x + 34:.1f}" y2="{yy - 4:.1f}" stroke="{col}" stroke-width="3"{da}/>')
             self.items.append(f'<text x="{x + 42:.1f}" y="{yy:.1f}" font-size="12.5" fill="{INK}">{esc(lab)}</text>')
 
-    def svg(self):
-        out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.w}" height="{self.h}" viewBox="0 0 {self.w} {self.h}" font-family="{FONT}">',
-               f'<rect x="0.5" y="0.5" width="{self.w - 1}" height="{self.h - 1}" rx="10" fill="white" stroke="{GRID}"/>',
-               f'<text x="{self.ml}" y="28" font-size="16" font-weight="600" fill="{INK}">{esc(self.title)}</text>']
+    def svg(self, card=True):
+        tx = self.title_x if self.title_x is not None else self.ml
+        out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{self.w}" height="{self.h}" viewBox="0 0 {self.w} {self.h}" font-family="{FONT}">']
+        if card:
+            out.append(f'<rect x="0.5" y="0.5" width="{self.w - 1}" height="{self.h - 1}" rx="10" fill="white" stroke="{GRID}"/>')
+            out.append(f'<text x="{tx}" y="28" font-size="16" font-weight="600" fill="{INK}">{esc(self.title)}</text>')
+        else:
+            out.append(f'<text x="{tx}" y="24" font-size="13.5" font-weight="600" fill="{INK}">{esc(self.title)}</text>')
         if self.subtitle:
-            out.append(f'<text x="{self.ml}" y="47" font-size="12.5" fill="{GRAY}">{esc(self.subtitle)}</text>')
+            out.append(f'<text x="{tx}" y="47" font-size="12.5" fill="{GRAY}">{esc(self.subtitle)}</text>')
         out += self.back + self.items
         cx = (self.ml + self.w - self.mr) / 2
         out.append(f'<text x="{cx:.1f}" y="{self.h - 16}" font-size="13.5" text-anchor="middle" fill="{INK}">{esc(self.xlabel)}</text>')
@@ -701,6 +705,183 @@ def old_fraction(v_ratio, n):
     return (flux(1) - flux(xi_c)) / flux(1)
 
 
+# Chapter 14: the whole printer as one toy function. ABS on a 0.4 nozzle, put together from the
+# chapters' own models: the tip drop (3, 4), plug-flow melting (3), r³-weighted pressure (4), PA as
+# C n P / q (4), stored and thermal ooze (4), bead contact (5), landing temperature, cooling and
+# weld time (6), built-in stress (7) and ringing (8). Nothing is fitted to a real print.
+RHO_C = 2.1e-3                         # J/(mm³ K), ABS. Chapter 3: 25 mm³/s over 200 K is about 10 W
+TG_ABS, CTE_ABS, E_ABS, NU_ABS, BETA_ABS = 105.0, 90e-6, 2000.0, 0.35, 4e-4
+R_TIP = {"brass": 2.8, "steel": 12.7}  # K/W through the tip, a quarter of the heat goes that way
+BASE = dict(v=150.0, h=0.2, w=0.45, t_set=250.0, t_ch=50.0, fan=0.3, area=1.0, L=20.0, nozzle="brass", a=5000.0)
+
+
+def wall_temp(q, t_set, nozzle):
+    t_w = t_set
+    for _ in range(30):
+        t_w = t_set - 0.25 * RHO_C * q * (t_w - T_IN) * R_TIP[nozzle]
+    return t_w
+
+
+def shift_eff(t_w, fo, n=120):
+    """a_T of the melt leaving the zone, weighted by r³ the way the flow resistance is."""
+    s = 0.0
+    for i in range(n):
+        xi = (i + 0.5) / n
+        s += xi ** 3 / 10 ** log_aT(t_w - (t_w - T_IN) * theta_at(xi, fo)) / n
+    return 1 / (4 * s)
+
+
+def landing(t_m, t_ch, fan, h, t_layer):
+    """Interface at landing (every layer lands on the one before), its cooling time, weld time at 230 °C."""
+    tau_c = RHO_C * h * 1e6 / (20 + 280 * fan)
+    e = math.exp(-t_layer / tau_c)
+    t_i0 = (t_m + t_ch * (1 - e)) / (2 - e)
+    teq, t, dt = 0.0, 0.0, 2e-3
+    while t < t_layer:
+        temp = t_ch + (t_i0 - t_ch) * math.exp(-t / tau_c)
+        if temp <= TG_ABS:
+            break
+        teq += dt / 10 ** log_aT(temp)
+        t += dt
+    return t_i0, tau_c, teq
+
+
+class WholePrinter:
+    """Knobs in, states and outcomes out. Scaled to 5 MPa, PA 40 ms and a 70% weld at the base point."""
+
+    def __init__(self):
+        self.ref = None
+        first = self(**BASE)
+        self.ref = dict(p=first["p_raw"], q=first["q"], tau_rep=first["teq"] / 0.7 ** 4)
+        self.base = self(**BASE)
+
+    def __call__(self, v, h, w, t_set, t_ch, fan, area, L, nozzle, a):
+        A = bead_area(w, h)
+        q = A * v
+        t_w = wall_temp(q, t_set, nozzle)
+        fo = math.pi * ALPHA * L / q
+        t_m = t_w - (t_w - T_IN) * theta_mean(fo)
+        p_raw = q ** N_POW * shift_eff(t_w, fo)
+        t_layer = 10.0 * area * BASE["w"] * BASE["v"] / (w * v)
+        t_i0, tau_c, teq = landing(t_m, t_ch, fan, h, t_layer)
+        o = dict(A=A, q=q, v=v, a=a, t_w=t_w, t_m=t_m, fo=fo, p_raw=p_raw, t_layer=t_layer, t_i0=t_i0,
+                 tau_c=tau_c, teq=teq)
+        if self.ref is None:
+            return o
+        r = self.ref
+        o["p"] = 5.0 * p_raw / r["p"]
+        o["tau"] = 0.04 * (p_raw / q) / (r["p"] / r["q"])
+        fo_l = math.pi * ALPHA * L / q
+        o["ooze_th"] = BETA_ABS * (t_w - T_IN) * R_FIL ** 2 * q / ALPHA * sum(
+            4 / l ** 4 * (1 - math.exp(-l * l * fo_l)) for l in ZEROS)
+        o["left"] = o["tau"] * q * (1 / N_POW - 1)
+        o["stop_bead"] = (o["left"] + o["ooze_th"]) / A
+        o["margin"] = fo / 0.3
+        o["phi"] = 1 - h / w
+        o["H"] = teq / r["tau_rep"]
+        o["z"] = o["phi"] * min(1.0, o["H"] ** 0.25)
+        o["stress"] = E_ABS * CTE_ABS * (TG_ABS - t_ch) / (1 - NU_ABS)
+        o["ring"] = a / (2 * math.pi * 50) ** 2
+        o["corner"] = 100 * (o["tau"] - 0.04) * a / v
+        return o
+
+
+KNOB_STEPS = [("Speed", "+20%", dict(v=180.0)), ("Layer", "0.20 → 0.24", dict(h=0.24)),
+              ("Line width", "+20%", dict(w=0.54)), ("Nozzle", "+10 K", dict(t_set=260.0)),
+              ("Chamber", "+10 K", dict(t_ch=60.0)), ("Part fan", "+20 points", dict(fan=0.5)),
+              ("Part area", "+20%", dict(area=1.2)), ("Melt zone", "+20%", dict(L=24.0)),
+              ("Nozzle", "brass → steel", dict(nozzle="steel")), ("Accel", "+20%", dict(a=6000.0))]
+
+# name, unit, how to compare with the base point, which way is good for the part (0 = neither), what counts as a big change
+OUTCOMES = [("Melt temperature", "K", lambda o, b: o["t_m"] - b["t_m"], 0, 5),
+            ("Max flow margin", "%", lambda o, b: 100 * (o["margin"] / b["margin"] - 1), 1, 10),
+            ("Nozzle pressure", "%", lambda o, b: 100 * (o["p"] / b["p"] - 1), -1, 20),
+            ("PA needed", "%", lambda o, b: 100 * (o["tau"] / b["tau"] - 1), 0, 10),
+            ("Corner error, old PA", "pts", lambda o, b: o["corner"] - b["corner"], -2, 5),
+            ("Stop volume per bead", "%", lambda o, b: 100 * (o["stop_bead"] / b["stop_bead"] - 1), -1, 10),
+            ("Interface temperature", "K", lambda o, b: o["t_i0"] - b["t_i0"], 1, 5),
+            ("Weld time", "%", lambda o, b: 100 * (o["H"] / b["H"] - 1), 1, 50),
+            ("Bonded fraction", "%", lambda o, b: 100 * (o["phi"] / b["phi"] - 1), 1, 5),
+            ("Z strength", "%", lambda o, b: 100 * (o["z"] / b["z"] - 1), 1, 5),
+            ("Built-in stress", "%", lambda o, b: 100 * (o["stress"] / b["stress"] - 1), -1, 10),
+            ("Ringing", "%", lambda o, b: 100 * (o["ring"] / b["ring"] - 1), -1, 10),
+            ("Throughput", "%", lambda o, b: 100 * (o["q"] / b["q"] - 1), 1, 10)]
+
+
+def sensitivity_table():
+    wp = WholePrinter()
+    table = []
+    for name, step, kw in KNOB_STEPS:
+        o = wp(**dict(BASE, **kw))
+        table.append([f(o, wp.base) for _, _, f, _, _ in OUTCOMES])
+    return wp, table
+
+
+def print_stretch(dt=0.05):
+    """Infill, travel, outer wall, travel, inner wall. Melt age from the extruder history (chapter 4)."""
+    phases = [(-4.0, 0.0, 10.0, "inner wall"), (0.0, 8.0, 20.0, "infill"), (8.0, 8.6, 0.0, "travel"),
+              (8.6, 18.0, 5.0, "outer wall"), (18.0, 18.4, 0.0, "travel"), (18.4, 26.0, 10.0, "inner wall")]
+
+    def flow(t):
+        for a, b, q, _ in phases:
+            if a <= t < b:
+                return q
+        return 10.0
+
+    v_z = A_FIL * 20.0
+    wp = WholePrinter()
+    ref_fo = math.pi * ALPHA * 20.0 / wp.base["q"]
+    ref_a = shift_eff(wall_temp(wp.base["q"], 250.0, "brass"), ref_fo, 48)
+
+    def tau_needed(q, age):
+        t_w = wall_temp(q, 250.0, "brass")
+        return 0.04 * (q / wp.base["q"]) ** (N_POW - 1) * shift_eff(t_w, ALPHA * age / R_FIL ** 2, 48) / ref_a
+
+    k_wall = tau_needed(5.0, v_z / 5.0)
+    b = wp.base
+    e = math.exp(-b["t_layer"] / b["tau_c"])
+    t_old = BASE["t_ch"] + (b["t_i0"] - BASE["t_ch"]) * e
+
+    def weld(t_m):
+        return landing_from(t_m, t_old, b["tau_c"], b["t_layer"])
+
+    wall_weld = weld(wall_temp(5.0, 250.0, "brass") - (wall_temp(5.0, 250.0, "brass") - T_IN) * theta_mean(ALPHA * v_z / 5.0 / R_FIL ** 2))
+    cum, out, t = 0.0, [], -4.0
+    hist = []
+    while t <= 26.0 + 1e-9:
+        q = flow(t)
+        hist.append((t, cum))
+        target = cum - v_z
+        if target <= hist[0][1]:
+            age = t - (hist[0][0] + (target - hist[0][1]) / 10.0)
+        else:
+            i = len(hist) - 1
+            while hist[i][1] > target:
+                i -= 1
+            (t0, c0), (t1, c1) = hist[i], hist[min(i + 1, len(hist) - 1)]
+            age = t - (t0 + (t1 - t0) * (target - c0) / (c1 - c0) if c1 > c0 else t0)
+        t_w = wall_temp(q, 250.0, "brass")
+        t_m = t_w - (t_w - T_IN) * theta_mean(ALPHA * age / R_FIL ** 2)
+        pa = tau_needed(q, age) / k_wall if q > 0 else None
+        strength = (weld(t_m) / wall_weld) ** 0.25 if q > 0 else None
+        out.append((t, q, age, t_m, pa, strength))
+        cum += q * dt
+        t += dt
+    return phases, out, k_wall
+
+
+def landing_from(t_m, t_old, tau_c, t_layer):
+    t_i0 = (t_m + t_old) / 2
+    teq, t, dt = 0.0, 0.0, 2e-3
+    while t < t_layer:
+        temp = BASE["t_ch"] + (t_i0 - BASE["t_ch"]) * math.exp(-t / tau_c)
+        if temp <= TG_ABS:
+            break
+        teq += dt / 10 ** log_aT(temp)
+        t += dt
+    return teq
+
+
 def melt_profile():
     p = Plot("What actually reaches the nozzle", "Position across the bore (0 = center, 1 = wall)",
              "Temperature (°C)", (0, 1), (80, 260),
@@ -875,6 +1056,228 @@ def scarf_restart():
     save("scarf-restart.svg", p.svg())
 
 
+# Chapter 14: the coupling map. Columns run from what I set to what I care about
+MAP_X = [20, 192, 364, 536, 708, 880, 1052]
+MAP_W, MAP_BH = 150, 34
+MAP_NODES = {
+    "speed": (0, 92, "Speed"), "layer": (0, 150, "Layer height"), "width": (0, 208, "Line width"),
+    "noz_t": (0, 266, "Nozzle temperature"), "path": (0, 324, "Nozzle and paste"),
+    "zone": (0, 382, "Melt zone length"), "chamber": (0, 440, "Chamber"), "fan": (0, 498, "Part fan"),
+    "pa": (0, 556, "PA setting"), "restart": (0, 614, "Restart and seam"), "accel": (0, 672, "Acceleration"),
+    "flow": (1, 110, "Flow"), "hw": (1, 214, "h/w ratio"), "tlayer": (1, 318, "Layer time"),
+    "shake": (1, 672, "Toolhead shake"),
+    "tmelt": (2, 282, "Melt temperature"), "strain": (2, 470, "Thermal strain"),
+    "visc": (3, 212, "Viscosity"), "tint": (3, 388, "Interface temperature"),
+    "press": (4, 180, "Pressure"), "weld": (4, 400, "Weld (healing)"),
+    "tau": (5, 150, "PA needed"), "stored": (5, 252, "Stored volume"),
+    "time": (6, 92, "Print time"), "margin": (6, 172, "Max flow margin"), "seam": (6, 262, "Corner and seam error"),
+    "dims": (6, 352, "Dimensions"), "zstr": (6, 442, "Z strength"), "warp": (6, 532, "Warp and stress"),
+    "surface": (6, 672, "Surface"),
+}
+# source, target, +1 raises it, -1 lowers it, 0 has to match it; a fourth True means my theory or weak evidence
+MAP_EDGES = [
+    ("speed", "flow", 1), ("layer", "flow", 1), ("width", "flow", 1),
+    ("layer", "hw", 1), ("width", "hw", -1), ("speed", "hw", 1, True),
+    ("speed", "tlayer", -1), ("width", "tlayer", -1), ("accel", "shake", 1), ("accel", "time", -1),
+    ("flow", "tmelt", -1), ("noz_t", "tmelt", 1), ("path", "tmelt", 1), ("zone", "tmelt", 1),
+    ("chamber", "strain", -1), ("chamber", "tint", 1), ("fan", "tint", -1), ("tlayer", "tint", -1),
+    ("layer", "tint", 1),
+    ("flow", "visc", -1), ("tmelt", "visc", -1), ("tmelt", "tint", 1),
+    ("visc", "press", 1), ("flow", "press", 1), ("tint", "weld", 1),
+    ("press", "tau", 1), ("flow", "tau", -1), ("press", "stored", 1),
+    ("flow", "time", -1), ("flow", "margin", -1), ("zone", "margin", 1), ("press", "margin", -1),
+    ("tau", "seam", 1), ("pa", "seam", 0), ("stored", "seam", 1), ("restart", "seam", 0),
+    ("tmelt", "seam", 1, True),
+    ("hw", "zstr", -1), ("weld", "zstr", 1), ("strain", "zstr", -1, True), ("strain", "warp", 1),
+    ("shake", "surface", 1), ("shake", "dims", 1, True), ("seam", "dims", 1),
+]
+
+
+def coupling_map():
+    W, H = 1222, 770
+    colors = {1: BLUE, -1: RED, 0: GRAY}
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="{FONT}">',
+           f'<rect x="0.5" y="0.5" width="{W - 1}" height="{H - 1}" rx="10" fill="white" stroke="{GRID}"/>',
+           '<defs>']
+    for sign, col in colors.items():
+        out.append(f'<marker id="arrow{sign + 1}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" '
+                   f'orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="{col}"/></marker>')
+    out.append('</defs>')
+    out.append(f'<text x="20" y="30" font-size="16" font-weight="600" fill="{INK}">Everything pulls on everything: the coupling map</text>')
+    out.append(f'<text x="20" y="50" font-size="12.5" fill="{GRAY}">Blue raises what it points at, red lowers it, gray has to match it. Dashed is my theory or thin evidence</text>')
+    heads = [(MAP_X[0] + MAP_W / 2, "What I set"), ((MAP_X[1] + MAP_X[5] + MAP_W) / 2, "What happens inside the machine and the part"),
+             (MAP_X[6] + MAP_W / 2, "What I care about")]
+    for x, s in heads:
+        out.append(f'<text x="{x:.0f}" y="76" font-size="13.5" font-weight="600" text-anchor="middle" fill="{INK}">{esc(s)}</text>')
+    for e in MAP_EDGES:
+        src, dst, sign = e[0], e[1], e[2]
+        dashed = len(e) > 3 and e[3]
+        (c1, y1, _), (c2, y2, _) = MAP_NODES[src], MAP_NODES[dst]
+        y1, y2 = y1 + MAP_BH / 2, y2 + MAP_BH / 2
+        if c1 == c2:
+            x = MAP_X[c1] + MAP_W
+            d = f"M{x},{y1} C{x + 34},{y1} {x + 34},{y2} {x + 2},{y2}"
+        else:
+            x1, x2 = MAP_X[c1] + MAP_W, MAP_X[c2] - 2
+            k = (x2 - x1) * 0.45
+            d = f"M{x1},{y1} C{x1 + k},{y1} {x2 - k},{y2} {x2},{y2}"
+        da = ' stroke-dasharray="5 4"' if dashed else ""
+        out.append(f'<path d="{d}" fill="none" stroke="{colors[sign]}" stroke-width="1.7" opacity="0.62"{da} '
+                   f'marker-end="url(#arrow{sign + 1})"/>')
+    for key, (c, y, label) in MAP_NODES.items():
+        edge = INK if c == 0 else (GREEN if c == 6 else PURPLE)
+        out.append(f'<rect x="{MAP_X[c]}" y="{y}" width="{MAP_W}" height="{MAP_BH}" rx="7" fill="white" stroke="{edge}" stroke-width="1.4"/>')
+        out.append(f'<text x="{MAP_X[c] + MAP_W / 2}" y="{y + 22}" font-size="12.5" text-anchor="middle" fill="{INK}">{esc(label)}</text>')
+    ly = H - 26
+    for i, (sign, lab) in enumerate([(1, "raises"), (-1, "lowers"), (0, "has to match")]):
+        x = 20 + i * 150
+        out.append(f'<line x1="{x}" y1="{ly - 4}" x2="{x + 34}" y2="{ly - 4}" stroke="{colors[sign]}" stroke-width="2.2" marker-end="url(#arrow{sign + 1})"/>')
+        out.append(f'<text x="{x + 44}" y="{ly}" font-size="12.5" fill="{INK}">{lab}</text>')
+    out.append(f'<line x1="470" y1="{ly - 4}" x2="504" y2="{ly - 4}" stroke="{GRAY}" stroke-width="2.2" stroke-dasharray="5 4"/>')
+    out.append(f'<text x="514" y="{ly}" font-size="12.5" fill="{INK}">my theory or thin evidence</text>')
+    out.append("</svg>")
+    save("coupling-map.svg", "\n".join(out) + "\n")
+
+
+# Chapter 14: every time scale in the handbook on one axis
+def timescales():
+    rows = [("Step pulses", 5e-6, 1e-4, GRAY, "8"),
+            ("Melt relaxation time", 1e-3, 0.3, BLUE, "2"),
+            ("Melt crossing the nozzle", 3e-3, 3e-2, BLUE, "2"),
+            ("Ringing period, 36 to 75 Hz", 0.013, 0.028, GRAY, "8"),
+            ("Input shaper", 0.02, 0.03, GRAY, "8"),
+            ("PA time constant", 0.01, 0.06, BLUE, "4"),
+            ("Pressure tail after a stop", 0.05, 1.0, BLUE, "4"),
+            ("Scarf ramp", 0.1, 0.4, BLUE, "5"),
+            ("Sintering and useful weld time", 0.1, 2.0, ORANGE, "6"),
+            ("Thermal ooze", 0.13, 5.0, BLUE, "4"),
+            ("MPC reach time", 1.5, 3.0, PURPLE, "9"),
+            ("Melt age, one transit", 2.0, 10.0, BLUE, "3, 4"),
+            ("Bead cooling under the fan", 2.0, 30.0, ORANGE, "6"),
+            ("Layer time", 3.0, 60.0, ORANGE, "6"),
+            ("Chamber air", 300.0, 900.0, PURPLE, "9"),
+            ("Stress relaxation, annealing", 600.0, 3e4, GREEN, "7"),
+            ("Frame and Z drift", 1800.0, 2e4, PURPLE, "9"),
+            ("Moisture pickup", 1e4, 1e6, GREEN, "2, 11"),
+            ("Nozzle wear", 1e6, 3e7, GREEN, "10")]
+    n = len(rows)
+    p = Plot("Every clock in the handbook", "Time (log scale)", "", (3e-6, 3e8), (0, n), xlog=True,
+             w=900, h=110 + 24 * n, ml=230, mr=24, mt=64, mb=52, title_x=20,
+             subtitle="Bars span the usual range. The shaded band is where most of the trouble lives")
+    p.band_x(0.01, 10, RED, "the crowded decades", opacity=0.07)
+    ticks = [1e-5, 1e-3, 0.1, 10, 1e3, 1e5, 1e7]
+    p.axes(ticks, [], ["10 µs", "1 ms", "0.1 s", "10 s", "17 min", "1 day", "4 months"])
+    for i, (label, a, b, col, ch) in enumerate(rows):
+        yc = n - i - 0.5
+        x0, x1 = p.X(a), p.X(b)
+        y0 = p.Y(yc) - 7
+        p.items.append(f'<rect x="{x0:.1f}" y="{y0:.1f}" width="{max(x1 - x0, 3):.1f}" height="14" rx="4" fill="{col}" opacity="0.8"/>')
+        p.items.append(f'<text x="{p.ml - 8}" y="{p.Y(yc) + 4:.1f}" font-size="12.5" text-anchor="end" fill="{INK}">{esc(label)}</text>')
+        p.items.append(f'<text x="{max(x1 - x0, 3) + x0 + 6:.1f}" y="{p.Y(yc) + 4:.1f}" font-size="11.5" fill="{GRAY}">ch. {ch}</text>')
+    save("timescales.svg", p.svg())
+
+
+# Chapter 14: the sensitivity matrix, one knob step at a time around the base point
+def sensitivity():
+    wp, table = sensitivity_table()
+    nk, no = len(KNOB_STEPS), len(OUTCOMES)
+    cw, ch, left, top = 80, 30, 250, 104
+    W, H = left + nk * cw + 24, top + no * ch + 64
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="{FONT}">',
+           f'<rect x="0.5" y="0.5" width="{W - 1}" height="{H - 1}" rx="10" fill="white" stroke="{GRID}"/>',
+           f'<text x="20" y="30" font-size="16" font-weight="600" fill="{INK}">One knob at a time: what moves, and how much</text>',
+           f'<text x="20" y="50" font-size="12.5" fill="{GRAY}">Toy model, ABS, 0.45 × 0.2 mm at 150 mm/s, 250 °C, 50 °C chamber, 20 mm melt zone. Green is better for the part, red is worse, blue is neither</text>']
+    for j, (name, step, _) in enumerate(KNOB_STEPS):
+        cx = left + j * cw + cw / 2
+        out.append(f'<text x="{cx}" y="{top - 26}" font-size="12.5" font-weight="600" text-anchor="middle" fill="{INK}">{esc(name)}</text>')
+        out.append(f'<text x="{cx}" y="{top - 10}" font-size="11.5" text-anchor="middle" fill="{GRAY}">{esc(step)}</text>')
+    minus = chr(0x2212)
+    for i, (name, unit, _, good, scale) in enumerate(OUTCOMES):
+        y = top + i * ch
+        if i % 2 == 0:
+            out.append(f'<rect x="12" y="{y}" width="{W - 24}" height="{ch}" fill="#f9fafb"/>')
+        out.append(f'<text x="{left - 10}" y="{y + 19}" font-size="12.5" text-anchor="end" fill="{INK}">{esc(name)}</text>')
+        for j in range(nk):
+            v = table[j][i]
+            x = left + j * cw
+            if abs(v) < (0.05 if unit == "K" else 0.5):
+                out.append(f'<text x="{x + cw / 2}" y="{y + 19}" font-size="12" text-anchor="middle" fill="{GRID}">·</text>')
+                continue
+            if good == 0:
+                col = BLUE
+            elif good == -2:
+                col = RED
+            else:
+                col = GREEN if v * good > 0 else RED
+            alpha = 0.12 + 0.6 * min(1.0, abs(v) / (2 * scale))
+            out.append(f'<rect x="{x + 3}" y="{y + 3}" width="{cw - 6}" height="{ch - 6}" rx="4" fill="{col}" opacity="{alpha:.2f}"/>')
+            num = f"{abs(v):.1f}" if unit == "K" else f"{abs(v):.0f}"
+            sign = "+" if v > 0 else minus
+            suffix = " K" if unit == "K" else ("" if unit == "pts" else "%")
+            out.append(f'<text x="{x + cw / 2}" y="{y + 19}" font-size="12" text-anchor="middle" fill="{INK}">{sign}{num}{suffix}</text>')
+    out.append(f'<text x="20" y="{H - 22}" font-size="12" fill="{GRAY}">Corner error is in percentage points of flow during acceleration, with PA left where it was tuned. '
+               f'Weld time and Z strength use the 1/4 power from chapter 6</text>')
+    out.append("</svg>")
+    save("sensitivity.svg", "\n".join(out) + "\n")
+
+
+# Chapter 14: the same stretch of print, every chapter at once
+def print_stretch_fig():
+    phases, out, k_wall = print_stretch()
+    ts = [r[0] for r in out]
+    shade = {"infill": ORANGE, "outer wall": BLUE, "inner wall": GREEN, "travel": GRAY}
+    panels = []
+
+    def panel(title, ylabel, ylim, yticks, last=False):
+        p = Plot(title, "Time (s)" if last else "", ylabel, (-4, 26), ylim, w=900, h=200 if not last else 228,
+                 ml=86, mr=24, mt=40, mb=56 if last else 30)
+        for a, b, _, name in phases:
+            p.band_x(max(a, -4), min(b, 26), shade[name], name if not panels and name != "travel" else None, opacity=0.08)
+        p.axes([-4, 0, 4, 8, 12, 16, 20, 24], yticks, None if last else [""] * 8)
+        panels.append(p)
+        return p
+
+    p = panel("Flow the slicer asks for", "mm³/s", (0, 24), [0, 5, 10, 15, 20])
+    p.line([(t, q) for t, q, *_ in out], INK, width=2.2)
+    p = panel("Melt temperature leaving the nozzle", "°C", (205, 255), [210, 230, 250])
+    p.line([(t, tm) for t, _, _, tm, _, _ in out], RED)
+    p = panel("PA needed, relative to PA tuned on the outer wall", "×", (0.5, 2.0), [0.5, 1, 1.5, 2])
+    p.hline(1, GRAY, dash="2 3")
+    for seg in _segments([(t, pa) for t, _, _, _, pa, _ in out]):
+        p.line(seg, PURPLE)
+    p = panel("Weld strength, relative to a settled outer wall", "×", (0.4, 1.1), [0.4, 0.6, 0.8, 1.0], last=True)
+    p.hline(1, GRAY, dash="2 3")
+    for seg in _segments([(t, s) for t, _, _, _, _, s in out]):
+        p.line(seg, ORANGE)
+    W = 900
+    H = 70 + sum(pp.h for pp in panels)
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="{FONT}">',
+             f'<rect x="0.5" y="0.5" width="{W - 1}" height="{H - 1}" rx="10" fill="white" stroke="{GRID}"/>',
+             f'<text x="20" y="30" font-size="16" font-weight="600" fill="{INK}">Eight seconds of infill, then an outer wall</text>',
+             f'<text x="20" y="50" font-size="12.5" fill="{GRAY}">Toy model, ABS at 250 °C, 20 mm melt zone. The wall inherits the infill for about ten seconds</text>']
+    y = 62
+    for pp in panels:
+        inner = pp.svg(card=False).split("\n", 1)[1].rsplit("</svg>", 1)[0]
+        parts.append(f'<svg x="0" y="{y}" width="{pp.w}" height="{pp.h}" viewBox="0 0 {pp.w} {pp.h}">{inner}</svg>')
+        y += pp.h
+    parts.append("</svg>")
+    save("print-stretch.svg", "\n".join(parts) + "\n")
+
+
+def _segments(pts):
+    segs, cur = [], []
+    for x, y in pts:
+        if y is None:
+            if cur:
+                segs.append(cur)
+            cur = []
+        else:
+            cur.append((x, y))
+    if cur:
+        segs.append(cur)
+    return segs
+
+
 if __name__ == "__main__":
     shear_thinning()
     wlf_shift()
@@ -898,3 +1301,7 @@ if __name__ == "__main__":
     scarf_joint()
     scarf_lag()
     scarf_restart()
+    coupling_map()
+    timescales()
+    sensitivity()
+    print_stretch_fig()

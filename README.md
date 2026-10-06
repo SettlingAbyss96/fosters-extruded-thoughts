@@ -26,6 +26,7 @@ I say which is which.
 |---|---|
 | The why behind printers, from the basics up to the math | [Handbook](handbook/README.md) |
 | What research has proven that nobody has built into slicers or firmware yet | [The gaps](handbook/12-gaps.md) |
+| The whole printer at once: every knob, every coupling, one model | [Bringing everything together](handbook/14-bringing-everything-together.md) |
 | The papers, organized, and what's worth stealing | [Research](research/README.md) |
 | Calibration as a control problem instead of a pile of test prints | [Calibration](calibration/README.md) |
 | Step-by-step guides | [Guides](guides/README.md) (just getting started) |

@@ -349,15 +349,15 @@ With $`\tau = 0.04`$ s and $`q = 15`$ mm³/s that's 0.6 mm³, about **a quarter 
 filament.**
 
 A shear-thinning melt holds more than that. $`\tau`$ is only the slope of pressure against flow,
-while the spring is charged to the full pressure, so with the exponent $`m`$ from "The melt zone in
-the pressure":
+while the spring is charged to the full pressure. PA acts in milliseconds, far too fast for the melt
+temperature to move, so the slope that counts is the shear-thinning one, $`n`$:
 
 ```math
-V_s = C\,P = \frac{\tau\,q}{m}
+V_s = C\,P = \frac{\tau\,q}{n}
 ```
 
-With $`m`$ around 0.5 that's twice as much, about half a millimeter of filament, and PA only takes
-back $`K q = \tau q`$ of it when the move stops. The other half drains slowly, because the nozzle gets
+With $`n`$ around 0.4 to 0.5 that's twice as much or more, about half a millimeter of filament, and
+PA only takes back $`K q = \tau q`$ of it when the move stops. The other half drains slowly, because the nozzle gets
 sluggish at low flow. That assumes a linear spring. One that stiffens under load would hold even
 more. It's also why a scarf seam wants its own restart ([chapter 5](05-laying-a-line.md#the-restart-is-tuned-for-the-wrong-start)).
 

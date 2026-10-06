@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="566" viewBox="0 0 900 566" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="899" height="565" rx="10" fill="white" stroke="#e5e7eb"/>
+<text x="20" y="28" font-size="16" font-weight="600" fill="#111827">Every clock in the handbook</text>
+<text x="20" y="47" font-size="12.5" fill="#6b7280">Bars span the usual range. The shaded band is where most of the trouble lives</text>
+<rect x="392.6" y="64" width="138.4" height="450" fill="#dc2626" opacity="0.07"/>
+<text x="461.8" y="80" font-size="12.5" text-anchor="middle" fill="#dc2626">the crowded decades</text>
+<line x1="254.1" y1="64" x2="254.1" y2="514" stroke="#e5e7eb"/>
+<text x="254.1" y="534" font-size="13" text-anchor="middle" fill="#6b7280">10 µs</text>
+<line x1="346.4" y1="64" x2="346.4" y2="514" stroke="#e5e7eb"/>
+<text x="346.4" y="534" font-size="13" text-anchor="middle" fill="#6b7280">1 ms</text>
+<line x1="438.7" y1="64" x2="438.7" y2="514" stroke="#e5e7eb"/>
+<text x="438.7" y="534" font-size="13" text-anchor="middle" fill="#6b7280">0.1 s</text>
+<line x1="531.0" y1="64" x2="531.0" y2="514" stroke="#e5e7eb"/>
+<text x="531.0" y="534" font-size="13" text-anchor="middle" fill="#6b7280">10 s</text>
+<line x1="623.3" y1="64" x2="623.3" y2="514" stroke="#e5e7eb"/>
+<text x="623.3" y="534" font-size="13" text-anchor="middle" fill="#6b7280">17 min</text>
+<line x1="715.6" y1="64" x2="715.6" y2="514" stroke="#e5e7eb"/>
+<text x="715.6" y="534" font-size="13" text-anchor="middle" fill="#6b7280">1 day</text>
+<line x1="807.8" y1="64" x2="807.8" y2="514" stroke="#e5e7eb"/>
+<text x="807.8" y="534" font-size="13" text-anchor="middle" fill="#6b7280">4 months</text>
+<line x1="230" y1="514" x2="876" y2="514" stroke="#111827" stroke-width="1.2"/>
+<line x1="230" y1="64" x2="230" y2="514" stroke="#111827" stroke-width="1.2"/>
+<rect x="240.2" y="68.8" width="60.0" height="14" rx="4" fill="#6b7280" opacity="0.8"/>
+<text x="222" y="79.8" font-size="12.5" text-anchor="end" fill="#111827">Step pulses</text>
+<text x="306.3" y="79.8" font-size="11.5" fill="#6b7280">ch. 8</text>
+<rect x="346.4" y="92.5" width="114.3" height="14" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="103.5" font-size="12.5" text-anchor="end" fill="#111827">Melt relaxation time</text>
+<text x="466.7" y="103.5" font-size="11.5" fill="#6b7280">ch. 2</text>
+<rect x="368.4" y="116.2" width="46.1" height="14" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="127.2" font-size="12.5" text-anchor="end" fill="#111827">Melt crossing the nozzle</text>
+<text x="420.6" y="127.2" font-size="11.5" fill="#6b7280">ch. 2</text>
+<rect x="397.8" y="139.9" width="15.4" height="14" rx="4" fill="#6b7280" opacity="0.8"/>
+<text x="222" y="150.9" font-size="12.5" text-anchor="end" fill="#111827">Ringing period, 36 to 75 Hz</text>
+<text x="419.2" y="150.9" font-size="11.5" fill="#6b7280">ch. 8</text>
+<rect x="406.4" y="163.6" width="8.1" height="14" rx="4" fill="#6b7280" opacity="0.8"/>
+<text x="222" y="174.6" font-size="12.5" text-anchor="end" fill="#111827">Input shaper</text>
+<text x="420.6" y="174.6" font-size="11.5" fill="#6b7280">ch. 8</text>
+<rect x="392.6" y="187.3" width="35.9" height="14" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="198.3" font-size="12.5" text-anchor="end" fill="#111827">PA time constant</text>
+<text x="434.5" y="198.3" font-size="11.5" fill="#6b7280">ch. 4</text>
+<rect x="424.8" y="210.9" width="60.0" height="14" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="221.9" font-size="12.5" text-anchor="end" fill="#111827">Pressure tail after a stop</text>
+<text x="490.8" y="221.9" font-size="11.5" fill="#6b7280">ch. 4</text>
+<rect x="438.7" y="234.6" width="27.8" height="14" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="245.6" font-size="12.5" text-anchor="end" fill="#111827">Scarf ramp</text>
+<text x="472.5" y="245.6" font-size="11.5" fill="#6b7280">ch. 5</text>
+<rect x="438.7" y="258.3" width="60.0" height="14" rx="4" fill="#ea580c" opacity="0.8"/>
+<text x="222" y="269.3" font-size="12.5" text-anchor="end" fill="#111827">Sintering and useful weld time</text>
+<text x="504.7" y="269.3" font-size="11.5" fill="#6b7280">ch. 6</text>
+<rect x="444.0" y="282.0" width="73.1" height="14" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="293.0" font-size="12.5" text-anchor="end" fill="#111827">Thermal ooze</text>
+<text x="523.1" y="293.0" font-size="11.5" fill="#6b7280">ch. 4</text>
+<rect x="493.0" y="305.7" width="13.9" height="14" rx="4" fill="#7c3aed" opacity="0.8"/>
+<text x="222" y="316.7" font-size="12.5" text-anchor="end" fill="#111827">MPC reach time</text>
+<text x="512.9" y="316.7" font-size="11.5" fill="#6b7280">ch. 9</text>
+<rect x="498.7" y="329.4" width="32.3" height="14" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="340.4" font-size="12.5" text-anchor="end" fill="#111827">Melt age, one transit</text>
+<text x="537.0" y="340.4" font-size="11.5" fill="#6b7280">ch. 3, 4</text>
+<rect x="498.7" y="353.1" width="54.3" height="14" rx="4" fill="#ea580c" opacity="0.8"/>
+<text x="222" y="364.1" font-size="12.5" text-anchor="end" fill="#111827">Bead cooling under the fan</text>
+<text x="559.0" y="364.1" font-size="11.5" fill="#6b7280">ch. 6</text>
+<rect x="506.9" y="376.7" width="60.0" height="14" rx="4" fill="#ea580c" opacity="0.8"/>
+<text x="222" y="387.7" font-size="12.5" text-anchor="end" fill="#111827">Layer time</text>
+<text x="572.9" y="387.7" font-size="11.5" fill="#6b7280">ch. 6</text>
+<rect x="599.1" y="400.4" width="22.0" height="14" rx="4" fill="#7c3aed" opacity="0.8"/>
+<text x="222" y="411.4" font-size="12.5" text-anchor="end" fill="#111827">Chamber air</text>
+<text x="627.2" y="411.4" font-size="11.5" fill="#6b7280">ch. 9</text>
+<rect x="613.0" y="424.1" width="78.4" height="14" rx="4" fill="#16a34a" opacity="0.8"/>
+<text x="222" y="435.1" font-size="12.5" text-anchor="end" fill="#111827">Stress relaxation, annealing</text>
+<text x="697.4" y="435.1" font-size="11.5" fill="#6b7280">ch. 7</text>
+<rect x="635.0" y="447.8" width="48.3" height="14" rx="4" fill="#7c3aed" opacity="0.8"/>
+<text x="222" y="458.8" font-size="12.5" text-anchor="end" fill="#111827">Frame and Z drift</text>
+<text x="689.3" y="458.8" font-size="11.5" fill="#6b7280">ch. 9</text>
+<rect x="669.4" y="471.5" width="92.3" height="14" rx="4" fill="#16a34a" opacity="0.8"/>
+<text x="222" y="482.5" font-size="12.5" text-anchor="end" fill="#111827">Moisture pickup</text>
+<text x="767.7" y="482.5" font-size="11.5" fill="#6b7280">ch. 2, 11</text>
+<rect x="761.7" y="495.2" width="68.2" height="14" rx="4" fill="#16a34a" opacity="0.8"/>
+<text x="222" y="506.2" font-size="12.5" text-anchor="end" fill="#111827">Nozzle wear</text>
+<text x="835.9" y="506.2" font-size="11.5" fill="#6b7280">ch. 10</text>
+<text x="553.0" y="550" font-size="13.5" text-anchor="middle" fill="#111827">Time (log scale)</text>
+<text x="24" y="289.0" font-size="13.5" text-anchor="middle" fill="#111827" transform="rotate(-90 24 289.0)"></text>
+</svg>
