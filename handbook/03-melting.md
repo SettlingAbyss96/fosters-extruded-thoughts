@@ -118,6 +118,12 @@ put a thermocouple and a pressure sensor right in the melt flow. The melt temper
 higher flow rates while the block happily sat at its setpoint. So the "nozzle temperature" in your
 slicer is really "block temperature." At high flow, the plastic coming out is cooler than you think.
 
+How much cooler? [Kapusuzoglu et al. (2026)](https://arxiv.org/abs/2608.18431) printed ABS through
+a 0.8 mm nozzle in an enclosed printer, and at the printer's 260 °C limit the filament came out
+roughly 40 to 50 °C below the setpoint. That's a big nozzle and a lot of plastic, so it's close to
+the worst case, but it's the same story: the number on the screen is a heater setting, not a melt
+temperature.
+
 Which means it makes sense to run hotter when flowing more. There's already a post-processing
 script that does exactly that:
 [G-Code Flow Temperature Controller](https://github.com/sb53systems/G-Code-Flow-Temperature-Controller),
@@ -176,5 +182,6 @@ None of this is set up yet. These are the experiments I'm most curious about, if
 - [Go, Hart (2017)](https://arxiv.org/abs/1709.05918). Fast desktop-scale extrusion with a screw and laser heating
 - [Phan, Swain, Mackay (2018)](https://doi.org/10.1122/1.5022982). Rheology and heat transfer in FFF, Nusselt vs Graetz
 - [Anderegg et al. (2019)](https://www.researchgate.net/publication/330392702_In-Situ_Monitoring_of_Polymer_Flow_Temperature_and_Pressure_in_Extrusion_Based_Additive_Manufacturing). Pressure and melt temperature in the flow
+- [Kapusuzoglu, Sato, Mahadevan, Witherell (2026)](https://arxiv.org/abs/2608.18431). ABS bond quality optimization; filament came out 40 to 50 °C below a 260 °C setpoint
 - [Turner, Strong, Gold (2014)](https://www.semanticscholar.org/paper/A-review-of-melt-extrusion-additive-manufacturing-Turner-Strong/2f47b171bb818a99a3f1f3a4b652bdc0db682d19). Review of liquefier modeling
 - [G-Code Flow Temperature Controller](https://github.com/sb53systems/G-Code-Flow-Temperature-Controller). Flow-dependent temperature as a post-processor

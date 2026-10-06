@@ -144,6 +144,78 @@ What actually moves the dimensions:
 - **Corners and seams:** PA errors bulge corners, seams add a zit. Both show up as dimension errors if you measure at the wrong spot
 - **The machine drifts too.** The frame and gantry grow as they warm up over a long print (chapter 9)
 
+## A rant about the shrinkage box
+
+This one genuinely blows my mind.
+
+Look back at the table at the top of this chapter. ABS shrinks about 0.7% after it sets, PLA about
+0.25%, and you can get there from a coefficient of expansion and one subtraction. It's not exotic,
+it's the most predictable difference between two filaments there is. And every slicer that matters
+has a box for it: Orca has [Shrinkage (XY) and Shrinkage (Z)](https://www.orcaslicer.com/wiki/material_settings/filament/material_basic_information)
+right in the filament settings, Bambu Studio has one too. What's in that box? 100%. Always. For
+everything.
+
+Bambu is the one that really gets me. They make the filament, the printer, the enclosure and the
+slicer. They ship a tuned profile for every filament they sell, with its own temperatures, flow
+ratio, max volumetric speed and cooling. They test all of it in house. And the shrink value is set
+exactly once, to 100%, in the base profile every Bambu filament inherits from, and not one of them
+overrides it. I went and checked their profile files. So what is the filament picker even for, if
+it ignores one of the most basic physical differences between two plastics, and the one that moves
+your tolerances the most? On a 100 mm ABS part that's 0.7 mm gone. I can print ABS on one of those
+machines, measure it, and it lands right where the shrink math says it should. The number is
+known. It's just not used.
+
+Which is how you end up running a [Calilantern](https://vector3d.shop/products/calilantern-calibration-tool-mk2)
+on a Bambu. Don't get me wrong, it's a great tool, and on a machine you built yourself, measuring
+skew and scale is exactly what you should do. But on a closed ecosystem where one company controls
+every variable, the scale half of that exercise is mostly re-measuring a material property the
+manufacturer could have shipped. Per filament. By you. Every time.
+
+The worst part is what it does to everyone else. Designers print on uncompensated machines, the
+part comes out small, so they fudge the CAD. Bigger holes, looser fits, a little extra on that
+bearing seat until it works on their printer with their filament. Then you calibrate properly, a
+100 mm part actually prints at 100 mm, and half the community files come out wrong. Bearings rattle,
+press fits don't press, inserts melt into holes sized for someone else's mistake. Nobody's sizes
+mean anything without knowing what they printed it on.
+
+Heat-set inserts are the clearest example. Someone prints an insert hole in ABS on a machine that
+never compensated, it comes out tight, so they open the hole up in CAD until the insert goes in
+right. That fix is now baked into the file. Print that same file on a machine that actually prints
+ABS true, and the hole is too big. The insert spins, or pulls out the first time you tighten a
+screw. Same story for bearing seats and press fits. The CAD isn't describing the part anymore, it's
+describing one person's uncorrected printer.
+
+The things people say back, and why I don't buy them:
+
+- **"Shrink isn't one exact number."** Sure. It moves a bit with chamber temperature, part size,
+  how hard the bed holds the bottom layers, fillers. But it lands in a range per family. ABS sits
+  in one range when I calibrate it, ASA in a similar one, the CF blends lower because the fibers
+  hold the length. I can ballpark a new filament before I ever print it, and land far closer than
+  100% does, with a lot fewer Calilantern prints. A default of 0.6% for ABS is wrong by a little.
+  100% is wrong by the whole amount, every time. I refuse to believe the filament teams don't know
+  this
+- **"Multi-material makes it impossible."** Bambu Studio currently skips shrink compensation on
+  [painted multi-filament models](https://github.com/bambulab/BambuStudio/releases/tag/v02.08.04.57)
+  because one part can't be scaled for two plastics. But it doesn't have to be one scale. Each
+  material's toolpaths can be scaled by its own shrink about the same origin:
+
+  ```math
+  x_{print,i} = \frac{x_{design}}{1 - s_i}
+  ```
+
+  Each region then cools back to its designed size. Where two materials meet, they disagree by
+  about $`(s_A - s_B)\,x`$ (ABS against PLA, roughly 0.45 mm across 100 mm), but that disagreement
+  happens on cooling whether you compensate or not. Compensating gets every region right and leaves
+  only the interface to deal with, which beats getting every region wrong. The math is clear
+- **"Just calibrate it yourself."** I do. That's the point. It's the one thing the filament
+  profile exists to carry, and it's the one thing it leaves out
+
+What I'd like to see: filament profiles that ship a real shrink value per filament, keyed to the
+chamber mode, compensation per material in multi-material prints, and designs drawn at true size
+with the fit clearance designed in on purpose. Until then my own library carries measured shrink
+per filament ([slicer plan](../calibration/slicer.md)), and I assume any downloaded part with a
+tight fit was tuned on somebody else's mistake.
+
 ## Cooling down
 
 Two things go wrong at the end of a print:
