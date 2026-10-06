@@ -16,7 +16,7 @@ Then automate whatever sensors can measure, and keep a human only for the stuff 
 taste (seam placement, how a surface looks).
 
 The research behind all this (material science, control, and stuff borrowed from other
-industries) is in [`docs/research/`](../research/README.md). The long-form explanation, from basics
+industries) is in [`research/`](../research/README.md). The long-form explanation, from basics
 to the math, is the [handbook](../handbook/README.md).
 
 **This is big and it's not getting solved in one go.** These pages are the breakdown, not the
@@ -110,4 +110,4 @@ still in the right order and stored in the right place.
 - [ ] Design one dimensional test part that separates shrinkage from contour offset ([models](models.md#dimensions))
 - [ ] Pick the storage format for parameters keyed by their dependencies (nozzle × material × temp...)
 - [ ] Figure out which of these the bd_pressureE can identify on its own, before buying it
-- [ ] Revisit [slicer.md](../slicer.md) once this settles, it's still too static
+- [ ] Revisit [slicer.md](slicer.md) once this settles, it's still too static

@@ -266,7 +266,7 @@ turns the inherited PA and retraction into measured ones. 5 minutes, no weighing
 
 The final word. One small part with seams, overhangs, a bridge, holes and a stringing section,
 printed in the new filament **and** the anchor, side by side. Call which one is better per feature,
-not a score. Photos go in the repo.
+not a score. Photos go in my lab notes.
 
 ## Confidence tiers
 
@@ -307,7 +307,7 @@ before trusting it.
 
 ## Library structure
 
-This extends the library in [slicer.md](../slicer.md#the-library): family → line → color →
+This extends the library in [slicer.md](slicer.md#the-library): family → line → color →
 spool. Each level only stores what was measured at that level, everything else is inherited.
 Anything that depends on hardware records what it was measured on, so a nozzle swap knows what's
 stale.

@@ -41,7 +41,6 @@ What falls out:
 On a CoreXY with 20-tooth pulleys, each motor turn is 40 mm of belt. 500 mm/s is 12.5 turns per
 second, which is 1,250 Hz electrical on a 0.9° motor. Plug your motor's datasheet $R$, $L$ and torque
 constant into that formula and you'll see whether 24 V is still keeping up at that speed.
-([roadmap: beefier drivers and 48 V](../roadmap.md#beefier-drivers-and-48-v))
 
 ## Belts are springs
 
@@ -61,7 +60,7 @@ f_0 = \frac{1}{2\pi}\sqrt{\frac{k}{m}}
 Two consequences:
 
 - **The span length changes as the toolhead moves,** so the resonance changes with position. That's why resonance testing happens at one spot, usually the middle, and why it's never quite right everywhere
-- **Stiffer or lighter means higher frequency.** Wider belts raise $k$, a lighter toolhead lowers $m$ ([input shaper](../tuning/input-shaper.md))
+- **Stiffer or lighter means higher frequency.** Wider belts raise $k$, a lighter toolhead lowers $m$
 
 ## Resonance and ringing
 
@@ -150,8 +149,8 @@ On a CoreXY, both motors drive every move. With Klipper's convention $a = x + y$
 - **A diagonal move turns only one motor**
 
 So if one motor, belt or pulley path is different from the other, it shows up on one diagonal and
-not the other. That's exactly the asymmetry this printer has
-([drivers](../tuning/drivers.md#ab-asymmetry)). Unequal belt paths can also rack the gantry
+not the other. That's exactly the asymmetry my printer has, and I'm
+still hunting it. Unequal belt paths can also rack the gantry
 (twist it slightly as it accelerates). [Okwudire's group](https://arxiv.org/abs/2105.09878) compensated
 racking on H-frame printers in software. CoreXY has the same geometry.
 
@@ -159,8 +158,7 @@ racking on H-frame printers in software. CoreXY has the same geometry.
 
 The motor, driver and load have their own resonance, separate from the belts. It shows up as
 vibration peaks at specific speeds, which is what Shake&Tune's vibrations profile maps. On this
-printer the peaks moved when the motor tuning changed, so they're motor resonance, not the frame
-([drivers](../tuning/drivers.md#autotune-and-what-it-did-to-the-vibration)). The practical fix is
+printer the peaks moved when the motor tuning changed, so they're motor resonance, not the frame. The practical fix is
 dumb but effective: don't print walls at those speeds.
 
 ## Beyond input shaping
@@ -189,4 +187,4 @@ method roughly doubled the allowed flow, and a Benchy printed only 12% faster.
 - [Shake&Tune](https://github.com/Frix-x/klippain-shaketune) and [klipper_tmc_autotune](https://github.com/andrewmcgr/klipper_tmc_autotune), what this printer was tuned with
 - [Okwudire: filtered B-splines](https://www.sciencedirect.com/science/article/abs/pii/S0957415817301277), [H-frame racking](https://arxiv.org/abs/2105.09878), [position-varying dynamics](https://arxiv.org/abs/2209.06791)
 - [Prusa: phase stepping](https://help.prusa3d.com/article/phase-stepping-core-one_914247)
-- This printer: [input shaper](../tuning/input-shaper.md), [motion](../tuning/motion.md), [drivers](../tuning/drivers.md)
+- My printer's tuning results are in my lab notes, which go public once they're cleaned up

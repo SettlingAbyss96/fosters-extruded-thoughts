@@ -19,7 +19,7 @@ This matters a lot for a hot chamber. The hotend fan cools the heatsink with cha
 cooling power goes roughly with the temperature difference between the heatsink and that air. At
 70 °C chamber air there's much less difference to work with. PLA softens around 60 °C, so **PLA in
 a 70 °C chamber is asking for heat creep jams.** That's one of several reasons the chamber modes in
-[slicer.md](../slicer.md#chamber-modes) keep PLA cool. High-temperature plastics soften much higher,
+[slicer.md](../calibration/slicer.md#chamber-modes) keep PLA cool. High-temperature plastics soften much higher,
 so they don't care.
 
 ## How long it takes heat to get in

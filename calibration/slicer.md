@@ -11,7 +11,7 @@ does the right thing for that material: chamber, fans, soak, temps, PA, speed li
 
 > This page is the plumbing between Orca and the machine. Still too static: it assumes the numbers
 > in the library are known. Where they come from, and how to measure them instead of tuning them by
-> eye, is the bigger problem: [calibration as a control problem](calibration/README.md).
+> eye, is the bigger problem: [calibration as a control problem](README.md).
 
 ## What's wrong right now
 
@@ -46,7 +46,7 @@ Same idea as the buffer plugin: one source of truth, everything else derived fro
 |---|---|---|---|---|
 | Slicer is the boss (how everyone does it) | Fat start G-code and per-filament G-code in Orca | Nothing to build | Every filament profile has to carry machine knowledge. Drifts. Exactly the problem | No |
 | Machine is the boss | Orca only sends `FILAMENT_TYPE=ABS`, the machine looks up the rest | One place for machine stuff | Orca doesn't know the flow limits, so speeds and time estimates are wrong | Half of it |
-| **One library, generated into both** | `filaments.toml` in this repo, a script writes the Orca presets *and* the Kalico table | Can't disagree, versioned in git, review the diff | Need a small generator, and I have to edit the library, not Orca | **Yes** |
+| **One library, generated into both** | `filaments.toml` in my printer's repo, a script writes the Orca presets *and* the Kalico table | Can't disagree, versioned in git, review the diff | Need a small generator, and I have to edit the library, not Orca | **Yes** |
 | Spoolman as the library | Spoolman holds filaments; [spoolman2slicer](https://github.com/bofh69/sm2ss) or [PipSpool](https://github.com/JP-Reitsma/pipspool-orcaslicer) make Orca presets | Per-spool tracking, nice UI | Another service. Macros can't read Spoolman directly, custom fields are clunky | Maybe later as a front end for the same library |
 | Orca's filament start G-code | Per-filament commands typed into Orca | Easy | It's option 1 again with extra steps | No |
 
@@ -69,7 +69,7 @@ flowchart LR
 ### The library
 
 One entry per material, brands inherit and override (family → line → color → spool, see
-[filament](calibration/filament.md#library-structure)). Rough shape:
+[filament](filament.md#library-structure)). Rough shape:
 
 ```toml
 [ABS]
@@ -124,7 +124,7 @@ Everything after that is the existing sequence.
 
 ## Chamber modes
 
-*Why the chamber matters for strength and warp: [handbook chapter 6](handbook/06-layer-bonding.md) and [chapter 7](handbook/07-shrink-stress-warp.md#why-hot-chambers-fix-warping).*
+*Why the chamber matters for strength and warp: [handbook chapter 6](../handbook/06-layer-bonding.md) and [chapter 7](../handbook/07-shrink-stress-warp.md#why-hot-chambers-fix-warping).*
 
 The machine picks a mode from the material. Fans, heater, soak and (later) shaper and Z
 compensation all key off the mode, so there's one switch instead of ten.
@@ -168,15 +168,15 @@ The Orca printer profile gets its limits from what the machine measured, not def
 |---|---|---|
 | Max speed | 500 mm/s | Speed test |
 | Travel accel | 10000 mm/s² | Speed test |
-| Max accel while extruding | about 3800 mm/s² | Shaper recommendation ([input shaper](tuning/input-shaper.md)) |
-| Z speed / accel | 20 mm/s, 500 mm/s² | [Z stays at 20](tuning/motion.md#z-leave-it-alone) |
+| Max accel while extruding | about 3800 mm/s² | Shaper recommendation on my printer |
+| Z speed / accel | 20 mm/s, 500 mm/s² | My Z test: 40 was loud, 50 stalled the motors |
 
 When the shaper changes (A/B fix, Monolith), I regenerate and the slicer follows. Bonus: Orca's time
 estimates get way more accurate when its limits match the machine.
 
 ### The hotend is the real speed limit
 
-*Where max flow comes from: [handbook chapter 3](handbook/03-melting.md#the-graetz-number).*
+*Where max flow comes from: [handbook chapter 3](../handbook/03-melting.md#the-graetz-number).*
 
 Max print speed for a line is set by how fast the hotend can melt:
 
@@ -197,7 +197,7 @@ it doesn't matter.
 
 ## Hotend: MPC with filament feedforward
 
-*Longer version: [handbook chapter 9](handbook/09-heat-control.md#mpc-the-hotend-as-a-model).*
+*Longer version: [handbook chapter 9](../handbook/09-heat-control.md#mpc-the-hotend-as-a-model).*
 
 Kalico has **MPC** (model predictive control) for heaters. It models the heater block, sensor,
 ambient and the filament, and it knows the extrusion rate from the planned moves. Power needed to
@@ -217,7 +217,7 @@ Needs the Conch's heater wattage first.
 
 ## Soak: stop guessing
 
-*Why the frame lags the air: [handbook chapter 9](handbook/09-heat-control.md#the-chamber-is-a-small-building).*
+*Why the frame lags the air: [handbook chapter 9](../handbook/09-heat-control.md#the-chamber-is-a-small-building).*
 
 Fixed soak times are either too long (waste) or too short (Z drifts during the first layers). What
 actually matters is how much the frame still has to move. The frame sensor warms like
@@ -252,7 +252,7 @@ Too much for a Jinja macro. Small Kalico plugin, same style as the buffer one, t
 
 ## Pressure advance, retraction, shrinkage
 
-*Why PA changes with flow and temperature: [handbook chapter 4](handbook/04-extrusion-dynamics.md#why-pa-changes-with-flow-and-temperature).*
+*Why PA changes with flow and temperature: [handbook chapter 4](../handbook/04-extrusion-dynamics.md#why-pa-changes-with-flow-and-temperature).*
 
 - **PA** lives in the library per filament × nozzle, applied by `PRINT_START`. Orca's PA option stays off so there's one source. Once bd_pressure is on the toolhead, its `PA_CALIBRATE` results get written back into the library. Machine measures, library updates, slicer regenerates
 - **Retraction** goes to firmware retraction (`[firmware_retraction]`, Orca "use firmware retraction"). Tuned on the machine, applies to every slice, `SET_RETRACTION` per filament

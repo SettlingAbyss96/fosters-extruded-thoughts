@@ -19,7 +19,7 @@ P = (-cQ + d + 1)\,T + eQ^2 + f
 
 - **Picking settings:** temperature = the temperature where it first flows + 80 °C. Flow = a fraction of the max force before slip (0.75 for max-rate features, 0.2 / 0.1 / 0.05 for more important ones). One set of these two numbers for everything
 - **Results:** PLA, wood PLA, an algae-based filament and a bio PETG on 0.4 and 0.8 nozzles. Temperatures landed inside the manufacturer's range in all but one case, no failed prints, stringing on two. Benchy only 12% faster, because acceleration was the limit, not flow
-- **Their own limitations:** nozzle data alone isn't enough to pick everything, the slicer is disconnected from the machine (same complaint as [slicer.md](../slicer.md)), and an uncalibrated load cell can't compare machines
+- **Their own limitations:** nozzle data alone isn't enough to pick everything, the slicer is disconnected from the machine (same complaint as [slicer.md](../calibration/slicer.md)), and an uncalibrated load cell can't compare machines
 
 What I take from it:
 
@@ -51,7 +51,7 @@ the phone-camera calibration is the cheapest possible path to the same idea.
 | [Coogan & Kazmer 2019](https://www.researchgate.net/publication/330031420_In-line_rheological_monitoring_of_fused_deposition_modeling) | Pressure transducer + thermocouple in a custom nozzle: an in-line rheometer, checked against a lab capillary rheometer | The nozzle measures viscosity |
 | [Anderegg et al. 2019](https://www.researchgate.net/publication/330392702_In-Situ_Monitoring_of_Polymer_Flow_Temperature_and_Pressure_in_Extrusion_Based_Additive_Manufacturing) | Pressure + melt temperature inside the flow. Melt temperature drops at high flow | The hotend thermistor doesn't see what the plastic sees |
 | [Phan, Swain, Mackay 2018](https://doi.org/10.1122/1.5022982) | Pressure in the nozzle during normal printing, measured from the extruder's drive power | Extruder load as a pressure signal |
-| Kalico MPC | Hotend model with filament feedforward | Already in the firmware ([slicer.md](../slicer.md#hotend-mpc-with-filament-feedforward)) |
+| Kalico MPC | Hotend model with filament feedforward | Already in the firmware ([slicer.md](../calibration/slicer.md#hotend-mpc-with-filament-feedforward)) |
 
 ## Motion
 

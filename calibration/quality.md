@@ -47,7 +47,7 @@ can measure on every loop, not judge from a photo.
 | Z offset | The squish | Autoz, load cell |
 | Bed shape / mesh | Squish varies across the bed | Probe |
 | Gantry level | Same | QGL |
-| Thermal drift during the first layer | Frame still moving | Frame sensor ([soak](../slicer.md#soak-stop-guessing)) |
+| Thermal drift during the first layer | Frame still moving | Frame sensor ([soak](slicer.md#soak-stop-guessing)) |
 | First-layer flow and width | Squish again | Flow chain |
 | Bed temp and surface | Adhesion | Thermistor, me |
 | Dirty nozzle | Drags and blobs | Blobifier, brush |
@@ -89,7 +89,7 @@ can measure on every loop, not judge from a photo.
 | Cause | Why | Measured by |
 |---|---|---|
 | Past max flow | Hotend can't melt it fast enough | Pressure knee, heater pegged |
-| Temperature droop under flow | PID reacts late | MPC fixes it ([MPC](../slicer.md#hotend-mpc-with-filament-feedforward)) |
+| Temperature droop under flow | PID reacts late | MPC fixes it ([MPC](slicer.md#hotend-mpc-with-filament-feedforward)) |
 | Extruder slip | High pressure, gears lose grip | BDwidth encoder, buffer drift |
 | Filament diameter | Thin spot | BDwidth |
 

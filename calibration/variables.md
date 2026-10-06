@@ -115,7 +115,7 @@ Not complete. Add as I go.
 | Variable | Kind | Depends on | Seen by |
 |---|---|---|---|
 | Chamber setpoint | Knob | Material | Known |
-| Soak time | Knob, **derived** | Frame drift rate | Frame sensor ([soak](../slicer.md#soak-stop-guessing)) |
+| Soak time | Knob, **derived** | Frame drift rate | Frame sensor ([soak](slicer.md#soak-stop-guessing)) |
 | Room humidity | Disturbance | House | Nothing yet |
 | Layer time | Derived | Geometry, speed | Known from the G-code |
 | Drafts | Disturbance | Door, fans, blowers | Chamber sensors (spread) |

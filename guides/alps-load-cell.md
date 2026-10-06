@@ -1,7 +1,7 @@
 # Mellow ALPS: signal-only, or real load-cell data?
 
 > [!NOTE]
-> **Status: ordered.** A HeatCore 4 UHF ALPS and a bd_pressureE are both on order (2026-10-01). Each gets its own toolhead for a side-by-side comparison ([roadmap](roadmap.md#bd_pressure-vs-alps--autopa)).
+> **Status: ordered.** A HeatCore 4 UHF ALPS and a bd_pressureE are both on order (2026-10-01). Each gets its own toolhead for a side-by-side comparison on my Voron.
 
 **Answer: both, depending on firmware.** Out of the box it only sends a trigger signal. **Reflashed with Klipper**, it streams raw load-cell data to Klipper's native `[load_cell_probe]`. That's what autopa (automatic PA) and proper load-cell probing need.
 
@@ -170,7 +170,7 @@ The bridge signal is **microvolts**. Digitize it **as close to the load cell as 
 ### Plan
 
 1. **Buy an ALPS and test it stock**: Klipper firmware over USB per the [setup above](#setup-outline). Confirm load-cell probing and autopa work, and log ALPS board temperature against chamber temperature.
-2. **Take it apart and document it**: board photos, how the bridge connects (connector or soldered), ADS131M02 location, and test pads for SPI, DRDY, CLKIN and NRST. Commit the photos to `docs/hardware/alps/`.
+2. **Take it apart and document it**: board photos, how the bridge connects (connector or soldered), ADS131M02 location, and test pads for SPI, DRDY, CLKIN and NRST. Keep the photos with the project notes.
 3. **Prototype A** to confirm the H36 reads the ADC at 6.8 MHz (`LOAD_CELL_DIAGNOSTIC`: sample rate, 0 saturated samples).
 4. **Design B** in KiCad. Release it as a public repo under GPL-3.0 (matching Klipper and Voron) or CERN-OHL-S, the standard open-hardware license. Order it from PCBWay.
 
@@ -183,7 +183,7 @@ the start:
 - [ETH Zurich](https://arxiv.org/abs/2403.16042) closed a loop on extrusion force and held line width steady while the layer height was varied from 20% to 200%
 - The same signal shows clogs, slip, and wet filament (it gets runnier)
 
-All of that is in the [handbook's gap list](handbook/12-gaps.md#the-big-table), rows 6 to 8, 26 and 27.
+All of that is in the [handbook's gap list](../handbook/12-gaps.md#the-big-table), rows 6 to 8, 26 and 27.
 
 ## Sources
 

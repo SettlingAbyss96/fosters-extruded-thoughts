@@ -62,7 +62,7 @@ too, but its docs call it experimental.
 
 ## The chamber is a small building
 
-The simplest model is one heat balance (from the [roadmap](../roadmap.md#how-much-heater)):
+The simplest model is one heat balance, the same one I used to size my chamber heater:
 
 ```math
 C\,\frac{dT}{dt} = P_{heater} + P_{bed} - UA\,(T - T_{room})
@@ -99,7 +99,9 @@ cool-down, fit the model, and the chamber is characterized.
 - **A cascade:** a fast inner loop on the duct or heater-outlet temperature, and a slow outer loop on chamber air that sets the inner loop's target. The inner loop keeps the heaters from overshooting, the outer loop gets the chamber right. Kalico supports this directly as `control: dual_loop_pid` with an `inner_sensor_name`, so it's a config change, not code
 - **Blowers** fast while heating, slow while holding. PTC heaters put out less power as they get hotter, and slowing the air over them makes them hotter, so holding mode naturally throttles itself
 
-Safety stuff for the module is in the [roadmap](../roadmap.md#safety-mains-inside-a-box-full-of-plastic).
+And because it's mains-powered heat inside a box full of plastic: a thermal cutoff fuse in series
+with the heaters, heaters never on without airflow (check the blower tach), a fused zero-cross SSR,
+earth on any metal, and a smoke detector near the printer.
 
 ## The frame and Z drift
 
@@ -118,7 +120,7 @@ readings at different temperatures. QGL and autoz already log what's needed. Tha
 plugin I'd like to write.
 
 The other half is waiting until the drift is small enough before starting, and doing that smartly
-instead of with a fixed timer: [predictive soak](../slicer.md#soak-stop-guessing).
+instead of with a fixed timer: [predictive soak](../calibration/slicer.md#soak-stop-guessing).
 
 ## References
 

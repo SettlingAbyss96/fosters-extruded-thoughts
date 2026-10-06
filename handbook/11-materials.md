@@ -20,7 +20,7 @@ Keep those in mind and the advice below stops being a list of rules and starts m
 ## PLA
 
 - $T_g$ about 60 °C. Printed at 200 °C plus, so the interface lands way above $T_g$ and welds heal fully almost instantly. **For PLA, Z strength is a geometry problem** (chapter 6): wider lines, lower $h/w$, a bit more flow
-- Hates a hot chamber: heat creep, soft parts, sagging. Cool chamber, vent if the box is insulated ([slicer.md](../slicer.md#pla-in-an-insulated-box-is-a-problem))
+- Hates a hot chamber: heat creep, soft parts, sagging. Cool chamber, vent if the box is insulated ([slicer.md](../calibration/slicer.md#pla-in-an-insulated-box-is-a-problem))
 - Low shrink (about 0.2 to 0.3%), so it's the accuracy-easy material
 - Absorbs some water. Wet PLA strings and gets brittle
 

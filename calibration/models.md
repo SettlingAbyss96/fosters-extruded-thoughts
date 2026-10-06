@@ -180,14 +180,14 @@ interface hot. A hot chamber is what lets both happen.
 
 *Two-node chamber model: [handbook chapter 9](../handbook/09-heat-control.md#the-chamber-is-a-small-building).*
 
-Frame drift and the predictive soak are in [slicer.md](../slicer.md#soak-stop-guessing). Chamber
-heat balance is in the [roadmap](../roadmap.md#how-much-heater).
+Frame drift and the predictive soak are in [slicer.md](slicer.md#soak-stop-guessing). The chamber
+heat balance is in [handbook chapter 9](../handbook/09-heat-control.md#the-chamber-is-a-small-building).
 
 ## Motion
 
 *Longer version: [handbook chapter 8](../handbook/08-motion.md#input-shaping-from-scratch).*
 
-Shaper limits and why they scale with stiffness and mass: [input shaper](../tuning/input-shaper.md).
+Shaper limits and why they scale with stiffness and mass: [handbook chapter 8](../handbook/08-motion.md#input-shaping-from-scratch).
 The link to everything else: corner quality depends on the shaper's smoothing, the accel, and PA
 together. Shaper first, then PA at the accel I actually print at.
 
