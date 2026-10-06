@@ -24,7 +24,7 @@ profile), and tallied the G-code line by line:
 
 *Steps are counted as my Voron's motors would take them. The chain count is an order of magnitude, the rest is exact.*
 
-Every second, for almost six hours straight: 64,000 motor steps, 15 moves, 7 corners, a new line
+Every second, for almost six hours straight: 64,000 motor microsteps, 15 moves, 7 corners, a new line
 starting about once a second, and a retraction every 2.8 s. The motors step more times in that one
 print than a heart beats in 36 years. The nozzle draws 2 km of bead, about 20 football fields, and
 the welds between layers add up to 0.41 m² of interface, a square about 64 cm on a side, built in
@@ -87,14 +87,16 @@ The same machine from the plastic's point of view, one slice at a time, at the b
 |---|---|---|---|
 | Enters the melt zone | 0 s | 50 °C, solid | Whether it's wet (chapter 2) |
 | Leaves the melt zone | 3.9 s | 234 °C on average, 217 °C in the core, 246 °C at the wall | Viscosity, pressure, PA, how much stays stored |
-| Through the orifice | 6 ms | Sheared at about 2,700 /s, $`De`$ near 1 | Die swell, how much lag the next speed change sees |
+| Through the orifice | 6 ms | Sheared at about 1,900 /s at the wall, $`De`$ near 1 | Die swell, how much lag the next speed change sees |
 | Lands | 3.9 s | Interface at 146 °C, 41 K above $`T_g`$ | Contact (from $`h/w`$ and squish) |
 | Welds | Next 2.2 s | Cools with $`\tau_c`$ about 4 s, falls below $`T_g`$ | 70% of bulk strength, almost all of it in the first second |
 | Gets buried | About 14 s | Surface at 58 °C when the next layer lands | A second, smaller hit of weld time |
 | Cools to the chamber | Minutes | Locks in up to 15 MPa | Warp, mostly in the first few layers (chapter 7) |
 | Leaves the printer | Hours | Shrinks 0.7% to room temperature | Dimensions |
 
-Four seconds in the hotend, two seconds to weld, everything else is slow. Which is why the next
+That interface is cooler than chapter 6's table, because here the melt leaves 16 K under the nozzle
+and the fan keeps the old layer near 58 °C. Four seconds in the hotend, two seconds to weld,
+everything else is slow. Which is why the next
 section is about clocks.
 
 ## Every clock at once
@@ -218,10 +220,13 @@ Now spread that over the events. With $`N`$ independent chances to fail, each wi
 P(\text{finish}) = (1 - p)^N \approx e^{-Np} \quad\Longrightarrow\quad p \approx \frac{5.8/84}{197{,}000} \approx 3.5 \times 10^{-7}
 ```
 
-**Every corner, start and stop already goes right about 2,999,999 times out of 3 million.** Factories
-call 3.4 defects per million "six sigma". Per event, on the failures that end a print, a hobby
-printer beats that by 10×. It just does so many events that the tiny number still wins on long
-prints: a 99% chance on the toolbox needs fewer than 5 failures per 100 million events.
+That pins every caught failure on a transient, at a steady rate. Neither is true: plenty of failures
+(adhesion, clogs, warping) have nothing to do with a corner, and they bunch up early in a print. Both
+make each transient more reliable than this, so it's an upper bound. **Every corner, start and stop
+goes right at least about 2,999,999 times out of 3 million.** Factories call 3.4 defects per million
+"six sigma". Per event, on the failures that end a print, a hobby printer beats that by 10× or more.
+It just does so many events that the tiny number still wins on long prints: a 99% chance on the
+toolbox needs about 5 failures per 100 million events.
 
 Sit with that for a second. A box of belts, plastic and a few cheap chips, on a desk, holds every
 single step of its job to a standard factories treat as the gold standard, and mostly pulls it off.
@@ -264,7 +269,7 @@ happen to engineering education in my lifetime.
 
 ## What the map says about tuning order
 
-Draw the arrows as a graph and it's nearly a tree. That's good news, because it means there's an
+Draw the arrows as a graph and it has no cycles. That's good news, because it means there's an
 order where each step only depends on the ones before it:
 
 1. **The machine first:** motion (it's decoupled), then the hotend's heat path and the chamber (they set every temperature downstream)
@@ -274,7 +279,7 @@ order where each step only depends on the ones before it:
 5. **Then dimensions and strength,** which depend on all of it
 
 That's the [calibration order](../calibration/README.md) I wrote before I had this picture, which
-was a relief. The one real loop is flow ↔ melt temperature ↔ PA, and the map says why calibrating
+was a relief. The one place that acts like a loop is flow ↔ melt temperature ↔ PA, and the map says why calibrating
 PA at one flow and printing at another fails: the arrow from flow to PA is two arrows with opposite
 signs (shear thinning and the cooler melt), and which wins moves with the operating point. At this
 base point they nearly cancel (+7% PA for +20% speed), in a short melt zone or a steel nozzle they

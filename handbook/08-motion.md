@@ -38,8 +38,9 @@ What falls out:
 - **48 V roughly doubles the speed** where that happens, for the same motor. That's the whole case for 48 V
 - **Lower inductance motors** push the limit up too, at the cost of needing more current for the same torque
 
-On a CoreXY with 20-tooth pulleys, each motor turn is 40 mm of belt. 500 mm/s is 12.5 turns per
-second, which is 1,250 Hz electrical on a 0.9° motor. Plug your motor's datasheet $`R`$, $`L`$ and torque
+On a CoreXY with 20-tooth pulleys, each motor turn is 40 mm of belt. 500 mm/s along X or Y is 12.5
+turns per second, which is 1,250 Hz electrical on a 0.9° motor. On a diagonal one motor does all the
+work at 707 mm/s, about 1,770 Hz, so that's the case to check. Plug your motor's datasheet $`R`$, $`L`$ and torque
 constant into that formula and you'll see whether 24 V is still keeping up at that speed.
 
 ## Belts are springs
@@ -152,7 +153,8 @@ So if one motor, belt or pulley path is different from the other, it shows up on
 not the other. That's exactly the asymmetry my printer has, and I'm
 still hunting it. Unequal belt paths can also rack the gantry
 (twist it slightly as it accelerates). [Okwudire's group](https://arxiv.org/abs/2105.09878) compensated
-racking on H-frame printers in software. CoreXY has the same geometry.
+racking on H-frame printers in software. CoreXY's crossed belts are there to cancel that twisting
+moment, so it only racks when the two sides don't match, which is exactly the asymmetry above.
 
 ## Motor resonance speeds
 

@@ -13,7 +13,7 @@ it in Orca, Klipper or Kalico, and that's what I say where I'm unsure.
 
 | # | Finding | Shown by | Where it lives today | What's missing | Takes | Payoff |
 |---|---|---|---|---|---|---|
-| 1 | Bonded area, not bond quality, limits PLA's Z strength. Lines 2.5× the nozzle width: 40 to 48% stronger | Allum 2020 and later, Moetazedian 2023 | Slicers allow wide lines, defaults sit around 1.1× | A strength profile that widens inner lines and watches $`h/w`$ and the nozzle tip | Software | High |
+| 1 | In PLA, bonded area rather than bond quality looks like the limit on Z strength. Lines 2.5× the nozzle width: 40 to 48% stronger | Allum 2020 and later, Moetazedian 2023 | Slicers allow wide lines, defaults sit around 1.1× | A strength profile that widens inner lines and watches $`h/w`$ and the nozzle tip | Software | High |
 | 2 | Equivalent weld time predicts weld strength in high-$`T_g`$ plastics | Seppala 2017, Coogan & Kazmer 2020 | Nowhere. Slicers only cool for overhangs | A thermal history model that plans layer time and fan | Software, IR sensor optional | Medium to high for ABS, PPA |
 | 3 | The old layer's temperature sets the interface as much as the nozzle does | Contact temperature physics | Nowhere | Chamber and layer time aware planning | Software | Medium |
 | 4 | Preheating the old layer: about 50% stronger bonds | Ravi 2016, Kishore 2017 | Large-format machines | IR or hot air ahead of the nozzle | Hardware | Medium |
@@ -21,7 +21,7 @@ it in Orca, Klipper or Kalico, and that's what I say where I'm unsure.
 | 6 | PA depends on flow and temperature (shear thinning) | Physics, Orca's measurements | Orca adaptive PA (6+ manual tests), Kalico per-move PA | PA from a two-parameter physical model, calibrated automatically | Software + pressure sensor | Medium |
 | 7 | Extrusion force tracks line width. Force feedback holds the width | ETH Zurich 2024 to 2025 | Research | A firmware loop on the pressure signal | Software + planned sensor | High |
 | 8 | Pressure vs flow vs temperature maps pick settings for unknown materials | Read 2024 | Research | A cool-down sweep routine and parameter selection | Software + planned sensor | High |
-| 9 | Slip can be measured and compensated | Greeff 2017, Moretti 2023 | Klipper corrects diameter only, motion sensors only detect jams | Encoder-based flow correction | Software + encoder | Medium |
+| 9 | Slip can be measured and compensated | Greeff 2017, [Moretti & Rossi 2023](https://journals.sagepub.com/doi/abs/10.1089/3dp.2021.0236) | Klipper corrects diameter only, motion sensors only detect jams | Encoder-based flow correction | Software + encoder | Medium |
 | 10 | Starts and stops can be modeled and fed forward | Wu, Qian, Okwudire 2023 | Constant retraction, scarf seams (geometry) | Pressure-aware retraction from the PA state, restarting to the next move's flow (zero for a scarf) | Software | Medium |
 | 11 | Thermal effects dominate machine error, multi-sensor models fix it | Mayr 2012 (machine tools) | One-sensor `z_thermal_adjust` | A multi-sensor regression plugin | Software | Medium |
 | 12 | Per-motor waveform correction kills fine vertical artifacts | Prusa (phase stepping) | Prusa firmware only | A Klipper/Kalico version | Software + suitable drivers | Medium |
@@ -33,9 +33,9 @@ it in Orca, Klipper or Kalico, and that's what I say where I'm unsure.
 | 18 | Interlocking layers raise Z strength | BrickLayers | A post-processing script, US patent | Testing it | Software (exists) | Medium |
 | 19 | Z-pinning: more than 3.5× Z strength, near isotropic | ORNL | Research | Slicer support for aligned voids and vertical fills | Software | High for specific parts |
 | 20 | Stress-aligned multi-axis paths: up to 6.35× the load | Fang 2020 | Research code | Extra axes | Big hardware | Out of scope |
-| 21 | Nonplanar top layers on a 3-axis printer | Ahlers 2019 | A research Slic3r fork | A toolhead clearance model in a mainstream slicer | Software | Low to medium |
+| 21 | Nonplanar top layers on a 3-axis printer | [Ahlers et al. 2019](https://doi.org/10.1109/COASE.2019.8843116) | A research Slic3r fork | A toolhead clearance model in a mainstream slicer | Software | Low to medium |
 | 22 | Remelting gives near-isotropic parts | CNC Kitchen | A hobby trick | Shrink compensation and a written process | Process | High for small parts |
-| 23 | A camera closed loop corrects flow, speed, Z and temperature | Brion & Pattinson 2022 | Research, first-layer checks on some commercial printers | Camera plus model | Software + camera | Medium, long term |
+| 23 | A camera closed loop corrects flow, speed, Z and temperature | [Brion & Pattinson 2022](https://www.nature.com/articles/s41467-022-31985-y) | Research, first-layer checks on some commercial printers | Camera plus model | Software + camera | Medium, long term |
 | 24 | A whole designed experiment in one print | Greeff 2018 | Slicers test one variable per tower | Multi-factor test plates plus regression | Software | Medium |
 | 25 | Learning across prints with SPC gating | Chip fab practice | Nowhere | A logger plus estimators | Software | High |
 | 26 | Heater power reveals the actual flow | Phan 2018, observability | MPC models it internally | A monitor with flags | Software | Medium |

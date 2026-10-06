@@ -91,6 +91,12 @@ max_flow = 26
 The shrinkage and flow numbers I already dialed in on the Bambus (PETG 100.21%, etc.) come over
 as starting points.
 
+**Slicers don't agree on how to ask for shrink.** Orca and Bambu Studio want the size a 100 mm part
+comes out at ("94% if you measure 94mm"), so ABS's 0.6% goes in as about 99.4%, and that PETG
+100.21% is in their convention. Others take a plain scale factor. Here `shrink_xy` is the scale the
+part gets printed at (100.6% for that ABS). Same idea every time, the generator just has to know
+which way round it's writing.
+
 ### What Orca sends
 
 The generated printer profile carries this start G-code, so I never type it:

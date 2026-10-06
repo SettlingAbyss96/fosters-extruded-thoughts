@@ -73,7 +73,10 @@ why bed adhesion and a hot bed matter so much.
 
 [Armillotta et al.](https://www.semanticscholar.org/paper/Warpage-of-FDM-parts:-Experimental-tests-and-model-Armillotta-Bellotti/9ee2ce3b84cf9620980c53c3bcd8544d8db7b4b5)
 built a better warp model for ABS blocks. They found the worst warp at medium part heights, with heat
-from the newest layer spreading the stress over several layers below.
+from the newest layer spreading the stress over several layers below. The two don't fight, as I read
+them. Stoney says which layers do the pulling, and the bottom ones pull hardest. Whether the part
+actually bends is a contest between that pull and how stiff the stack has gotten: a short part
+doesn't have much pulling on it yet, a tall one is too stiff to bend, and in between the pull wins.
 
 ## Why hot chambers fix warping
 
@@ -140,7 +143,7 @@ What actually moves the dimensions:
 - **Scale vs offset.** Shrink scales everything. Line width errors shift every edge by a fixed amount, outward on outside edges and inward on holes. A test part with several sizes of both separates the two ([models](../calibration/models.md#dimensions))
 - **Holes come out small:** polygon approximation plus the bead squishing inward. Hole compensation fixes the offset part
 - **Elephant foot:** the first layer squishes out
-- **Z quantization.** On this printer Z moves 0.04 mm per full step (`rotation_distance` 40, 80:16 gearing, 200 steps per rev). Layer heights that are multiples of 0.04 (0.20, 0.24, 0.28, 0.32) land on full steps, where the motor positions most consistently
+- **Z quantization.** On this printer Z moves 0.04 mm per full step (`rotation_distance` 40, 80:16 gearing, 200 steps per rev). Layer heights that are multiples of 0.04 (0.20, 0.24, 0.28, 0.32) land on full steps, where the motor positions most consistently. With 32 microsteps and 5:1 gearing the gain is small and people argue about it, but it costs nothing
 - **Corners and seams:** PA errors bulge corners, seams add a zit. Both show up as dimension errors if you measure at the wrong spot
 - **The machine drifts too.** The frame and gantry grow as they warm up over a long print (chapter 9)
 
@@ -166,8 +169,8 @@ and Bambu Studio's too. What's in the box? 100%. For everything.
 
 Bambu gets me the most. They make the filament, the printer, the enclosure and the slicer, and every
 filament they sell ships with a tuned profile: temperatures, flow ratio, max volumetric speed,
-cooling. Shrink is set once, to 100%, in the base profile they all inherit, and not one of them
-overrides it (I checked their profile files). So what's the filament picker for, if it ignores the
+cooling. Shrink sits at 100% for every one of them. I learned that on my own Bambu Lab X2D, using it
+and running my own tests on it. So what's the filament picker for, if it ignores the
 property that moves your tolerances the most? On a 100 mm ABS part that's 0.7 mm, and when I print
 ABS on those machines it lands right where the shrink math says. The number is known, it just isn't
 used. That's how you end up running a [Calilantern](https://vector3d.shop/products/calilantern-calibration-tool-mk2)

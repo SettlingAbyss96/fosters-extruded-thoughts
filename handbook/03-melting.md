@@ -349,7 +349,10 @@ power against flow is
 
 If $`\rho`$ and $`c`$ are known, the slope tells me $`X`$: how crystalline the filament came off the spool.
 That varies by brand (PLA especially) and changes how it melts and prints. A printer is already a
-crude differential scanning calorimeter. I haven't seen anyone use it that way.
+crude differential scanning calorimeter. I haven't seen anyone use it that way. The catch is size:
+melting the crystals in 30% crystalline PLA takes about 28 J/g, against roughly 330 J/g just to heat
+it, so $`c`$ has to be known to a few percent before the crystallinity shows up. Running an amorphous
+grade of the same family first would pin it down.
 
 ## How long plastic stays in
 
@@ -368,7 +371,7 @@ out after pushing $`V`$ is exactly
 c_{old} = \left(\frac{V_z}{2V}\right)^2, \qquad V \ge V_z/2
 ```
 
-and $`n = 0.4`$ is close:
+and $`n = 0.4`$, which the table uses, is close:
 
 | Volume pushed | 1 $`V_z`$ | 2 $`V_z`$ | 3 $`V_z`$ | 5 $`V_z`$ |
 |---|---|---|---|---|

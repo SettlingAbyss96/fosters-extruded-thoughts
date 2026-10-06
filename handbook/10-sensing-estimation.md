@@ -34,6 +34,9 @@ of the block. Because $`d`$ shows up in the block dynamics and the block shows u
 augmented system is still observable. **A Kalman filter on the hotend can estimate how much plastic
 is really flowing, from heater power and temperature alone.** That's the "heater power as a flow
 sensor" idea from [library.md](../calibration/library.md#every-print-is-a-test), done properly.
+The catch is that $`d`$ also soaks up part fan and draft losses, which can be as big as the plastic's
+own load. That's not a dead end: MPC already models the fan, and a few logged prints with the fan
+stepped on and off separate the two.
 
 Some things simply aren't observable with today's sensors. Nozzle pressure, for example: nothing
 measures it and no model ties it uniquely to anything measured. That's why the pressure sensor

@@ -935,7 +935,7 @@ def pa_flip():
     p.hline(1, GRAY, "tuned at 5 mm³/s")
     qs = linspace(5, 30)
     for drop, col, lab in [(0, GRAY, "Melt stays at the setpoint"), (10, BLUE, "Good brass setup (10 K cooler at 25)"),
-                           (30, RED, "Steel under a hard fan (30 K cooler at 25)")]:
+                           (30, RED, "Steel nozzle (30 K cooler at 25)")]:
         p.line([(q, pa_ratio(q, drop)) for q in qs], col, lab)
         v = pa_ratio(25, drop)
         p.point(25, v, col)

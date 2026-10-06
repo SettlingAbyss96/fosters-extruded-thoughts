@@ -35,8 +35,10 @@ between the nozzle temperature and the old layer's surface temperature.**
 | ABS, 50 °C chamber | 250 °C | 90 °C | about 170 °C | about 65 K |
 | ABS, 70 °C chamber | 250 °C | 110 °C | about 180 °C | about 75 K |
 
-The old layer temperatures are guesses for illustration, they depend a lot on the part. The point
-holds anyway: **the old layer's temperature matters just as much as the nozzle's.** A hotter chamber
+The old layer temperatures are guesses for illustration, they depend a lot on the part, and they're
+on the warm side. With the fan on and 10 s layers, chapter 14's model puts the old ABS layer near
+58 °C and the melt itself about 16 K under the nozzle, which lands the interface around 146 °C, only
+about 40 K above $`T_g`$. The point holds anyway: **the old layer's temperature matters just as much as the nozzle's.** A hotter chamber
 that keeps the old layer 20 K warmer lifts the interface by 10 K. And from the WLF table in chapter 2,
 going from 65 K to 75 K above $`T_g`$ makes chain motion about **4× faster**, right at the moment it
 counts most.
@@ -65,8 +67,9 @@ so the new bead and the top of the old layer equalize within about a second.
 | Part fan, moderate | 100 | about 7 s |
 | Part fan, hard | 300 | about 2 s |
 
-The Biot number $`h_{conv} h / k`$ comes out around 0.2, so the bead is roughly the same temperature
-through its thickness. The part fan and the chamber decide how fast the whole top region cools.
+The Biot number $`h_{conv} h / k`$ comes out around 0.2 with a moderate fan, so the bead is roughly
+the same temperature through its thickness. Under a hard fan it's closer to 0.7, and the top starts
+running cooler than the bottom. The part fan and the chamber decide how fast the whole top region cools.
 
 **Reheating from the next layers.** Heat from a new layer reaches down a depth of about
 
@@ -154,7 +157,7 @@ you're fully healed.**
 
 ## Stage 3: what else gets in the way
 
-- **Flow-induced alignment.** Squeezing through the nozzle stretches chains near the bead surface. [McIlroy & Olmsted (2017)](https://www.sciencedirect.com/science/article/abs/pii/S0032386117306213) showed it partly untangles them. [Cunha & Robbins (2020)](https://arxiv.org/abs/2006.15742) simulated it and found diffusion across the interface isn't actually slowed, but the stretched material right next to the weld stays weaker until it relaxes. (about four disentanglement times instead of one). **Theory:** irrelevant for PLA, but for ABS or PC in a cool box the healing number below probably needs to clear about 4, not 1
+- **Flow-induced alignment.** Squeezing through the nozzle stretches chains near the bead surface. [McIlroy & Olmsted (2017)](https://www.sciencedirect.com/science/article/abs/pii/S0032386117306213) showed it partly untangles them. [Cunha & Robbins (2020)](https://arxiv.org/abs/2006.15742) simulated it and found diffusion across the interface isn't actually slowed, but the stretched material right next to the weld stays weaker until it relaxes, which takes about four disentanglement times instead of one. **Theory:** irrelevant for PLA, but for ABS or PC in a cool box the healing number above probably needs to clear about 4, not 1
 - **Crystallization racing diffusion.** In semi-crystalline plastics (nylon, PPA, PLA), once crystals form at the interface, chains stop crossing. [Costanzo et al. (2020)](https://doi.org/10.3390/polym12122980) studied exactly this for polyamides
 - **Voids and notches.** The groove between stacked beads (chapter 5) is a notch, and stress concentrates there
 - **Residual stress** (chapter 7) pre-loads the weld before you ever pull on it
@@ -175,15 +178,17 @@ This is where it gets interesting, because the research looks like it disagrees.
 **Camp two: geometry dominates.**
 
 - [Allum, Moetazedian, Gleadall & Silberschmidt (2020)](https://www.sciencedirect.com/science/article/abs/pii/S2214860420306692): in PLA, the interface has the strength of the bulk filament. The anisotropy comes from the shape of the extruded lines and strain concentrating at the interface, not incomplete bonding. Print speed and layer time didn't change bond strength
-- [Moetazedian et al. (2023)](https://pmc.ncbi.nlm.nih.gov/articles/PMC10280202/): PLA bond strength stayed at bulk strength across a 60 °C nozzle temperature span, a 16× speed range and an 8× layer time range. They recommend refocusing interlayer work on extrusion geometry.. The bonded width was only 75 to 78% of the line width, and the one condition that lost strength was the *slowest* (250 mm/min), where the bead skinned over before it could spread. So "print slower for better adhesion" can be backwards. The bonds also broke at about half the bulk strain, so strength isn't toughness
+- [Moetazedian et al. (2023)](https://pmc.ncbi.nlm.nih.gov/articles/PMC10280202/): PLA bond strength stayed at bulk strength across a 60 °C nozzle temperature span, a 16× speed range and an 8× layer time range. They recommend refocusing interlayer work on extrusion geometry. The bonded width was only 75 to 78% of the line width, and the one condition that lost strength was the *slowest* (250 mm/min), where the bead skinned over before it could spread. So "print slower for better adhesion" can be backwards. The bonds also broke at about half the bulk strain, so strength isn't toughness
 - [Allum et al.](https://www.sciencedirect.com/science/article/pii/S2214860422007230) extra-wide lines: 40 to 48% stronger purely from more contact area
 
 **My reconciliation (theory):** it's the healing number. PLA has $`T_g`$ around 60 °C and gets printed
 at 200 °C or more, so the interface lands 70 to 90 K above $`T_g`$. Chain motion there is so fast that
 $`H \gg 1`$ within milliseconds. The weld always fully heals, so geometry is the only thing left to
-change. ABS ($`T_g`$ about 105 °C), PC (about 145 °C), ULTEM and PPA only get 40 to 70 K above $`T_g`$
-at the interface, cool fast, and often have stiffer or longer chains. There $`H`$ can sit near or below
-1, and temperature matters. **Both camps are right, for their materials.** Aliheidari's split shows
+change. ABS ($`T_g`$ about 105 °C), PC (about 145 °C), ULTEM and PPA get 40 to 75 K above $`T_g`$ at the
+interface, the low end with the fan on, cool fast, and often have stiffer or longer chains. There $`H`$
+can sit near or below 1, and temperature matters. The margin alone doesn't split them cleanly (the
+warm end of ABS overlaps PLA), so part of the difference has to be the chains themselves: how long
+they take to cross at the same distance above $`T_g`$. That's the piece of this I'm least sure of. **Both camps are right, for their materials.** Aliheidari's split shows
 both effects in one experiment: part of the gain was better bonding, part was more bonded area.
 
 The test that would settle it on my machine: print identical Z coupons in ABS at two chamber

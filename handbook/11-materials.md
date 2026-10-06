@@ -19,7 +19,7 @@ Keep those in mind and the advice below stops being a list of rules and starts m
 
 ## PLA
 
-- $`T_g`$ about 60 °C. Printed at 200 °C plus, so the interface lands way above $`T_g`$ and welds heal fully almost instantly. **For PLA, Z strength is a geometry problem** (chapter 6): wider lines, lower $`h/w`$, a bit more flow
+- $`T_g`$ about 60 °C. Printed at 200 °C plus, so the interface lands way above $`T_g`$ and welds heal fully almost instantly. **For PLA, Z strength is mostly a geometry problem**, going by the studies so far (chapter 6): wider lines, lower $`h/w`$, a bit more flow
 - Hates a hot chamber: heat creep, soft parts, sagging. Cool chamber, vent if the box is insulated ([slicer.md](../calibration/slicer.md#pla-in-an-insulated-box-is-a-problem))
 - Low shrink (about 0.2 to 0.3%), so it's the accuracy-easy material
 - Absorbs some water. Wet PLA strings and gets brittle
@@ -39,14 +39,14 @@ problems than any retraction setting.
 
 ## ABS and ASA
 
-- Amorphous, $`T_g`$ about 100 to 105 °C. The interface only gets 50 to 75 K above $`T_g`$ and cools fast, so **ABS is where temperature history really matters** for weld strength (chapter 6)
+- Amorphous, $`T_g`$ about 100 to 105 °C. The interface only gets about 40 to 75 K above $`T_g`$ and cools fast, so **ABS is where temperature history really matters** for weld strength (chapter 6)
 - Shrinks about 0.5 to 0.8% and builds a lot of thermal stress in a cold box. Warping and layer splits are its signature failures
 - The fix is heat. Stratasys's own [patent](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6722872) describes their machines building in a 70 to 90 °C chamber
 - ASA behaves almost the same, with better UV resistance
 
 **Not widespread:**
 
-- **Run the chamber much closer to the glass transition** than hobby printers do. 70 °C instead of 50 roughly halves the built-in stress (chapter 7)
+- **Run the chamber much closer to the glass transition** than hobby printers do. 70 °C instead of 50 cuts the built-in stress by about a third, and by more than half against a cold box (chapter 7)
 - **Minimal part cooling.** Only for overhangs and bridges. Every bit of cooling costs weld time
 - **A slow, controlled cool-down** instead of shutting everything off at the end
 - **Salt remelting** for small solid structural parts: [CNC Kitchen](https://www.cnckitchen.com/blog/testing-the-strength-of-3d-prints-re-melted-in-salt) measured ABS layer adhesion up 150%, to about 90% of solid material

@@ -102,7 +102,8 @@ At high shear it turns into a simple power law, which is what I'll use most of t
 $`n`$ is the power-law index. $`n = 1`$ is honey (Newtonian), and smaller means more shear thinning.
 Printing plastics are often somewhere around 0.3 to 0.6 at printing rates.
 
-How fast is "printing rates"? The wall shear rate in the nozzle bore is about
+How fast is "printing rates"? The apparent wall shear rate in the nozzle bore (the Newtonian
+formula, a shear-thinning melt runs a bit higher right at the wall) is about
 
 ```math
 \dot\gamma_w \approx \frac{4Q}{\pi R^3}

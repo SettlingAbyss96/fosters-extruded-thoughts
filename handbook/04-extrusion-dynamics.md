@@ -106,9 +106,10 @@ q_{out} = q - (\tau - K)\,\dot{q}
 Too little PA ($`K < \tau`$) underextrudes while speeding up and overextrudes while slowing down,
 which is the classic bulging corner. Too much does the opposite and leaves gaps.
 
-How big is that? A 0.65 × 0.3 mm line at 5,000 mm/s² ramps the flow at about 975 mm³/s². If $`K`$
-is off by just 0.01 s, that's about 10 mm³/s of error. At 150 mm/s the line itself is only about
-29 mm³/s, so **a 10 ms PA error is a 30% flow error at the corners.** That's why PA matters more
+How big is that? A 0.65 × 0.3 mm line (0.176 mm², chapter 5's rounded rectangle) at 5,000 mm/s²
+ramps the flow at about 880 mm³/s². If $`K`$ is off by just 0.01 s, that's about 9 mm³/s of error. At
+150 mm/s the line itself is only about 26 mm³/s, so **a 10 ms PA error is a 30% flow error at the
+corners.** That's why PA matters more
 the harder you accelerate.
 
 ![Flow out of the nozzle for no pressure advance, correct pressure advance and too much pressure advance](figures/pa-step-response.svg)
@@ -124,8 +125,9 @@ power-law melt through a round bore of radius $`R`$ and length $`L`$, the pressu
 \Delta P = \frac{2 L K}{R}\left[\frac{(3n+1)\,Q}{n\,\pi R^3}\right]^{n}
 ```
 
-Sanity check: with $`n = 1`$ (Newtonian, $`K = \mu`$) that becomes the classic Hagen-Poiseuille
-$`8 \mu L Q / (\pi R^4)`$. Good.
+Here $`R`$ is the bore radius and $`K`$ the melt's consistency, not the resistance and PA from above. I
+ran out of letters. Sanity check: with $`n = 1`$ (Newtonian, $`K = \mu`$) that becomes the classic
+Hagen-Poiseuille $`8 \mu L Q / (\pi R^4)`$. Good.
 
 Two things fall out:
 
@@ -198,11 +200,12 @@ the hotend. For ABS (Seppala's constants from chapter 6, $`n = 0.4`$, 250 °C se
 |---|---|---|
 | Melt stays at setpoint | none | 0.38× |
 | Good brass setup | about 10 K | 0.55× |
-| Steel nozzle under a hard part fan | about 30 K | 1.34× |
+| Steel nozzle | about 30 K | 1.34× |
 
 The drops come from chapter 3's tip resistances. At 25 mm³/s the plastic needs about 10 W, and if
-roughly a quarter of it comes through the tip, 2.8 K/W in brass gives about 7 K and 12.7 K/W in
-steel gives about 33 K.
+roughly a quarter of it comes through the tip, 2.8 K/W in brass gives about 7 K, plus a few kelvin
+across the thread and contact, and 12.7 K/W in steel gives about 33 K. A hard part fan on a steel
+tip takes more off on top of that (chapter 3's fin model), so the steel row is the gentle case.
 
 ![PA needed against flow for three hotends, relative to 5 mm³/s](figures/pa-flip.svg)
 
@@ -215,7 +218,7 @@ It also lags: PA acts in milliseconds, the melt over seconds. Exactly how is in 
 
 And it changes how much plastic lands, not just the corners. During a ramp the output is off by
 $`(\tau - K)\,\dot q`$. At 5,000 mm/s² on a 0.65 × 0.3 mm line, a PA tuned at 40 ms when the hot,
-fast nozzle is really at 15 ms puts down roughly 24 mm³/s extra during the ramp. Max volumetric
+fast nozzle is really at 15 ms puts down roughly 22 mm³/s extra during the ramp. Max volumetric
 speed is a steady-state number, and every speed change is a transient.
 
 A possible fix: MPC already predicts flow from the planned moves, and Kalico's
@@ -255,8 +258,9 @@ That's the max flow wall, derived instead of observed. Pressure that grows like 
 comfortable melt zone grows like $`q^3`$ to $`q^5`$ near the knee, which is the pressure spike from
 chapter 3's "Two ways to hit the wall".
 
-PA follows, since $`\tau = C\,R_{inc} = C\,m\,P/q`$. Both $`m`$ and $`P`$ climb as $`Fo`$ falls, so PA
-climbs much faster than pressure near the limit. A longer melt zone raises $`Fo`$ at the same flow,
+PA follows, but with $`n`$ instead of $`m`$: PA acts in milliseconds, too fast for the melt
+temperature to move, so $`\tau = C\,n\,P/q`$. Near the knee $`P`$ grows faster than $`q`$ ($`m > 1`$), so
+$`P/q`$, and PA with it, climbs with flow instead of falling. A longer melt zone raises $`Fo`$ at the same flow,
 so it should need less PA at high flow and give a flatter PA vs flow curve, while a short one bends
 upward near its limit (a prediction, not a measurement). It's the same flip as the last section,
 coming from the melt zone instead of the heat path, and the two add.
