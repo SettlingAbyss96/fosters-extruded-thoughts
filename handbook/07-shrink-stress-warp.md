@@ -197,13 +197,8 @@ The things people say back, and why I don't buy them:
 - **"Multi-material makes it impossible."** Bambu Studio currently skips shrink compensation on
   [painted multi-filament models](https://github.com/bambulab/BambuStudio/releases/tag/v02.08.04.57)
   because one part can't be scaled for two plastics. But it doesn't have to be one scale. Each
-  material's toolpaths can be scaled by its own shrink about the same origin:
-
-  ```math
-  x_{print,i} = \frac{x_{design}}{1 - s_i}
-  ```
-
-  Each region then cools back to its designed size. Where two materials meet, they disagree by
+  material's toolpaths can be scaled by its own shrink $`s_i`$ about the same origin,
+  $`x_{print,i} = x_{design}/(1 - s_i)`$, and each region then cools back to its designed size. Where two materials meet, they disagree by
   about $`(s_A - s_B)\,x`$ (ABS against PLA, roughly 0.45 mm across 100 mm), but that disagreement
   happens on cooling whether you compensate or not. Compensating gets every region right and leaves
   only the interface to deal with, which beats getting every region wrong. The math is clear

@@ -1,4 +1,4 @@
-"""Check the docs for the things GitHub rendering and this repo's style care about.
+"""Check the docs for the things GitHub rendering and the hard rules care about.
 
     python tools/check_docs.py [folder]   # report problems, exit 1 if there are any
     python tools/check_docs.py --fix      # also rewrite plain $...$ inline math as $`...`$
@@ -10,6 +10,8 @@ Checks:
   italics or link text (it doesn't render there), and GitHub's brace limits
 - relative links: the file exists, and the #anchor matches a heading
 - em dashes and stray control characters
+
+It doesn't judge the writing. That's on purpose.
 """
 
 import os
@@ -35,7 +37,7 @@ BRACES_FORMULA, BRACES_PAGE = 1000, 2000
 
 def md_files():
     for dirpath, dirs, files in os.walk(ROOT):
-        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("backups", "node_modules")]
         for fn in files:
             if fn.endswith(".md"):
                 yield os.path.join(dirpath, fn)
@@ -152,6 +154,9 @@ def check_math(path, text):
                 block.append(line)
             out.append(line)
             continue
+        if re.match(r"\s+(```+|~~~+)\s*math\b|\s*>\s*(```+|~~~+)\s*math\b", line, flags=re.I):
+            problems.append(f"{where}: ```math block inside a list or quote renders as plain code on "
+                            "GitHub; move it to the top level or use inline $`...`$")
         m = re.match(r"(```+|~~~+)\s*(\S*)", stripped)
         if m:
             fence, block, start = (m.group(1), m.group(2).lower()), [], i
@@ -215,7 +220,7 @@ def check_links(path, text):
 
 def main():
     problems = []
-    for path in md_files():
+    for path in sorted(md_files()):
         text = open(path, encoding="utf-8", newline="").read()
         math_problems, fixed = check_math(path, text)
         problems += math_problems
