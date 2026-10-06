@@ -16,22 +16,25 @@ It's seeing the whole thing at once, so the influences and the dynamics are visi
 
 ## How much happens in one print
 
-Before any model, some counting. I sliced a real project, a four-plate PETG toolbox for a Bambu P2S
-(202 g, 5 h 48 min, the standard 0.2 mm profile), and counted the G-code line by line:
+Before any model, I wanted to know how much actually happens in a print, so I counted. I sliced a
+real project, a four-plate PETG toolbox for a Bambu P2S (202 g, 5 h 48 min, the standard 0.2 mm
+profile), and tallied the G-code line by line:
 
 ![Bars on a log scale counting what happens in one six-hour print: over a billion motor steps, hundreds of thousands of moves and corners, thousands of retractions and seams, and about ten to the seventeenth polymer chains crossing the welds](figures/print-numbers.svg)
 
 *Steps are counted as my Voron's motors would take them. The chain count is an order of magnitude, the rest is exact.*
 
-On average, every second for almost six hours: 64,000 motor steps, 15 moves, 7 corners, a new line
+Every second, for almost six hours straight: 64,000 motor steps, 15 moves, 7 corners, a new line
 starting about once a second, and a retraction every 2.8 s. The motors step more times in that one
-print than a heart beats in 36 years. The nozzle lays 2 km of bead, and the welds between layers add
-up to 0.41 m² of interface, a square about 64 cm on a side, built in strips under half a millimeter
-wide. Across it, around $`10^{17}`$ polymer chains have to wriggle from one layer into the next before
-it freezes (rough: 50 kg/mol chains, coils about 7 nm in radius).
+print than a heart beats in 36 years. The nozzle draws 2 km of bead, about 20 football fields, and
+the welds between layers add up to 0.41 m² of interface, a square about 64 cm on a side, built in
+strips under half a millimeter wide. Across it, around $`10^{17}`$ polymer chains, something like a
+million times the number of stars in the Milky Way, have to wriggle from one layer into the next in
+the second or two before it freezes (rough: 50 kg/mol chains, coils about 7 nm in radius).
 
 Every corner, start, stop and retraction is a pressure transient (chapter 4), about 197,000 of
-them, and every millimeter of bead is a weld (chapter 6). Nearly all of it has to go right.
+them, and every millimeter of bead is a weld (chapter 6). Nearly all of it has to go right, for six
+hours, with nobody watching. I still find it a little ridiculous that it usually does.
 
 ## The whole printer in one block
 
@@ -220,16 +223,44 @@ call 3.4 defects per million "six sigma". Per event, on the failures that end a 
 printer beats that by 10×. It just does so many events that the tiny number still wins on long
 prints: a 99% chance on the toolbox needs fewer than 5 failures per 100 million events.
 
+Sit with that for a second. A box of belts, plastic and a few cheap chips, on a desk, holds every
+single step of its job to a standard factories treat as the gold standard, and mostly pulls it off.
+
 ![The chance a print finishes against its length, for three per-event failure rates and for Obico's observed rate](figures/print-odds.svg)
 
 *Obico's observed rate sits between one in a million and one in ten million per event.*
 
-Surveys that count every failure are harsher: 41% failed in a university makerspace, a quarter of
-all prints from human error, and experience didn't help ([Song & Telenko 2019](https://doi.org/10.1016/j.procir.2018.12.007)).
-Early RepRaps ran around 20%, newer setups about 10% ([Petsiuk & Pearce 2020](https://arxiv.org/abs/2003.05660)).
-And none of this counts defects. If each transient had just a 1 in 10,000 chance of leaving a zit, a
-bulge or a gap, the toolbox would carry about 20 of them. Which might be why a print that worked still
-has a handful of flaws up close.
+Surveys that count every failure are harsher: 41% failed in a university makerspace, about a quarter
+of all prints from human error ([Song & Telenko 2019](https://doi.org/10.1016/j.procir.2018.12.007)),
+and early RepRaps ran around 20% ([Petsiuk & Pearce 2020](https://arxiv.org/abs/2003.05660)). None of
+it counts defects either. If each transient had a 1 in 10,000 chance of leaving a zit, a bulge or a
+gap, the toolbox would carry about 20, which might be why a print that worked still has a handful of
+flaws up close.
+
+## How far this has come
+
+This is the part that makes the controls engineer in me grin. Almost every trick in this handbook
+started somewhere expensive:
+
+- **Input shaping** goes back to Otto Smith's posicast in 1957 and Singer and Seering's work on vibrating robots and structures in 1990 (chapter 8)
+- **The Kalman filter** (1960) helped navigate Apollo to the Moon (chapter 10)
+- **Model predictive control** grew up in oil refineries in the late 1970s, and now runs hotends in Kalico (chapter 9)
+- **Pressure sensing and feedforward** were industrial process control long before anyone pointed them at a nozzle (chapter 4)
+
+The first FDM machine, Stratasys's 3D Modeler, went on sale in 1992 for $130,000, or $178,000 with
+the Silicon Graphics workstation to run it. Roughly $300,000 in today's money.
+
+As I write this, Bambu's US store sells the A1 mini for $209. Before every print it probes its own
+bed with the nozzle, shakes itself to measure its resonances on both axes and sets its input shaper,
+and calibrates pressure advance from an eddy current sensor that reads the pressure in the nozzle,
+which it keeps using to correct the flow while it prints. That's system identification,
+feedforward and closed-loop pressure control, the sensor this handbook keeps wishing for, in a
+machine that costs less than a thousandth of the first one in real terms.
+
+It took nearly seventy years of control theory, the RepRap project throwing the doors open in 2005, and the
+core FDM patent running out in 2009 to put that on a desk. And because so much of it is open source,
+anyone curious can read the code that does it. I think that's one of the most underrated things to
+happen to engineering education in my lifetime.
 
 ## What the map says about tuning order
 
@@ -251,7 +282,8 @@ don't.
 
 ## What it would take to see all of it
 
-Look at the map's middle column and ask which boxes anything can measure:
+Look at the map's middle column and ask which boxes my Voron can measure today (the A1 mini
+above already reads one of them):
 
 | State | Seen today | Could be seen with |
 |---|---|---|
@@ -264,8 +296,9 @@ Look at the map's middle column and ask which boxes anything can measure:
 | Layer time | Planned | Already known |
 | Toolhead shake | Once, during tuning | The accelerometer, during prints |
 
-Today the purple boxes are dark, apart from layer time and a one-off accelerometer run. With a pressure sensor, an encoder, heater
-power and one IR spot, every purple box is either measured or one model away from it. That's the
+Today the purple boxes are dark, apart from layer time and a one-off accelerometer run. With a
+pressure sensor, an encoder, heater power and one IR spot, every purple box is either measured or
+one model away from it. That's the
 sensor list from [chapter 12](12-gaps.md) and the loops from [chapter 13](13-where-this-goes.md)
 seen from above: the gaps are missing arrows, the future is closing loops around the right-hand
 column instead of the left.
@@ -297,6 +330,26 @@ seams that need a different restart, and the layers whose weld drops below some 
 printing anything. Then, if time allows, I'd check its predictions against the pressure sensor and an
 IR spot on the Voron, and find out which arrows on the map I drew wrong.
 
+## Where this started for me
+
+I'll end on something personal, because none of this exists without the community it's written for.
+
+One of the first printers I got my hands on was a Solidoodle at work, when I was 13. It was,
+rightfully, a terrible machine, and getting it to print anything at all was a fight. Then came a few
+that were OK, back in the ABS slurry days. At 16 I built my first kit, a Folgertech FT-5, and went
+pretty far with it: I learned C and C++ from Marlin, built a ton of upgrades, picked up the
+fundamentals of control theory along the way, and eventually got it printing rather accurately. From
+there it was Klipper, and everything since.
+
+I can't imagine how different my life would be if the RepRap community hadn't been so open. I
+probably wouldn't be an engineer at a leading robotics company today. Everything in this handbook,
+the math, the models, the arguments with myself about seams, grew out of people sharing their
+machines, their firmware and their mistakes for free.
+
+So, thank you. To the RepRap project, to the people who write and maintain Marlin, Klipper, Kalico,
+Orca and PrusaSlicer, and to everyone who ever answered a stranger's question about a clogged nozzle.
+This handbook is my attempt to give a little of it back.
+
 ## References
 
 Everything here comes from the earlier chapters, and their references carry the papers. The pieces
@@ -313,4 +366,7 @@ used most:
 - [Song, Telenko (2019)](https://doi.org/10.1016/j.procir.2018.12.007). 41.1% of prints failed in a university makerspace, 26.3% of prints from human error
 - [Petsiuk, Pearce (2020)](https://arxiv.org/abs/2003.05660). Failure rates from about 20% on early RepRaps to about 10%, with community polls at 1 to 20%
 - Skogestad, Postlethwaite (2005). *Multivariable Feedback Control.* Wiley. Where the singular value view of a plant comes from
+- Smith (1957). *Posicast control of damped oscillatory systems.* Proceedings of the IRE 45. Input shaping's ancestor
+- [Stratasys, Inc. (company history)](https://www.encyclopedia.com/books/politics-and-business-magazines/stratasys-inc). The 3D Modeler: April 1992, $130,000, $178,000 with a workstation
+- [Bambu Lab A1 mini](https://bambulab.com/en-us/a1-mini). Nozzle probing, resonance calibration on both axes, pressure advance from an eddy current nozzle pressure sensor, active flow compensation
 - Kokotović, Khalil, O'Reilly (1999). *Singular Perturbation Methods in Control.* SIAM. The formal version of "fast things are instant, slow things are constant"
