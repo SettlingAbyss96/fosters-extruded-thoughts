@@ -6,7 +6,7 @@ If you only read one chapter of physics, make it this one. Almost every weird th
 (pressure advance, stringing, weak layers, warping, wet filament printing badly) comes straight
 out of what plastic is at the molecular level.
 
-## Long spaghetti
+## Spaghetti the loooong way
 
 A polymer is a really long molecule made of the same small unit repeated thousands of times. PLA,
 ABS, nylon, all the same idea, different repeat unit. The chains are absurdly long compared to how
