@@ -5,13 +5,13 @@
 ## Mass conservation is the whole slicer
 
 The slicer's core assumption is simple: whatever volume goes out of the nozzle ends up as a line
-of a known shape. If the line has cross-section $A$ and the toolhead moves at $v$, then
+of a known shape. If the line has cross-section $`A`$ and the toolhead moves at $`v`$, then
 
 ```math
 Q = A\,v
 ```
 
-Pick a line width $w$ and layer height $h$, assume a shape, get $A$, and the extrusion per
+Pick a line width $`w`$ and layer height $`h`$, assume a shape, get $`A`$, and the extrusion per
 millimeter falls right out. Everything about extrusion amounts in a slicer is this one equation.
 The interesting question is what shape the line really is.
 
@@ -68,7 +68,7 @@ is the fraction of each layer that's actually bonded to the layer below, and
 
 is how much of the part is empty space between lines.
 
-| Setup | $w$ | $h$ | Bonded fraction | Voids |
+| Setup | $`w`$ | $`h`$ | Bonded fraction | Voids |
 |---|---|---|---|---|
 | 0.4 nozzle, typical | 0.45 | 0.20 | 56% | 9% |
 | 0.4 nozzle, thick layers | 0.45 | 0.28 | 38% | 13% |
@@ -76,7 +76,7 @@ is how much of the part is empty space between lines.
 | 0.6 nozzle, extra wide | 1.50 | 0.30 | 80% | 4% |
 
 Real beads flow into the corners somewhat, so measured contact comes out higher than this. But the
-trend is the point. **The ratio $h/w$ decides how much of each layer is actually stuck to the next
+trend is the point. **The ratio $`h/w`$ decides how much of each layer is actually stuck to the next
 one.** Thick layers on narrow lines leave less than half the cross-section bonded.
 
 ![Cross-sections of stacked beads: three normal lines vs one extra-wide line, with bonded contact marked](figures/bead-contact.svg)
@@ -124,8 +124,8 @@ vs flow limit" instead of a pile of separate width settings. That's a theme in [
 
 Not started yet. If time allows:
 
-- Z-direction tensile coupons at three $h/w$ ratios on the 0.6 nozzle, including an extra-wide case
-- Cut and polish the coupons, measure the actual bonded width under a USB microscope, compare to $1 - h/w$
+- Z-direction tensile coupons at three $`h/w`$ ratios on the 0.6 nozzle, including an extra-wide case
+- Cut and polish the coupons, measure the actual bonded width under a USB microscope, compare to $`1 - h/w`$
 - Whether the Conch's tip is flat and wide enough for 1.5 mm lines, before trying it
 
 ## References

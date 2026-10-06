@@ -37,7 +37,7 @@ All of that was measured on somebody else's hotend. Bambu PLA Basic's 21 mm³/s 
 hotend with a 0.4, not the Conch with a 0.6. Temperatures mostly transfer. Max flow and PA don't.
 
 The fix is to borrow **the differences between filaments**, not the raw numbers. If Bambu's data
-says filament $f$ flows 20% less than Bambu PLA Basic, it probably flows about 20% less on my
+says filament $`f`$ flows 20% less than Bambu PLA Basic, it probably flows about 20% less on my
 machine too. Measure a few anchors here that also exist in the source, and for everything else:
 
 ```math
@@ -50,7 +50,7 @@ With several anchors, it's one fitted number per parameter and per source, in lo
 \log y_{here} = \log h + \log y_{src}
 ```
 
-$h$ is "this machine relative to that source." The scatter between anchors says how far to trust
+$`h`$ is "this machine relative to that source." The scatter between anchors says how far to trust
 it. Chemists have done exactly this with spectrometers since the 90s, it's called calibration
 transfer: measure a handful of standards on both instruments, map one onto the other
 ([research](../research/other-fields.md#chemometrics-calibration-transfer)). The anchors are my
@@ -92,7 +92,7 @@ The heater one works today. Power going into the hotend is losses plus heating t
 P_{heater} = P_{loss}(T,\ \text{fan}) + \rho\,c\,(T - T_{fil})\,Q
 ```
 
-Fit the slope of heater power against flow over a print. For a known material, $\rho c$ is known
+Fit the slope of heater power against flow over a print. For a known material, $`\rho c`$ is known
 within about 10%, so a slope that's off means the plastic actually going through isn't what was
 commanded (slip, partial clog) or the material isn't what the profile says.
 
@@ -103,7 +103,7 @@ Each print nudges the estimates, the way fabs tune a process between wafers
 \hat{\theta}_{k+1} = \hat{\theta}_k + w\,(\theta_k - \hat{\theta}_k), \qquad 0 < w \le 1
 ```
 
-Small $w$ ignores noise, big $w$ reacts fast. And it only updates when the new number is outside
+Small $`w`$ ignores noise, big $`w`$ reacts fast. And it only updates when the new number is outside
 the noise band, so it doesn't chase noise.
 
 ## Only test when something's off
@@ -142,7 +142,7 @@ exactly those ([research](../research/other-fields.md#recommender-systems)):
 y_{f,m} \approx \sum_{k=1}^{r} u_{f,k}\,v_{m,k}
 ```
 
-$r = 1$ is the ratio idea above: a filament factor times a machine factor. Could be a public repo,
+$`r = 1`$ is the ratio idea above: a filament factor times a machine factor. Could be a public repo,
 like the buffer plugin.
 
 ## To do
@@ -150,7 +150,7 @@ like the buffer plugin.
 - [ ] Spoolman on the Pi, connected to Moonraker
 - [ ] Pull density, max flow, flow ratio and temps from the Bambu/Orca libraries for everything I own
 - [ ] Logger on the Pi: heater power, temperature, live extruder velocity, fan, per print
-- [ ] Pick anchors that exist in the Bambu library, measure them here, fit $h$
+- [ ] Pick anchors that exist in the Bambu library, measure them here, fit $`h`$
 - [ ] Flags in the logger (3σ, headroom, slip)
 - [ ] QR labels from Spoolman, NFC later
 - [ ] Check how good the 3D Filament Profiles data really is before trusting any of it

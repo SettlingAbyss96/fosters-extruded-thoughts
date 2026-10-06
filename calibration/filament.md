@@ -75,7 +75,7 @@ the ratios, and only the measured part changes:
 | Setting | Stored as | Measured on the new filament |
 |---|---|---|
 | Nozzle temp | The temp where its knee flow matches the anchor's | Ladder at 2 temps |
-| Max flow | A fraction $\mu$ of the knee flow | Ladder |
+| Max flow | A fraction $`\mu`$ of the knee flow | Ladder |
 | Flow | Spool area from mass, bead residual from a weighed part | Scale |
 | PA | Same as the anchor at the matched temp (same family only) | Pressure sensor later |
 | Retraction | Relative to PA | Inherited |
@@ -163,7 +163,7 @@ each into its own pile at its own spot. After each step it waits a few seconds s
 pressure bleeds out into that pile (everything pushed in comes out eventually), then moves to
 the next spot. Afterwards, weigh every pile.
 
-Delivered fraction per step, with $E_i$ the commanded filament length:
+Delivered fraction per step, with $`E_i`$ the commanded filament length:
 
 ```math
 \varphi_i = \frac{m_i}{\lambda E_i}
@@ -171,10 +171,10 @@ Delivered fraction per step, with $E_i$ the commanded filament length:
 
 What comes out of it:
 
-- **Low steps, before any slip:** $\varphi_0 = r_{true}/r_{cfg}$. That's the extruder rotation distance, measured hot and under real pressure. No more marking filament with a sharpie
-- **Slip curve:** $s(q) = 1 - \varphi(q)/\varphi_0$
-- **Mechanical knee** $q^{\ast}_{mech}$: where $\varphi/\varphi_0$ drops under 0.97
-- **Thermal knee** $q^{\ast}_{th}$: logged at the same time from the hotend, where the temperature drops more than 3 °C under target or the heater sits above 95%
+- **Low steps, before any slip:** $`\varphi_0 = r_{true}/r_{cfg}`$. That's the extruder rotation distance, measured hot and under real pressure. No more marking filament with a sharpie
+- **Slip curve:** $`s(q) = 1 - \varphi(q)/\varphi_0`$
+- **Mechanical knee** $`q^{\ast}_{mech}`$: where $`\varphi/\varphi_0`$ drops under 0.97
+- **Thermal knee** $`q^{\ast}_{th}`$: logged at the same time from the hotend, where the temperature drops more than 3 °C under target or the heater sits above 95%
 
 Steps for the 0.6 Conch:
 
@@ -195,7 +195,7 @@ scale noise is under 0.5%. Stop early once two steps come in under 90%. Run it a
 normal temperature and 15 °C above.
 
 **What the knee means.** At the mechanical knee the extruder is at its force limit, so the melt
-pressure there is about the same for every filament, $P^{\ast} = F_{max}/A_f$. Pressure goes as
+pressure there is about the same for every filament, $`P^{\ast} = F_{max}/A_f`$. Pressure goes as
 viscosity times flow ([models](models.md#nozzle-pressure)), so:
 
 ```math
@@ -217,7 +217,7 @@ numbers instead of vibes.
 
 Caveats:
 
-- Free extrusion has no back pressure from the bed or the layer below, so real printing gets into trouble before the knee. That's what $\mu$ from the anchor absorbs
+- Free extrusion has no back pressure from the bed or the layer below, so real printing gets into trouble before the knee. That's what $`\mu`$ from the anchor absorbs
 - Undermelted plastic goes matte or rough before it actually slips. Note the first step where the strand changes (camera later)
 
 ### Matching temperature
@@ -250,9 +250,9 @@ Q_{new} = \mu_{ref}\, q^{\ast}_{new}(T_{new}), \qquad \mu_{ref} = \frac{Q_{ref}}
 The dimensional test part from [models](models.md#dimensions) (outside widths and holes at a few
 sizes), but weighed too:
 
-- slope → shrinkage $s$
-- offset → contour offset $b$
-- mass → flow residual $f = m/(\rho V_{cmd})$. With the spool area and rotation distance already corrected, this is only the bead
+- slope → shrinkage $`s`$
+- offset → contour offset $`b`$
+- mass → flow residual $`f = m/(\rho V_{cmd})`$. With the spool area and rotation distance already corrected, this is only the bead
 
 One 15 minute print, three numbers.
 
@@ -302,7 +302,7 @@ Which anchor is closest, in units of measurement noise:
 D = \sqrt{\sum_i \left(\frac{x_i - a_i}{\sigma_i}\right)^2}
 ```
 
-Small $D$: inherit from it with confidence. Big $D$: I'm extrapolating, get it to tier 2 or more
+Small $`D`$: inherit from it with confidence. Big $`D`$: I'm extrapolating, get it to tier 2 or more
 before trusting it.
 
 ## Library structure

@@ -13,8 +13,8 @@ it in Orca, Klipper or Kalico, and that's what I say where I'm unsure.
 
 | # | Finding | Shown by | Where it lives today | What's missing | Takes | Payoff |
 |---|---|---|---|---|---|---|
-| 1 | Bonded area, not bond quality, limits PLA's Z strength. Lines 2.5× the nozzle width: 40 to 48% stronger | Allum 2020 and later, Moetazedian 2023 | Slicers allow wide lines, defaults sit around 1.1× | A strength profile that widens inner lines and watches $h/w$ and the nozzle tip | Software | High |
-| 2 | Equivalent weld time predicts weld strength in high-$T_g$ plastics | Seppala 2017, Coogan & Kazmer 2020 | Nowhere. Slicers only cool for overhangs | A thermal history model that plans layer time and fan | Software, IR sensor optional | Medium to high for ABS, PPA |
+| 1 | Bonded area, not bond quality, limits PLA's Z strength. Lines 2.5× the nozzle width: 40 to 48% stronger | Allum 2020 and later, Moetazedian 2023 | Slicers allow wide lines, defaults sit around 1.1× | A strength profile that widens inner lines and watches $`h/w`$ and the nozzle tip | Software | High |
+| 2 | Equivalent weld time predicts weld strength in high-$`T_g`$ plastics | Seppala 2017, Coogan & Kazmer 2020 | Nowhere. Slicers only cool for overhangs | A thermal history model that plans layer time and fan | Software, IR sensor optional | Medium to high for ABS, PPA |
 | 3 | The old layer's temperature sets the interface as much as the nozzle does | Contact temperature physics | Nowhere | Chamber and layer time aware planning | Software | Medium |
 | 4 | Preheating the old layer: about 50% stronger bonds | Ravi 2016, Kishore 2017 | Large-format machines | IR or hot air ahead of the nozzle | Hardware | Medium |
 | 5 | Melt runs cooler at high flow, so temperature should follow flow | Anderegg 2019, Phan 2018 | A third-party post-processor | Built into firmware or slicer, with lookahead | Software | Medium to high at speed |
@@ -28,7 +28,7 @@ it in Orca, Klipper or Kalico, and that's what I say where I'm unsure.
 | 13 | Model inversion handles several modes and position-dependent dynamics | Okwudire (filtered B-splines) | Commercial (Ulendo) | An open version, position-dependent shaping | Software | Medium |
 | 14 | Annealing shrink is separate from print shrink, and predictable | Crystallization physics, datasheets | One shrink number | Print shrink and annealing shrink per material | Software | High for PPA, nylon |
 | 15 | Fiber-filled parts shrink differently along and across the lines | Tekinalp 2014 | One XY shrink number | Direction-aware compensation | Software (hard) | Medium for CF |
-| 16 | A chamber close to $T_g$ cuts stress and warp | Physics, Stratasys's 70 to 90 °C | Hobby machines run about 50 to 60 °C | The 70 °C chamber | Hardware (in progress) | High |
+| 16 | A chamber close to $`T_g`$ cuts stress and warp | Physics, Stratasys's 70 to 90 °C | Hobby machines run about 50 to 60 °C | The 70 °C chamber | Hardware (in progress) | High |
 | 17 | Part fan cooling power depends on the chamber temperature | Heat transfer | Fan percentage only | Chamber-aware fan scaling | Software | Medium |
 | 18 | Interlocking layers raise Z strength | BrickLayers | A post-processing script, US patent | Testing it | Software (exists) | Medium |
 | 19 | Z-pinning: more than 3.5× Z strength, near isotropic | ORNL | Research | Slicer support for aligned voids and vertical fills | Software | High for specific parts |
@@ -41,7 +41,7 @@ it in Orca, Klipper or Kalico, and that's what I say where I'm unsure.
 | 26 | Heater power reveals the actual flow | Phan 2018, observability | MPC models it internally | A monitor with flags | Software | Medium |
 | 27 | Wet filament shows up as lower viscosity | Rheology, moisture studies | Nowhere | Comparison against a baseline | Software (+ sensor) | Medium |
 | 28 | Two-node chamber model with cascade control | Bacher & Madsen, Kalico `dual_loop_pid` | Kalico has the controller | Using it in the thermal module | Config | Medium |
-| 29 | Layer time matters in both directions for high-$T_g$ welds | Thermal history | Slicers enforce a minimum layer time only | A warning when layers will be too cold, and the chamber or preheat to fix it | Software | Medium |
+| 29 | Layer time matters in both directions for high-$`T_g`$ welds | Thermal history | Slicers enforce a minimum layer time only | A warning when layers will be too cold, and the chamber or preheat to fix it | Software | Medium |
 | 30 | Bead shape depends on the speed ratio and the gap | Comminal 2018 | A fixed bead model | Speed-aware width and flow | Software | Low to medium |
 
 Details and references for each are in the chapter that covers the physics: welds in
@@ -53,7 +53,7 @@ Details and references for each are in the chapter that covers the physics: weld
 
 What I could do without buying anything, roughly in order:
 
-1. **A strength profile in Orca.** Extra-wide inner walls and infill, watch $h/w$, check the Conch's tip is wide enough
+1. **A strength profile in Orca.** Extra-wide inner walls and infill, watch $`h/w`$, check the Conch's tip is wide enough
 2. **A print logger on the Pi.** Heater power, temperatures, live extruder velocity, fan, chamber. Per-print estimates and flags (chapter 10)
 3. **Flow-dependent temperature.** Try the existing post-processor first. If it helps, think about a lookahead version in firmware
 4. **A slow chamber cool-down** at the end of hot prints. A macro
@@ -76,12 +76,12 @@ What I could do without buying anything, roughly in order:
 | Contact microphone | Clog and skip detection (acoustic emission research) |
 | Camera + line laser | First layer and layer profile measurement |
 | Humidity sensors (dry box, room) | The disturbance nobody logs |
-| IR or hot air preheater on the toolhead | Hotter interfaces for high-$T_g$ welds |
+| IR or hot air preheater on the toolhead | Hotter interfaces for high-$`T_g`$ welds |
 
 ## Practices that cost nothing
 
 From [chapter 11](11-materials.md#what-most-people-skip-across-the-board): dry everything, chamber
-close to $T_g$ for ABS/ASA/PPA, cool and vent for PLA/PETG, extra-wide inner lines, part fan only
+close to $`T_g`$ for ABS/ASA/PPA, cool and vent for PLA/PETG, extra-wide inner lines, part fan only
 where needed, slow cool-down, annealing with a ramp and support, separate print and annealing shrink,
 salt remelting for small solid parts.
 
@@ -89,8 +89,8 @@ salt remelting for small solid parts.
 
 From [chapter 6](06-layer-bonding.md#making-z-stronger-within-fffs-limits):
 
-1. **Geometry first, for everything:** wider lines, lower $h/w$, a touch more flow, a wide nozzle land, maybe interlocking layers
-2. **Thermal, for high-$T_g$ materials:** chamber, nozzle temperature, minimal fan, layer time, maybe preheat
+1. **Geometry first, for everything:** wider lines, lower $`h/w`$, a touch more flow, a wide nozzle land, maybe interlocking layers
+2. **Thermal, for high-$`T_g`$ materials:** chamber, nozzle temperature, minimal fan, layer time, maybe preheat
 3. **After the print:** annealing, salt remelting for small parts
 
 And the one experiment that tells me which of those matters for which material: Z coupons at two

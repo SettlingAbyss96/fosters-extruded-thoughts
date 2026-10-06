@@ -31,17 +31,17 @@ diffusivity:
 t_{cond} \sim \frac{r^2}{\alpha}, \qquad \alpha = \frac{k}{\rho\,c}
 ```
 
-Common plastics have $\alpha$ around 0.06 to 0.11 mm²/s. For 1.75 mm filament ($r = 0.875$ mm)
+Common plastics have $`\alpha`$ around 0.06 to 0.11 mm²/s. For 1.75 mm filament ($`r = 0.875`$ mm)
 that's on the order of 10 seconds for the center to fully catch up. The center doesn't have to reach
 nozzle temperature, just get soft enough to flow, so call it a few seconds in practice.
 
-Now compare that to how long the plastic actually spends in the hot zone. With a heated length $L$:
+Now compare that to how long the plastic actually spends in the hot zone. With a heated length $`L`$:
 
 ```math
 t_{res} = \frac{L\,A_f}{Q}
 ```
 
-For a 30 mm melt zone and 1.75 mm filament ($A_f \approx 2.4$ mm²):
+For a 30 mm melt zone and 1.75 mm filament ($`A_f \approx 2.4`$ mm²):
 
 | Flow | Time in the hot zone |
 |---|---|
@@ -71,7 +71,7 @@ fast heat conducts in:
 Gz = \frac{Q}{\alpha\,L}
 ```
 
-Melting keeps up while $Gz$ stays under some critical value $Gz^{\ast}$, so per melt channel:
+Melting keeps up while $`Gz`$ stays under some critical value $`Gz^{\ast}`$, so per melt channel:
 
 ```math
 Q_{max} \approx Gz^{\ast}\,\alpha\,L
@@ -79,14 +79,14 @@ Q_{max} \approx Gz^{\ast}\,\alpha\,L
 
 That little formula explains most hotend marketing:
 
-- **Longer melt zone, more flow.** Volcano, UHF, and so on. $Q_{max}$ scales with $L$
-- **Splitting the filament multiplies it.** CHT-style and "high flow" nozzles split the melt into $N$ thinner streams. Each stream gets its own $\alpha L$ budget, so ideally $Q_{max}$ goes up by $N$. In practice less, since they share the heat going in
+- **Longer melt zone, more flow.** Volcano, UHF, and so on. $`Q_{max}`$ scales with $`L`$
+- **Splitting the filament multiplies it.** CHT-style and "high flow" nozzles split the melt into $`N`$ thinner streams. Each stream gets its own $`\alpha L`$ budget, so ideally $`Q_{max}`$ goes up by $`N`$. In practice less, since they share the heat going in
 - **Filament diameter drops out,** at least in this crude version. Surprising, but it falls out of the math: a fatter filament has more area but needs more time
-- **Material matters through $\alpha$.** Carbon fiber fillers conduct heat better, so CF filaments can melt faster than their base plastic
+- **Material matters through $`\alpha`$.** Carbon fiber fillers conduct heat better, so CF filaments can melt faster than their base plastic
 
 [Phan, Swain & Mackay (2018)](https://doi.org/10.1122/1.5022982) did this properly with a Nusselt vs
 Graetz correlation built from pressure data. My version is the back-of-envelope cousin. The useful
-thing about it: fit $Gz^{\ast}$ once with a known filament, and you can predict roughly how a longer
+thing about it: fit $`Gz^{\ast}`$ once with a known filament, and you can predict roughly how a longer
 melt zone or a different material changes max flow before buying anything.
 
 ## Energy bookkeeping
@@ -98,8 +98,8 @@ through.
 P_{heater} = P_{loss}(T,\ \text{fan}) + \rho\,Q\left[c\,(T_{n} - T_{f}) + X\,\Delta H_m\right]
 ```
 
-The last term only matters for semi-crystalline plastics: $X$ is how crystalline the filament is
-and $\Delta H_m$ is the heat it takes to melt those crystals.
+The last term only matters for semi-crystalline plastics: $`X`$ is how crystalline the filament is
+and $`\Delta H_m`$ is the heat it takes to melt those crystals.
 
 Some numbers to get a feel:
 
@@ -158,7 +158,7 @@ power against flow is
 \frac{dP_{heater}}{dQ} = \rho\left[c\,(T_n - T_f) + X\,\Delta H_m\right]
 ```
 
-If $\rho$ and $c$ are known, the slope tells me $X$: how crystalline the filament came off the spool.
+If $`\rho`$ and $`c`$ are known, the slope tells me $`X`$: how crystalline the filament came off the spool.
 That varies by brand (PLA especially) and changes how it melts and prints. A printer is already a
 crude differential scanning calorimeter. I haven't seen anyone use it that way.
 

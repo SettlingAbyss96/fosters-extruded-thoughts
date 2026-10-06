@@ -88,7 +88,7 @@ and trusts its own data when there's a lot:
 \hat\theta_{line} = \frac{n\,\bar{y}/\sigma^2 + \theta_{family}/\tau^2}{n/\sigma^2 + 1/\tau^2}
 ```
 
-$n$ measurements with noise $\sigma$, family spread $\tau$. One weird spool doesn't drag the whole
+$`n`$ measurements with noise $`\sigma`$, family spread $`\tau`$. One weird spool doesn't drag the whole
 line around, and a new color of a known line starts with a tight guess.
 
 **Design of experiments.** Box & Wilson (1951) response surfaces, factorial designs. Taguchi

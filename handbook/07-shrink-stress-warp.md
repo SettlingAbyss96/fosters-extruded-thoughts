@@ -5,17 +5,17 @@
 ## Why parts shrink
 
 Plastic shrinks as it cools, like everything else. The question is from what temperature. Above
-$T_g$ the melt can flow and relax, so it doesn't hold onto any strain. The shrink that actually
-gets locked into the part starts around where it stops flowing ($T_{set}$): roughly $T_g$ for
+$`T_g`$ the melt can flow and relax, so it doesn't hold onto any strain. The shrink that actually
+gets locked into the part starts around where it stops flowing ($`T_{set}`$): roughly $`T_g`$ for
 amorphous plastics, the crystallization temperature for semi-crystalline ones.
 
 ```math
 \frac{\Delta L}{L} \approx \alpha\,(T_{set} - T_{room})
 ```
 
-$\alpha$ here is the thermal expansion coefficient. Quick sanity check with rough values:
+$`\alpha`$ here is the thermal expansion coefficient. Quick sanity check with rough values:
 
-| Plastic | $\alpha$ (rough) | $T_{set}$ | Predicted shrink | What people typically set |
+| Plastic | $`\alpha`$ (rough) | $`T_{set}`$ | Predicted shrink | What people typically set |
 |---|---|---|---|---|
 | ABS | about 90 × 10⁻⁶ /K | about 105 °C | about 0.7% | about 0.5 to 0.8% |
 | PLA | about 70 × 10⁻⁶ /K | about 60 °C | about 0.25% | about 0.2 to 0.3% |
@@ -23,13 +23,13 @@ $\alpha$ here is the thermal expansion coefficient. Quick sanity check with roug
 That simple model lands right where people's shrink settings end up, which makes me trust it.
 
 Semi-crystalline plastics have a second shrink on top: crystals are denser than the tangled stuff.
-With $X$ the crystalline fraction and $\rho_a$, $\rho_c$ the amorphous and crystalline densities:
+With $`X`$ the crystalline fraction and $`\rho_a`$, $`\rho_c`$ the amorphous and crystalline densities:
 
 ```math
 \frac{\Delta V}{V} \approx X\left(1 - \frac{\rho_a}{\rho_c}\right)
 ```
 
-For nylon 6 ($\rho_a \approx 1.08$, $\rho_c \approx 1.23$ g/cm³) that's about 12% volume change per
+For nylon 6 ($`\rho_a \approx 1.08`$, $`\rho_c \approx 1.23`$ g/cm³) that's about 12% volume change per
 unit of crystallinity. Crystallize another 10% of it during annealing and you get about 1.2% in
 volume, around 0.4% in each direction if it's isotropic. That's annealing shrink, and it's on top of
 the print shrink.
@@ -43,7 +43,7 @@ the mismatch turns into stress:
 \varepsilon_{th} \approx \alpha\,(T_{set} - T_{chamber}), \qquad \sigma \approx \frac{E\,\varepsilon_{th}}{1 - \nu}
 ```
 
-For ABS ($E \approx 2$ GPa):
+For ABS ($`E \approx 2`$ GPa):
 
 | Chamber | Strain | Built-in stress (upper bound) |
 |---|---|---|
@@ -54,14 +54,14 @@ ABS breaks around 40 MPa. Some of that stress relaxes, so these are upper bounds
 ABS cracks in a cold box.
 
 **How it turns into warp.** Here's a toy model I like. Stoney's formula (1909) gives the curvature
-a thin stressed layer puts on a thicker plate. For a layer of thickness $h$ on a stack of $m$ layers,
+a thin stressed layer puts on a thicker plate. For a layer of thickness $`h`$ on a stack of $`m`$ layers,
 same material:
 
 ```math
 \Delta\kappa_m = \frac{6\,\varepsilon_{th}\,h}{(m h)^2} = \frac{6\,\varepsilon_{th}}{m^2\,h}
 ```
 
-Add up the bending tendency over all the layers and it goes like $\sum 1/m^2$. **The first three
+Add up the bending tendency over all the layers and it goes like $`\sum 1/m^2`$. **The first three
 layers carry about 83% of the total.** Stoney's formula isn't really valid when the layer and the
 stack are similar in thickness, and the bed is holding the part down, so don't take the numbers
 literally. But the shape of it is right: **warp gets decided in the first few millimeters.** That's
@@ -79,15 +79,15 @@ from the newest layer spreading the stress over several layers below.
 
 Two effects stack up:
 
-1. **Less strain to begin with.** $T_{set} - T_{chamber}$ gets smaller
-2. **The stress relaxes faster.** Close to $T_g$, chains can still move a bit, and built-in stress bleeds away while the part prints
+1. **Less strain to begin with.** $`T_{set} - T_{chamber}`$ gets smaller
+2. **The stress relaxes faster.** Close to $`T_g`$, chains can still move a bit, and built-in stress bleeds away while the part prints
 
 Industrial machines lean on this hard. A
 [Stratasys patent](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6722872) describes
 their FDM machines building in a chamber heated to between 70 and 90 °C. Hobby printers rarely get
 past 60.
 
-For this printer at 70 °C, that's 35 K below ABS's $T_g$. For Bambu PPA-CF ($T_g$ = 85 °C) it's only
+For this printer at 70 °C, that's 35 K below ABS's $`T_g`$. For Bambu PPA-CF ($`T_g`$ = 85 °C) it's only
 15 K below. **A 70 °C chamber is close to ideal for PPA-CF.**
 
 ## Stress relaxation
@@ -98,23 +98,23 @@ The Maxwell model from chapter 2 again. Built-in stress decays like
 \sigma(t) = \sigma_0\,e^{-t/\lambda(T)}
 ```
 
-Above $T_g$, $\lambda$ shifts with the WLF factor and relaxation is quick. Below $T_g$ it slows down
+Above $`T_g`$, $`\lambda`$ shifts with the WLF factor and relaxation is quick. Below $`T_g`$ it slows down
 enormously (the glass is nearly frozen), but not to zero.
 
-The hot bed does exactly this for the bottom layers: they sit above $T_g$, stay relaxed, and don't
+The hot bed does exactly this for the bottom layers: they sit above $`T_g`$, stay relaxed, and don't
 lock in stress until the print is done and everything cools together. The chamber does a milder
 version for the whole part.
 
 ## Crystallization and annealing
 
 Semi-crystalline plastics printed in a cool chamber come out only partly crystallized, because they
-cooled too fast. Annealing heats them above $T_g$ (but well below $T_m$), and the tangled regions
+cooled too fast. Annealing heats them above $`T_g`$ (but well below $`T_m`$), and the tangled regions
 organize into crystals. The part gets stiffer, much more heat resistant, and it shrinks while doing
 it.
 
 Bambu's [PPA-CF datasheet](https://store.bblcdn.eu/s8/default/f592e57fe69c40289897513bdd2b61bc/Bambus_PPA-CF_Technical_Data_Sheet_2ab26420-79f5-4692-888e-090006814050.pdf)
-gives: $T_g$ 85 °C, $T_m$ 258 °C, anneal at 120 to 140 °C, heat deflection 196 °C at 1.8 MPa. A part
-annealed at 130 °C is well above its $T_g$, so it's soft while it crystallizes, and thin features can
+gives: $`T_g`$ 85 °C, $`T_m`$ 258 °C, anneal at 120 to 140 °C, heat deflection 196 °C at 1.8 MPa. A part
+annealed at 130 °C is well above its $`T_g`$, so it's soft while it crystallizes, and thin features can
 sag.
 
 Some practices I'd borrow from glassmaking, where annealing schedules are a solved science:
@@ -154,15 +154,15 @@ mismatch is around 0.6% strain at the interface. That's why parts pop off when c
 good, and why thin or brittle parts sometimes crack or curl at the corners, which isn't.
 
 **Thick parts.** Cooling a part from the outside sets up an internal temperature difference. For a
-slab of half-thickness $L$ cooling at rate $\dot T$:
+slab of half-thickness $`L`$ cooling at rate $`\dot T`$:
 
 ```math
 \Delta T \approx \frac{\dot{T}\,L^2}{2\,\alpha}
 ```
 
 A 20 mm thick part cooling at 5 K/min has about a 40 K difference between its middle and its skin.
-At 1 K/min it's about 8 K. Below $T_g$ that stress is mostly elastic and goes away once the part is
-uniform again. Close to or above $T_g$ it can relax and then come back inverted, which is how parts
+At 1 K/min it's about 8 K. Below $`T_g`$ that stress is mostly elastic and goes away once the part is
+uniform again. Close to or above $`T_g`$ it can relax and then come back inverted, which is how parts
 end up with locked-in stress.
 
 **Theory, low risk:** a controlled chamber cool-down for big ABS, ASA and PPA parts. Ramp the chamber

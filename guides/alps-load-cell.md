@@ -148,7 +148,7 @@ trigger_force: 200
 | What | Hold the ALPS's STM32F072 in **reset** (NRST to GND, which tri-states its pins). Solder 8 thin wires from the ADS131M02's SPI/DRDY/CLKIN nets (or test pads) to the H36 header. | A tiny board: **ADS131M02 + reference parts + load-cell connector + 2×6 header cable to the H36**. It either replaces the ALPS electronics at the load cell, or plugs into the H36 with the bridge wired to it. | Your own STM32 + CAN + TMC2209 + ADS131M02 toolhead board, all 125 °C parts |
 | Effort | An evening or two, once the ALPS board is in hand | **About 1–3 weeks**: KiCad design (a weekend for a simple 2-layer board), PCBWay assembly (about 1–2 weeks), bring-up | Months |
 | Skills | Fine-pitch soldering (0.5 mm pitch), multimeter tracing | KiCad schematic + layout, reading a datasheet | Full board design, power, motor driver layout |
-| Cost | ≈ $0 | ≈ $30–100 for 5 assembled boards | $$ |
+| Cost | ≈ $0 | ≈ $30–100 for 5 assembled boards | Highest |
 | Reliability | Fragile (wires on a hot, moving toolhead) | **Good**, repeatable | Best |
 | Shareable | Barely | ✅ **Clean open-source release** | ✅ (big project) |
 | Risk | Can damage the ALPS | Low, and the ALPS stays stock if B plugs in at the bridge wires | Higher |

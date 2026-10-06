@@ -147,16 +147,16 @@ gets with the heater **off**. The bed alone heats it. At steady state:
 T_{ss} = T_{room} + \frac{P_{bed}}{UA + \dot{V}\rho c_p}
 ```
 
-where $\dot{V}\rho c_p$ is what venting adds (air is about 1.2 W/K per L/s of flow). Foam makes
-$UA$ small, so with no venting PLA cooks. To stay under $T_{max}$:
+where $`\dot{V}\rho c_p`$ is what venting adds (air is about 1.2 W/K per L/s of flow). Foam makes
+$`UA`$ small, so with no venting PLA cooks. To stay under $`T_{max}`$:
 
 ```math
 \dot{V} \geq \frac{1}{\rho c_p}\left(\frac{P_{bed}}{T_{max} - T_{room}} - UA\right)
 ```
 
-Guessing 100 W from the bed into the chamber, 22 °C room, 35 °C max and $UA$ around 3 W/K for the
+Guessing 100 W from the bed into the chamber, 22 °C room, 35 °C max and $`UA`$ around 3 W/K for the
 foam box: about 4 L/s, roughly 10 CFM. A small fan and a damper. **So the rear thermal module needs
-a fresh-air path with a damper, not just recirculation.** Real numbers once $UA$ is measured.
+a fresh-air path with a damper, not just recirculation.** Real numbers once $`UA`$ is measured.
 
 ## Speed
 
@@ -185,7 +185,7 @@ v_{max} = \frac{Q_{max}}{w\,h}
 ```
 
 0.6 nozzle, 0.65 mm line, 0.3 mm layer, and say 30 mm³/s for the Conch (not measured yet):
-$v_{max} \approx 150$ mm/s. So for real printing the hotend, not the motion system, is the limit
+$`v_{max} \approx 150`$ mm/s. So for real printing the hotend, not the motion system, is the limit
 for most features. That's why `max_flow` per filament in the library matters more than the speed
 numbers, and why Orca has to have it.
 
@@ -207,7 +207,7 @@ heat the plastic going through:
 P_{fil} = \rho\,c\,Q\,(T_{nozzle} - T_{fil})
 ```
 
-PETG at 30 mm³/s and 240 °C: $1.27 \times 10^{-3}$ g/mm³ × 2.2 J/(g·K) × 30 mm³/s × 215 K ≈
+PETG at 30 mm³/s and 240 °C: $`1.27 \times 10^{-3}`$ g/mm³ × 2.2 J/(g·K) × 30 mm³/s × 215 K ≈
 **18 W**. On a hotend heater that's a big chunk. PID only finds out after the temperature drops,
 so you get underextrusion right when you go fast. MPC adds that power *as* the flow goes up.
 Feedforward for the bulk, feedback for the rest.
@@ -226,13 +226,13 @@ actually matters is how much the frame still has to move. The frame sensor warms
 T(t) = T_{\infty} - (T_{\infty} - T_0)\,e^{-t/\tau}
 ```
 
-Take three readings $T_1, T_2, T_3$ a fixed time apart. Then
+Take three readings $`T_1, T_2, T_3`$ a fixed time apart. Then
 
 ```math
 r = \frac{T_3 - T_2}{T_2 - T_1} = e^{-\Delta t/\tau}, \qquad D = T_{\infty} - T_3 = (T_3 - T_2)\,\frac{r}{1 - r}
 ```
 
-$D$ is how many degrees the frame still has to go. With $k_z$ (mm of Z per °C of frame, measured
+$`D`$ is how many degrees the frame still has to go. With $`k_z`$ (mm of Z per °C of frame, measured
 once):
 
 ```math
@@ -248,7 +248,7 @@ compensation is left and the soak can end way earlier:
 
 Readings are noisy, so this wants a least-squares fit over a sliding window, not three points.
 Too much for a Jinja macro. Small Kalico plugin, same style as the buffer one, that blocks
-`PRINT_START` and prints an ETA. $\varepsilon$ comes from the precision tolerances once I set them.
+`PRINT_START` and prints an ETA. $`\varepsilon`$ comes from the precision tolerances once I set them.
 
 ## Pressure advance, retraction, shrinkage
 
@@ -285,7 +285,7 @@ Work in progress. Roughly in order:
 - [ ] New `PRINT_START`: handshake, filament apply, chamber modes
 - [ ] Firmware retraction
 - [ ] Find the Conch heater wattage, switch the hotend to MPC
-- [ ] Measure $k_z$ (Z vs frame temp), turn on `z_thermal_adjust`
+- [ ] Measure $`k_z`$ (Z vs frame temp), turn on `z_thermal_adjust`
 - [ ] Soak plugin
 - [ ] Vent damper in the rear thermal module design
 - [ ] Shaper at 70 °C vs cold, see if per-mode shapers are worth it

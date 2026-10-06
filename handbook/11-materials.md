@@ -10,8 +10,8 @@ ballpark unless they come from a datasheet I link.
 
 Every material question in this handbook comes back to four things:
 
-1. **How far the interface gets above $T_g$, and for how long** (chapter 6). Decides whether welds heal fully
-2. **How far below $T_{set}$ the chamber is** (chapter 7). Decides built-in stress and warp
+1. **How far the interface gets above $`T_g`$, and for how long** (chapter 6). Decides whether welds heal fully
+2. **How far below $`T_{set}`$ the chamber is** (chapter 7). Decides built-in stress and warp
 3. **How wet it is** (chapter 2). Decides viscosity, bubbles and strength
 4. **Whether it crystallizes** (chapters 2 and 7). Decides heat resistance and annealing shrink
 
@@ -19,7 +19,7 @@ Keep those in mind and the advice below stops being a list of rules and starts m
 
 ## PLA
 
-- $T_g$ about 60 °C. Printed at 200 °C plus, so the interface lands way above $T_g$ and welds heal fully almost instantly. **For PLA, Z strength is a geometry problem** (chapter 6): wider lines, lower $h/w$, a bit more flow
+- $`T_g`$ about 60 °C. Printed at 200 °C plus, so the interface lands way above $`T_g`$ and welds heal fully almost instantly. **For PLA, Z strength is a geometry problem** (chapter 6): wider lines, lower $`h/w`$, a bit more flow
 - Hates a hot chamber: heat creep, soft parts, sagging. Cool chamber, vent if the box is insulated ([slicer.md](../calibration/slicer.md#pla-in-an-insulated-box-is-a-problem))
 - Low shrink (about 0.2 to 0.3%), so it's the accuracy-easy material
 - Absorbs some water. Wet PLA strings and gets brittle
@@ -29,7 +29,7 @@ structural parts (CNC Kitchen got PLA and PETG back to nearly their flat-printed
 
 ## PETG
 
-- Amorphous, $T_g$ about 80 °C
+- Amorphous, $`T_g`$ about 80 °C
 - Sticky, stringy, and quite sensitive to moisture. Most "PETG strings" problems are wet PETG
 - Doesn't want a hot chamber either. Warm at most
 - Bonds well, tough
@@ -39,7 +39,7 @@ problems than any retraction setting.
 
 ## ABS and ASA
 
-- Amorphous, $T_g$ about 100 to 105 °C. The interface only gets 50 to 75 K above $T_g$ and cools fast, so **ABS is where temperature history really matters** for weld strength (chapter 6)
+- Amorphous, $`T_g`$ about 100 to 105 °C. The interface only gets 50 to 75 K above $`T_g`$ and cools fast, so **ABS is where temperature history really matters** for weld strength (chapter 6)
 - Shrinks about 0.5 to 0.8% and builds a lot of thermal stress in a cold box. Warping and layer splits are its signature failures
 - The fix is heat. Stratasys's own [patent](https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6722872) describes their machines building in a 70 to 90 °C chamber
 - ASA behaves almost the same, with better UV resistance
@@ -54,13 +54,13 @@ problems than any retraction setting.
 
 ## PC and PC blends
 
-- $T_g$ about 145 °C. Wants a really hot chamber, well past what this printer will have
-- At 70 °C the chamber is 75 K below $T_g$. Small PC parts are fine, big ones will warp and split. PC-ABS blends are the realistic option here
+- $`T_g`$ about 145 °C. Wants a really hot chamber, well past what this printer will have
+- At 70 °C the chamber is 75 K below $`T_g`$. Small PC parts are fine, big ones will warp and split. PC-ABS blends are the realistic option here
 - Very sensitive to moisture (hydrolysis). Dry it hot and long
 
 ## Nylon (PA6, PA12) and nylon-CF
 
-- Semi-crystalline. $T_g$ around 50 °C dry, and lower when wet, because water plasticizes it
+- Semi-crystalline. $`T_g`$ around 50 °C dry, and lower when wet, because water plasticizes it
 - **Extremely hygroscopic.** Wet nylon foams, strings, and makes weak parts. Dry it, print it from a dry box, and treat the dry box as part of the printer
 - After printing it picks up water from the air again. That makes it tougher and less stiff. Whether that's good depends on the part
 - CF versions shrink much less, are stiffer, and need a hardened nozzle
@@ -75,8 +75,8 @@ Bambu's [PPA-CF datasheet](https://store.bblcdn.eu/s8/default/f592e57fe69c402898
 
 | Property | Value |
 |---|---|
-| $T_g$ (DSC) | 85 °C |
-| $T_m$ | 258 °C |
+| $`T_g`$ (DSC) | 85 °C |
+| $`T_m`$ | 258 °C |
 | Annealing | 120 to 140 °C |
 | Drying (blast oven) | 100 to 140 °C, 8 to 12 h |
 | Heat deflection (1.8 MPa) | 196 °C |
@@ -85,8 +85,8 @@ Bambu's [PPA-CF datasheet](https://store.bblcdn.eu/s8/default/f592e57fe69c402898
 
 What that means:
 
-- **A 70 °C chamber is only 15 K below its $T_g$.** That's close to ideal: low built-in stress, slow but real stress relaxation during the print, and a hot old layer for the next one to weld to
-- **It's semi-crystalline,** so annealing is where the heat resistance comes from. Annealing at 120 to 140 °C is well above $T_g$: the part is soft while it crystallizes
+- **A 70 °C chamber is only 15 K below its $`T_g`$.** That's close to ideal: low built-in stress, slow but real stress relaxation during the print, and a hot old layer for the next one to weld to
+- **It's semi-crystalline,** so annealing is where the heat resistance comes from. Annealing at 120 to 140 °C is well above $`T_g`$: the part is soft while it crystallizes
 - **It shrinks during annealing,** on top of the print shrink. And because it's carbon fiber filled, that shrink is bigger across the lines than along them
 
 **Practices I'd follow:**
@@ -110,7 +110,7 @@ What that means:
 | Practice | Why it works | Materials |
 |---|---|---|
 | Dry everything, print from a dry box | Water cuts chains and boils in the nozzle (chapter 2) | All, nylon/PPA/PC/PETG most |
-| Chamber close to $T_g$ | Less built-in stress, better welds (chapters 6, 7) | ABS, ASA, PPA, PC |
+| Chamber close to $`T_g`$ | Less built-in stress, better welds (chapters 6, 7) | ABS, ASA, PPA, PC |
 | Cool PLA and PETG, vent insulated boxes | Heat creep, sagging | PLA, PETG |
 | Extra-wide inner lines | More bonded area (chapter 5) | All |
 | Part fan only where needed | Cooling costs weld time | ABS, ASA, PPA, PC |

@@ -14,7 +14,7 @@ The standard controller:
 u(t) = K_p\,e(t) + K_i\int e\,dt + K_d\,\frac{de}{dt}
 ```
 
-where $e$ is the error between target and measured temperature. It works, and it's simple. Its
+where $`e`$ is the error between target and measured temperature. It works, and it's simple. Its
 basic problem: **it only reacts once there's an error.** When the flow jumps, the plastic starts
 pulling heat out of the block, the block cools, the heat travels to the thermistor, the thermistor
 reads low, and only then does PID add power. By then the plastic coming out is already a bit cold.
@@ -34,9 +34,9 @@ C_b\,\frac{dT_b}{dt} = P - \big(h_a + h_f(u_{fan})\big)(T_b - T_{amb}) - \rho\,c
 \frac{dT_s}{dt} = r_s\,(T_b - T_s)
 ```
 
-$C_b$ is the block's heat capacity, $h_a$ and $h_f$ the heat loss to still air and to the fan,
-$r_s$ how quickly the sensor follows the block. The last term in the first equation is the
-filament: Kalico knows $Q$ from the planned moves, so **it adds the power for the plastic before
+$`C_b`$ is the block's heat capacity, $`h_a`$ and $`h_f`$ the heat loss to still air and to the fan,
+$`r_s`$ how quickly the sensor follows the block. The last term in the first equation is the
+filament: Kalico knows $`Q`$ from the planned moves, so **it adds the power for the plastic before
 the temperature drops.** That's feedforward.
 
 The controller picks the power that brings the modeled block to target within `target_reach_time`
@@ -68,7 +68,7 @@ The simplest model is one heat balance, the same one I used to size my chamber h
 C\,\frac{dT}{dt} = P_{heater} + P_{bed} - UA\,(T - T_{room})
 ```
 
-with a single time constant $\tau = C/UA$. That's useful for sizing the heater, but it hides
+with a single time constant $`\tau = C/UA`$. That's useful for sizing the heater, but it hides
 something important. The air and the walls/frame are really two separate heat stores:
 
 ```math

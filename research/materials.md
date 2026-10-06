@@ -22,14 +22,14 @@ model:
 \eta(\dot\gamma, T) = \frac{\eta_0(T)}{1 + (\lambda\dot\gamma)^{1-n}}
 ```
 
-with $n < 1$. And they get runnier with temperature. Close to Tg (within about 100 °C) the WLF
+with $`n < 1`$. And they get runnier with temperature. Close to Tg (within about 100 °C) the WLF
 equation describes it:
 
 ```math
 \log_{10} a_T = \frac{-C_1\,(T - T_r)}{C_2 + T - T_r}, \qquad \eta_0(T) = a_T\,\eta_0(T_r)
 ```
 
-The part that matters: **one shift factor $a_T$ rescales everything at once.** Viscosity,
+The part that matters: **one shift factor $`a_T`$ rescales everything at once.** Viscosity,
 relaxation times, and how fast chains diffuse across a weld all shift by the same factor with
 temperature (time-temperature superposition). That's the physics behind the "matching
 temperature" idea in [filament.md](../calibration/filament.md#matching-temperature): match the
@@ -66,7 +66,7 @@ FFF speed into three limits: how hard the extruder can push, how fast heat gets 
 filament, and how fast the gantry moves. Melting turned out to be the limit in a lot of machines.
 
 The heat side has a neat scaling. Heat has to conduct into the middle of the filament while it
-moves through the heated length $L$. [Phan, Swain & Mackay 2018](https://doi.org/10.1122/1.5022982)
+moves through the heated length $`L`$. [Phan, Swain & Mackay 2018](https://doi.org/10.1122/1.5022982)
 did this properly with a Nusselt vs Graetz number correlation. The back-of-envelope version: the
 Graetz number compares flow to conduction,
 
@@ -74,7 +74,7 @@ Graetz number compares flow to conduction,
 Gz = \frac{Q}{\alpha L}, \qquad \alpha = \frac{k}{\rho c_p}
 ```
 
-and melting keeps up while $Gz$ stays under some critical value. So per melt channel:
+and melting keeps up while $`Gz`$ stays under some critical value. So per melt channel:
 
 ```math
 Q_{max} \approx Gz^{\ast}\,\alpha\,L
@@ -83,11 +83,11 @@ Q_{max} \approx Gz^{\ast}\,\alpha\,L
 What falls out:
 
 - **Max flow scales with heated length.** That's why long melt zones (UHF) help
-- **Splitting the filament into channels multiplies it.** That's what HF and CHT-style nozzles do: $N$ thin streams instead of one fat one
+- **Splitting the filament into channels multiplies it.** That's what HF and CHT-style nozzles do: $`N`$ thin streams instead of one fat one
 - **Material thermal diffusivity matters.** Fillers like carbon fiber conduct heat better, so they melt faster
 - **Filament diameter mostly drops out** (in this crude version), surprisingly
 
-$Gz^{\ast}$ is fitted once from the anchor's flow ladder, then the heated length and the material
+$`Gz^{\ast}`$ is fitted once from the anchor's flow ladder, then the heated length and the material
 predict the rest. That's how I'd compare the Conch to a Rapido 2 UHF on paper before buying.
 
 Also worth knowing: [Go & Hart](https://arxiv.org/abs/1709.05918) pushed desktop FFF way past
@@ -139,7 +139,7 @@ How strong a part is across layers comes down to the weld between them. Two step
 \frac{\sigma}{\sigma_\infty} = \left(\frac{t}{\tau_{rep}}\right)^{1/4}, \qquad t < \tau_{rep}
 ```
 
-The catch is the temperature drops fast after the strand lands, and $\tau_{rep}$ shoots up as it
+The catch is the temperature drops fast after the strand lands, and $`\tau_{rep}`$ shoots up as it
 cools. [Seppala et al. 2017](https://pubs.rsc.org/en/content/articlelanding/2017/sm/c7sm00950j)
 (NIST) handled that with an **equivalent isothermal weld time**, measured with an IR camera:
 
@@ -156,9 +156,9 @@ the previous layer with IR to near Tg before printing on it, and the bond streng
 
 For this printer:
 
-- **A hot chamber keeps the weld from cooling as far,** so $t_{eq}$ goes up. That's the strength argument for 70 °C, in numbers
+- **A hot chamber keeps the weld from cooling as far,** so $`t_{eq}`$ goes up. That's the strength argument for 70 °C, in numbers
 - **Layer time and part cooling fan trade directly against strength.** The fan that saves an overhang costs weld time
-- An IR sensor at the toolhead ([sensors](../calibration/sensors.md#cheap-things-to-add)) would give $T(t)$ for real, and $t_{eq}$ per layer
+- An IR sensor at the toolhead ([sensors](../calibration/sensors.md#cheap-things-to-add)) would give $`T(t)`$ for real, and $`t_{eq}`$ per layer
 
 ## 6. Crystallization (PLA, PA, PPA, PP, PEEK)
 
@@ -186,8 +186,8 @@ Rough size of it:
 \varepsilon_{th} \approx \alpha\,(T_{set} - T_{chamber}), \qquad \sigma \approx \frac{E\,\varepsilon_{th}}{1 - \nu}
 ```
 
-$T_{set}$ is where the plastic stops flowing: about Tg for amorphous plastics, the crystallization
-temperature for semi-crystalline ones. ABS ($\alpha \approx 90 \times 10^{-6}$ /K, $E \approx 2$ GPa):
+$`T_{set}`$ is where the plastic stops flowing: about Tg for amorphous plastics, the crystallization
+temperature for semi-crystalline ones. ABS ($`\alpha \approx 90 \times 10^{-6}`$ /K, $`E \approx 2`$ GPa):
 
 | Chamber | ΔT from Tg (105 °C) | Built-in stress (upper bound) |
 |---|---|---|
@@ -221,7 +221,7 @@ prints go bad. Dry first, before touching settings.
 
 - **Stiffer and they conduct heat better**, so they melt faster ([section 2](#2-melting-how-fast-the-hotend-can-go))
 - **Fibers line up with the print path.** [Tekinalp et al. 2014](https://doi.org/10.1016/j.compscitech.2014.10.009) (ORNL) printed ABS with chopped carbon fiber: strength up about 115%, stiffness up about 700%, along the print direction. Across it, much less. Shrinkage goes anisotropic too
-- **Abrasive.** The nozzle wears and the bore grows. The nozzle's resistance climbs steeply as the bore shrinks (between $d^{-2}$ and $d^{-4}$ depending on how shear-thinning the melt is), so wear shifts PA and flow slowly. The monthly anchor check catches that
+- **Abrasive.** The nozzle wears and the bore grows. The nozzle's resistance climbs steeply as the bore shrinks (between $`d^{-2}`$ and $`d^{-4}`$ depending on how shear-thinning the melt is), so wear shifts PA and flow slowly. The monthly anchor check catches that
 - **Matte and glow fillers** move density and flow, which is why density is such a good tell
 
 ## 10. Predicting printability from properties

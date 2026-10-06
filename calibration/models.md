@@ -16,10 +16,10 @@ Q = \frac{\pi d_f^2}{4}\,\dot{e}_{cmd}\,\frac{r_{true}}{r_{cfg}}\,(1 - s)
 
 | Symbol | What | Measured by |
 |---|---|---|
-| $d_f$ | Real filament diameter | BDwidth |
-| $\dot{e}_{cmd}$ | Commanded extrusion rate | Known |
-| $r_{true}/r_{cfg}$ | Real vs configured rotation distance | Mark-and-measure, BDwidth encoder |
-| $s$ | Slip at the gears (goes up with pressure) | BDwidth encoder vs commanded |
+| $`d_f`$ | Real filament diameter | BDwidth |
+| $`\dot{e}_{cmd}`$ | Commanded extrusion rate | Known |
+| $`r_{true}/r_{cfg}`$ | Real vs configured rotation distance | Mark-and-measure, BDwidth encoder |
+| $`s`$ | Slip at the gears (goes up with pressure) | BDwidth encoder vs commanded |
 
 The slicer's "flow ratio" lumps all four together **plus** the bead shape into one number, which
 is why it changes with every spool and never sticks. Measure each factor on its own and what's
@@ -30,7 +30,7 @@ left is the [bead residual](#bead), which is small and stable.
 *Longer version, with the power-law math: [handbook chapter 4](../handbook/04-extrusion-dynamics.md#the-nozzles-resistance-for-a-real-melt).*
 
 The nozzle behaves like a capacitor and a resistor. The filament and melt between the gears and
-the tip squish a little (compliance $C$), and the nozzle resists flow (resistance $R$):
+the tip squish a little (compliance $`C`$), and the nozzle resists flow (resistance $`R`$):
 
 ```math
 C\,\frac{dP}{dt} = q_{in} - \frac{P}{R}, \qquad q_{out} = \frac{P}{R}
@@ -42,8 +42,8 @@ which is a first-order lag between what the extruder pushes and what comes out:
 \tau\,\frac{dq_{out}}{dt} = q_{in} - q_{out}, \qquad \tau = RC
 ```
 
-Pressure advance pushes $q_{in} = q + \tau\\,\dot{q}$, so $q_{out}$ follows $q$. Kalico's PA value
-$K$ is in seconds, and it's this $\tau$. **PA isn't a magic number, it's the time constant of the
+Pressure advance pushes $`q_{in} = q + \tau\,\dot{q}`$, so $`q_{out}`$ follows $`q`$. Kalico's PA value
+$`K`$ is in seconds, and it's this $`\tau`$. **PA isn't a magic number, it's the time constant of the
 nozzle.**
 
 The resistance is mostly the nozzle bore and the melt zone:
@@ -52,7 +52,7 @@ The resistance is mostly the nozzle bore and the melt zone:
 R \approx \frac{128\,\eta\,L}{\pi d^4}
 ```
 
-and the melt viscosity $\eta$ drops with temperature and with shear rate (polymer melts thin out
+and the melt viscosity $`\eta`$ drops with temperature and with shear rate (polymer melts thin out
 the faster they flow):
 
 ```math
@@ -61,9 +61,9 @@ the faster they flow):
 
 What falls out of that:
 
-- **PA changes with flow and temperature.** $R$ isn't constant, so one PA value is always a compromise. That's what Orca's adaptive PA option is about (PA as a function of flow and accel)
-- **A pressure sensor can identify the material.** Pressure vs flow at two or three temperatures fits $\eta_0$, $E_a$ and $n$. Then PA and max flow can be *predicted* for that material, from a few minutes of extruding into the air
-- **A pressure sensor can check the nozzle.** For a Newtonian fluid $R \propto 1/d^4$, but a shear-thinning melt goes more like $d^{-(1+3n)}$, so 0.4 vs 0.6 is about 2.4× for $n = 0.4$ instead of 5× ([handbook](../handbook/04-extrusion-dynamics.md#the-nozzles-resistance-for-a-real-melt)). The melt zone adds resistance that doesn't depend on the bore, so the real ratio is smaller still. Easy to tell apart anyway
+- **PA changes with flow and temperature.** $`R`$ isn't constant, so one PA value is always a compromise. That's what Orca's adaptive PA option is about (PA as a function of flow and accel)
+- **A pressure sensor can identify the material.** Pressure vs flow at two or three temperatures fits $`\eta_0`$, $`E_a`$ and $`n`$. Then PA and max flow can be *predicted* for that material, from a few minutes of extruding into the air
+- **A pressure sensor can check the nozzle.** For a Newtonian fluid $`R \propto 1/d^4`$, but a shear-thinning melt goes more like $`d^{-(1+3n)}`$, so 0.4 vs 0.6 is about 2.4× for $`n = 0.4`$ instead of 5× ([handbook](../handbook/04-extrusion-dynamics.md#the-nozzles-resistance-for-a-real-melt)). The melt zone adds resistance that doesn't depend on the bore, so the real ratio is smaller still. Easy to tell apart anyway
 
 ## Ooze and retraction
 
@@ -75,7 +75,7 @@ When the extruder stops, pressure bleeds off through the nozzle:
 P(t) = P_0\,e^{-t/\tau}, \qquad V_{ooze} = \int_0^{\infty} \frac{P}{R}\,dt = C\,P_0
 ```
 
-With PA right, the extruder already pulled back as the flow ramped down, so $P_0 \approx 0$ and
+With PA right, the extruder already pulled back as the flow ramped down, so $`P_0 \approx 0`$ and
 there's almost nothing to ooze. What's left: melt expanding as it reheats, gravity, steam from
 wet filament.
 
@@ -108,7 +108,7 @@ Flipped around, at steady flow the heater power tells me the actual flow:
 Q \approx \frac{P_{heater} - P_{loss}(T,\ \text{fan})}{\rho\,c\,(T_{nozzle} - T_{fil})}
 ```
 
-MPC already models $P_{loss}$, so that's a free, crude flow sensor.
+MPC already models $`P_{loss}`$, so that's a free, crude flow sensor.
 
 ## Bead
 
@@ -120,16 +120,16 @@ Orca models a line as a rectangle with round ends:
 A = (w - h)\,h + \frac{\pi h^2}{4}
 ```
 
-Line width $w$ comes from the nozzle, layer height $h$ is a choice, and the commanded extrusion
-follows from $A$. Not tuned.
+Line width $`w`$ comes from the nozzle, layer height $`h`$ is a choice, and the commanded extrusion
+follows from $`A`$. Not tuned.
 
-**Flow residual from mass:** once $d_f$ and density are known, weigh a print:
+**Flow residual from mass:** once $`d_f`$ and density are known, weigh a print:
 
 ```math
 f = \frac{m_{measured}}{\rho\,V_{commanded}}
 ```
 
-$V_{commanded}$ comes from the G-code. A scale replaces the flow cube. Density and the real
+$`V_{commanded}`$ comes from the G-code. A scale replaces the flow cube. Density and the real
 filament area come off the scale too ([filament](filament.md#weigh-a-meter-true-cross-section)).
 
 ## Dimensions
@@ -144,10 +144,10 @@ x_{meas} = s\,x_{nom} + 2b \quad \text{(outside)}, \qquad x_{meas} = s\,x_{nom} 
 
 Least squares over all the features gives both at once:
 
-- $s$ from the **slope**: shrinkage (or axis scale)
-- $b$ from the **offset**, which flips sign between outsides and holes: the bead is wider or narrower than the model thinks
+- $`s`$ from the **slope**: shrinkage (or axis scale)
+- $`b`$ from the **offset**, which flips sign between outsides and holes: the bead is wider or narrower than the model thinks
 
-One print, two parameters, no guessing which knob caused what. Separate $s_{xy}$ and $s_z$. Skew
+One print, two parameters, no guessing which knob caused what. Separate $`s_{xy}`$ and $`s_z`$. Skew
 stays with Calilantern.
 
 Shrinkage is roughly the material's expansion times how far it cools after it sets:
@@ -156,7 +156,7 @@ Shrinkage is roughly the material's expansion times how far it cools after it se
 \frac{\Delta L}{L} \approx \alpha\,(T_{set} - T_{room})
 ```
 
-and the chamber changes when it sets, so $s$ is keyed by material **and** chamber mode.
+and the chamber changes when it sets, so $`s`$ is keyed by material **and** chamber mode.
 
 ## Cooling
 

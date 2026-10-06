@@ -15,14 +15,14 @@ all fine until the motor spins fast, and then the driver can't push the current 
 
 ## Why torque falls off with speed
 
-Each coil is a resistance $R$, an inductance $L$, and a back-EMF that grows with speed. For the
-driver to keep the full current $I$ flowing, the supply voltage has to cover all three, roughly:
+Each coil is a resistance $`R`$, an inductance $`L`$, and a back-EMF that grows with speed. For the
+driver to keep the full current $`I`$ flowing, the supply voltage has to cover all three, roughly:
 
 ```math
 V \gtrsim \sqrt{\left(I R + k_e\,\omega\right)^2 + \left(\omega_e\,L\,I\right)^2}
 ```
 
-$\omega$ is the shaft speed, $k_e$ the back-EMF constant, and $\omega_e$ the electrical frequency.
+$`\omega`$ is the shaft speed, $`k_e`$ the back-EMF constant, and $`\omega_e`$ the electrical frequency.
 The motor goes through one electrical cycle every four full steps, so
 
 ```math
@@ -39,7 +39,7 @@ What falls out:
 - **Lower inductance motors** push the limit up too, at the cost of needing more current for the same torque
 
 On a CoreXY with 20-tooth pulleys, each motor turn is 40 mm of belt. 500 mm/s is 12.5 turns per
-second, which is 1,250 Hz electrical on a 0.9° motor. Plug your motor's datasheet $R$, $L$ and torque
+second, which is 1,250 Hz electrical on a 0.9° motor. Plug your motor's datasheet $`R`$, $`L`$ and torque
 constant into that formula and you'll see whether 24 V is still keeping up at that speed.
 
 ## Belts are springs
@@ -60,11 +60,11 @@ f_0 = \frac{1}{2\pi}\sqrt{\frac{k}{m}}
 Two consequences:
 
 - **The span length changes as the toolhead moves,** so the resonance changes with position. That's why resonance testing happens at one spot, usually the middle, and why it's never quite right everywhere
-- **Stiffer or lighter means higher frequency.** Wider belts raise $k$, a lighter toolhead lowers $m$
+- **Stiffer or lighter means higher frequency.** Wider belts raise $`k`$, a lighter toolhead lowers $`m`$
 
 ## Resonance and ringing
 
-When acceleration changes suddenly, the toolhead overshoots and rings at $f_0$. The size of the
+When acceleration changes suddenly, the toolhead overshoots and rings at $`f_0`$. The size of the
 ringing is roughly how far the "spring" stretches under the inertial load:
 
 ```math
@@ -78,14 +78,14 @@ At 5,000 mm/s²:
 | 40 Hz | about 0.08 mm |
 | 75 Hz | about 0.02 mm |
 
-0.08 mm is very visible on a surface. And it goes as $1/f^2$, which is why stiffness matters so much.
+0.08 mm is very visible on a surface. And it goes as $`1/f^2`$, which is why stiffness matters so much.
 
 ## Input shaping from scratch
 
 The trick: instead of sending one sharp command, split it into a few smaller ones, timed so their
 vibrations cancel each other out.
 
-A hit at time $t_i$ with size $A_i$ makes the toolhead ring like
+A hit at time $`t_i`$ with size $`A_i`$ makes the toolhead ring like
 
 ```math
 x_i(t) \propto A_i\,e^{-\zeta\omega_0 (t - t_i)}\,\sin\big(\omega_d (t - t_i)\big), \qquad \omega_d = \omega_0\sqrt{1 - \zeta^2}
@@ -100,20 +100,20 @@ t_2 = \frac{\pi}{\omega_d}, \qquad K = e^{-\zeta\pi/\sqrt{1 - \zeta^2}}, \qquad 
 ```
 
 Every move gets convolved with those two hits. The machine now takes half a period longer to
-finish each acceleration change, and in exchange the ringing at $f_0$ is gone.
+finish each acceleration change, and in exchange the ringing at $`f_0`$ is gone.
 
 ![Two impulse responses half a period apart cancelling each other out](figures/input-shaping.svg)
 
 *The first hit rings, the second rings exactly out of phase, and after the second hit the sum is flat.*
 
 **How well it works off-frequency.** Singer and Seering's residual vibration for a shaper with hits
-$A_i$ at times $t_i$ (last one at $t_N$):
+$`A_i`$ at times $`t_i`$ (last one at $`t_N`$):
 
 ```math
 V(\omega, \zeta) = e^{-\zeta\omega t_N}\sqrt{\left(\sum_i A_i e^{\zeta\omega t_i}\cos\omega_d t_i\right)^2 + \left(\sum_i A_i e^{\zeta\omega t_i}\sin\omega_d t_i\right)^2}
 ```
 
-ZV hits zero right at $f_0$ but climbs fast if the real frequency is a bit off. MZV, EI, 2HUMP_EI and
+ZV hits zero right at $`f_0`$ but climbs fast if the real frequency is a bit off. MZV, EI, 2HUMP_EI and
 3HUMP_EI add more hits to widen the notch, so they tolerate frequency error and multiple peaks
 better. The cost is a longer shaper.
 
@@ -121,7 +121,7 @@ better. The cost is a longer shaper.
 
 Roughly, from how each shaper is built (the [Klipper docs](https://www.klipper3d.org/Resonance_Compensation.html) cover choosing one):
 
-| Shaper | Duration (periods of $f$) | Good at |
+| Shaper | Duration (periods of $`f`$) | Good at |
 |---|---|---|
 | ZV | 0.5 | One clean peak, exactly known |
 | MZV | 0.75 | One peak, a bit of tolerance |
@@ -142,7 +142,7 @@ smoothing, which is why both land near the same recommended acceleration. Gettin
 
 ## CoreXY quirks
 
-On a CoreXY, both motors drive every move. With Klipper's convention $a = x + y$ and $b = x - y$:
+On a CoreXY, both motors drive every move. With Klipper's convention $`a = x + y`$ and $`b = x - y`$:
 
 - A pure X move turns both motors the same way
 - A pure Y move turns them opposite ways
@@ -169,7 +169,7 @@ dumb but effective: don't print walls at those speeds.
 
 ## When speed is really limited by acceleration
 
-A move of length $L$ that never reaches cruise speed takes
+A move of length $`L`$ that never reaches cruise speed takes
 
 ```math
 t = 2\sqrt{\frac{L}{a}}, \qquad v_{peak} = \sqrt{a\,L}

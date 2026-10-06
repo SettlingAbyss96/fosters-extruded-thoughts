@@ -41,15 +41,15 @@ or a real test showed, I say so. When I'm guessing, I'll tell you I'm guessing.
 
 | Symbol | Meaning | Usual units |
 |---|---|---|
-| $Q$ | Volumetric flow | mm³/s |
-| $T$, $T_g$, $T_m$ | Temperature, glass transition, melting point | °C (K inside equations) |
-| $\eta$ | Melt viscosity | Pa·s |
-| $\dot\gamma$ | Shear rate | 1/s |
-| $\tau$ | A time constant (which one is always said) | s |
-| $\alpha$ | Thermal diffusivity, or thermal expansion (said which) | mm²/s or 1/K |
-| $\rho$, $c$ | Density, specific heat | g/cm³, J/(g·K) |
-| $w$, $h$ | Line width, layer height | mm |
-| $a_T$ | Temperature shift factor (chapter 2) | none |
+| $`Q`$ | Volumetric flow | mm³/s |
+| $`T`$, $`T_g`$, $`T_m`$ | Temperature, glass transition, melting point | °C (K inside equations) |
+| $`\eta`$ | Melt viscosity | Pa·s |
+| $`\dot\gamma`$ | Shear rate | 1/s |
+| $`\tau`$ | A time constant (which one is always said) | s |
+| $`\alpha`$ | Thermal diffusivity, or thermal expansion (said which) | mm²/s or 1/K |
+| $`\rho`$, $`c`$ | Density, specific heat | g/cm³, J/(g·K) |
+| $`w`$, $`h`$ | Line width, layer height | mm |
+| $`a_T`$ | Temperature shift factor (chapter 2) | none |
 
 ## Figures
 

@@ -50,7 +50,7 @@ things a real sensor could measure.
 
 ## Using what I already have, smarter
 
-- **Heater power as a flow sensor.** At steady flow, the extra heater power is about $\rho c Q \Delta T$ ([models](models.md#melt-capacity)). MPC already knows the power, so actual flow can be backed out. If it's less than commanded, something's slipping or clogged. When the heater pegs at 100%, that's max flow
+- **Heater power as a flow sensor.** At steady flow, the extra heater power is about $`\rho c Q \Delta T`$ ([models](models.md#melt-capacity)). MPC already knows the power, so actual flow can be backed out. If it's less than commanded, something's slipping or clogged. When the heater pegs at 100%, that's max flow
 - **Buffer drift as a slip detector.** The buffer is calibrated against the commanded extrusion. If the extruder slips, it uses less filament than commanded and the buffer slowly fills. Crude, but free
 - **Probe as a Z-only CMM.** Touch the top of a printed test part in a few spots: warp and Z shrink without calipers. With the load cell later, maybe XY edges too
 - **Accelerometer during a print.** Vibration at the speeds actually being printed, not just in test patterns. Could also catch extruder clicks
