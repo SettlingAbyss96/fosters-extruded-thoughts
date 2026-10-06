@@ -6,7 +6,7 @@ Each thing that goes wrong on a print, split into what actually causes it. Order
 
 ## Seams
 
-*Longer version: [handbook chapter 4](../handbook/04-extrusion-dynamics.md#seams-are-pressure-transients).*
+*Longer version: [handbook chapter 4](../handbook/04-extrusion-dynamics.md#seams-are-pressure-transients), and the scarf joint in [chapter 5](../handbook/05-laying-a-line.md#where-a-line-starts-and-stops).*
 
 A seam is a **pressure transient.** The loop ends, the nozzle has to go to zero flow, travel, then
 come back to exactly the right flow at the start of the next loop. Any error in that pressure state

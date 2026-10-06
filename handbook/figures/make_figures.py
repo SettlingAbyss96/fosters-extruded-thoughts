@@ -7,6 +7,7 @@ No dependencies beyond the Python standard library, so anyone can rerun it:
 Every curve comes from the same toy models and numbers used in the chapters.
 """
 
+import bisect
 import math
 import os
 
@@ -112,6 +113,11 @@ class Plot:
         self.items.append(f'<path d="{d}" fill="none" stroke="{color}" stroke-width="{width}" stroke-linejoin="round"{da}/>')
         if label:
             self.legend_items.append((label, color, dash))
+
+    def area(self, pts, color, opacity=0.85, stroke=None):
+        d = " ".join(f"{'M' if i == 0 else 'L'}{self.X(x):.1f},{self.Y(y):.1f}" for i, (x, y) in enumerate(pts))
+        st = f' stroke="{stroke}" stroke-width="1.2"' if stroke else ""
+        self.items.append(f'<path d="{d} Z" fill="{color}" fill-opacity="{opacity}"{st}/>')
 
     def point(self, x, y, color, r=4.5):
         self.items.append(f'<circle cx="{self.X(x):.1f}" cy="{self.Y(y):.1f}" r="{r}" fill="{color}" stroke="white" stroke-width="1.5"/>')
@@ -542,10 +548,142 @@ def step_temp(t, q1, q2, L=20.0):
 
 def ooze_parts(t, q=10.0, L=20.0, tau=0.04, beta_v=4e-4):
     fo_l = math.pi * ALPHA * L / q
-    elastic = tau * q * (1 - math.exp(-t / tau))
+    elastic = pressure_ooze(t, q, tau)
     thermal = beta_v * (T_WALL - T_IN) * R_FIL ** 2 * q / ALPHA * sum(
         4 / l ** 4 * (1 - math.exp(-l * l * fo_l)) * (1 - math.exp(-l * l * ALPHA * t / R_FIL ** 2)) for l in ZEROS)
     return elastic / A_FIL, thermal / A_FIL
+
+
+# Chapters 4 and 5: a toy nozzle for stops and seams. A linear spring C (gears, filament, melt)
+# charged to whatever pressure the melt needs. The melt is either a plain resistance or chapter 2's
+# filament A in a 0.4 nozzle (wall shear rate about 160/s per mm³/s). C is set so the time constant
+# is tau_ref at q_ref.
+FIL_A = (3000.0, 0.01, 0.35)
+
+
+class ToyNozzle:
+    def __init__(self, shear_thin=True, q_ref=8.14, tau_ref=0.03):
+        eta0, lam, n = FIL_A
+        if shear_thin:
+            self.p = lambda q: q * eta0 / (1 + (lam * 160.0 * q) ** (1 - n))
+        else:
+            self.p = lambda q: q
+        self.c = tau_ref / self.slope(q_ref)
+        self.qs = logspace(1e-6, 100, 6000)
+        self.ps = [self.p(q) for q in self.qs]
+
+    def slope(self, q, d=1e-4):
+        q = max(q, 2 * d)
+        return (self.p(q + d) - self.p(q - d)) / (2 * d)
+
+    def tau(self, q):
+        return self.c * self.slope(q)
+
+    def stored(self, q):
+        return self.c * self.p(q)
+
+    def flow(self, v):
+        pr = v / self.c
+        if pr <= 0:
+            return 0.0
+        i = bisect.bisect_left(self.ps, pr)
+        if i == 0:
+            return self.qs[0] * pr / self.ps[0]
+        if i == len(self.ps):
+            return self.qs[-1]
+        f = (pr - self.ps[i - 1]) / (self.ps[i] - self.ps[i - 1])
+        return self.qs[i - 1] + f * (self.qs[i] - self.qs[i - 1])
+
+
+_DRAIN = {}
+
+
+def pressure_ooze(t, q, tau):
+    """Volume out of the stored pressure after the extruder stops (no PA, no retraction)."""
+    if (q, tau) not in _DRAIN:
+        noz = ToyNozzle(q_ref=q, tau_ref=tau)
+        v, now, out, pts = noz.stored(q), 0.0, 0.0, [(0.0, 0.0)]
+        while now < 12:
+            dt = 1e-5 if now < 0.01 else (1e-4 if now < 0.1 else 1e-3)
+            f = noz.flow(v)
+            v, out, now = v - f * dt, out + f * dt, now + dt
+            pts.append((now, out))
+        _DRAIN[(q, tau)] = pts
+    pts = _DRAIN[(q, tau)]
+    i = min(max(bisect.bisect_left(pts, (t,)), 1), len(pts) - 1)
+    (t0, a), (t1, b) = pts[i - 1], pts[i]
+    return a + (b - a) * min(max((t - t0) / (t1 - t0), 0.0), 1.0)
+
+
+def bead_area(w, h):
+    return (w - h) * h + math.pi * h * h / 4
+
+
+def seam_profile(noz, scarf=True, w=0.45, h=0.2, v=100.0, accel=5000.0, loop=94.2, length=20.0,
+                 gap=0.04, pa=None, restart=0.0, follow_flow=False, dt=1e-5, smooth=0.04):
+    """Cross-section error along one wall loop, folded so the seam point is x = 0.
+
+    The toolhead starts and stops at rest with constant acceleration. The extruder runs Klipper-style
+    PA (rate = q + K dq/dt, triangle-smoothed over `smooth`), or with follow_flow the exact inverse
+    of the toy nozzle. `restart` is the stored volume (mm³) the nozzle starts the loop with.
+    """
+    area = bead_area(w, h)
+    k_pa = noz.tau(area * v) if pa is None else pa
+    end = loop + length if scarf else loop - gap
+
+    def ratio(x):
+        if not scarf:
+            return 1.0
+        if x < length:
+            return x / length
+        return 1.0 if x < loop else max(0.0, 1 - (x - loop) / length)
+
+    t_acc, x_acc = v / accel, v * v / (2 * accel)
+    t_end = 2 * t_acc + (end - 2 * x_acc) / v
+    n = int(t_end / dt) + 1
+    xs, qc = [], []
+    for i in range(n):
+        t = i * dt
+        if t < t_acc:
+            x, sp = accel * t * t / 2, accel * t
+        elif t < t_end - t_acc:
+            x, sp = x_acc + v * (t - t_acc), v
+        else:
+            r = max(t_end - t, 0.0)
+            x, sp = end - accel * r * r / 2, accel * r
+        xs.append(x)
+        qc.append(area * sp * ratio(x))
+    base = [noz.stored(q) for q in qc] if follow_flow else [k_pa * q for q in qc]
+    raw = [qc[i] + (base[min(i + 1, n - 1)] - base[max(i - 1, 0)]) / (2 * dt) for i in range(n)]
+    half = max(1, int(smooth / 4 / dt))
+    for _ in range(2):
+        acc = [0.0]
+        for val in raw:
+            acc.append(acc[-1] + val)
+        raw = [(acc[min(n, i + half + 1)] - acc[max(0, i - half)]) / (2 * half + 1) for i in range(n)]
+    stored, dep, bin_mm = restart, {}, 0.02
+    for i in range(n):
+        out = noz.flow(stored)
+        stored += (raw[i] - out) * dt
+        x = xs[i]
+        if (scarf and x >= loop) or (not scarf and x > loop / 2):
+            x -= loop
+        b = math.floor(x / bin_mm)
+        dep[b] = dep.get(b, 0.0) + out * dt
+    keys = range(min(dep), max(dep) + 1)
+    rel = {k: dep.get(k, 0.0) / (area * bin_mm) - 1 for k in keys}
+    sig = w / 3 / bin_mm
+    reach = int(3 * sig) + 1
+    gauss = [math.exp(-0.5 * (d / sig) ** 2) for d in range(-reach, reach + 1)]
+    prof = []
+    for k in keys:
+        s = ws = 0.0
+        for d in range(-reach, reach + 1):
+            if k + d in rel:
+                s += gauss[d + reach] * rel[k + d]
+                ws += gauss[d + reach]
+        prof.append(((k + 0.5) * bin_mm, s / ws))
+    return prof
 
 
 def tip_drop(h, k, length=4e-3, radius=2e-3, t_block=250.0, t_air=40.0):
@@ -658,9 +796,9 @@ def melt_age_step():
 
 def ooze_time():
     p = Plot("Ooze runs on two clocks", "Time after the extruder stops (s, log scale)",
-             "Ooze (mm of filament)", (0.01, 10), (0, 0.6), xlog=True,
-             subtitle="ABS at 10 mm³/s into a 20 mm melt zone. Pressure is gone in 0.1 s, heat keeps pushing for seconds")
-    p.axes([0.01, 0.1, 1, 10], [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6], ["0.01", "0.1", "1", "10"])
+             "Ooze (mm of filament)", (0.01, 10), (0, 0.8), xlog=True,
+             subtitle="ABS at 10 mm³/s into a 20 mm melt zone. Pressure is mostly out in half a second, heat keeps pushing for seconds")
+    p.axes([0.01, 0.1, 1, 10], [0, 0.2, 0.4, 0.6, 0.8], ["0.01", "0.1", "1", "10"])
     ts = logspace(0.01, 10)
     parts = [(t, *ooze_parts(t)) for t in ts]
     p.line([(t, e) for t, e, _ in parts], BLUE, "Pressure (elastic)")
@@ -668,6 +806,73 @@ def ooze_time():
     p.line([(t, e + h) for t, e, h in parts], GREEN, "Total", width=3.2)
     p.legend("tl")
     save("ooze-time.svg", p.svg())
+
+
+# Chapter 5: the scarf joint, unrolled
+def scarf_joint():
+    p = Plot("A scarf seam, unrolled", "Along the loop (mm)", "Height (layers)", (-5, 25), (0, 2.6),
+             subtitle="Orca, start height 0, 20 mm scarf. Height stretched about 27×")
+    p.axes([-5, 0, 5, 10, 15, 20, 25], [0, 1, 2])
+    p.area([(-5, 0), (25, 0), (25, 1), (-5, 1)], GRID, opacity=1, stroke=GRAY)
+    p.area([(-5, 1), (0, 1), (20, 2), (25, 2), (25, 1)], "#bfdbfe", opacity=1, stroke=BLUE)
+    p.area([(-5, 1), (0, 1), (0, 2), (-5, 2)], "#bfdbfe", opacity=1, stroke=BLUE)
+    p.area([(0, 1), (20, 2), (0, 2)], "#fed7aa", opacity=1, stroke=ORANGE)
+    p.text(10, 0.5, "layer below", color=GRAY, anchor="middle", dy=4)
+    p.text(13.5, 1.1, "ramp: height and flow climb 0 → 1", color=BLUE, anchor="middle")
+    p.text(6.5, 1.78, "end pass: full height, flow fades 1 → 0", color=ORANGE, anchor="middle")
+    p.text(-2.5, 1.5, "loop end", color=BLUE, anchor="middle", dy=4)
+    p.text(22.5, 1.5, "rest of loop", color=BLUE, anchor="middle", dy=4)
+    p.vline(0, INK, "seam point", label_y=2.35)
+    p.vline(20, INK, "L = 20 mm", label_y=2.35, anchor="end")
+    save("scarf-joint.svg", p.svg())
+
+
+SEAM_LIN = None
+SEAM_CROSS = None
+
+
+def _seam_nozzles():
+    global SEAM_LIN, SEAM_CROSS
+    if SEAM_LIN is None:
+        SEAM_LIN, SEAM_CROSS = ToyNozzle(shear_thin=False), ToyNozzle()
+    return SEAM_LIN, SEAM_CROSS
+
+
+def scarf_lag():
+    lin, _ = _seam_nozzles()
+    p = Plot("The scarf cancels its own lag", "Along the loop, from the seam point (mm)",
+             "Plastic laid vs planned (%)", (-5, 25), (-70, 70),
+             subtitle="Linear toy nozzle, τ = 30 ms, PA set to half of that. 0.45 × 0.2 mm line at 100 mm/s")
+    p.band_x(0, 20, ORANGE, "scarf", opacity=0.08)
+    p.axes([-5, 0, 5, 10, 15, 20, 25], [-60, -30, 0, 30, 60])
+    p.hline(0, GRAY, dash="2 3")
+    butt = seam_profile(lin, scarf=False, pa=0.015)
+    scarf = seam_profile(lin, scarf=True, pa=0.015)
+    p.line([(x, 100 * e) for x, e in butt if -5 <= x <= 25], BLUE, "Butt seam")
+    p.line([(x, 100 * e) for x, e in scarf if -5 <= x <= 25], ORANGE, "Scarf seam")
+    p.legend("br")
+    save("scarf-lag.svg", p.svg())
+
+
+def scarf_restart():
+    _, noz = _seam_nozzles()
+    area = bead_area(0.45, 0.2)
+    q = area * 100
+    restart = noz.stored(q) - noz.tau(q) * q
+    p = Plot("A scarf wants a different restart", "Along the loop, from the seam point (mm)",
+             "Plastic laid vs planned (%)", (-5, 25), (-40, 120),
+             subtitle="Shear-thinning toy nozzle (chapter 2's filament A), PA tuned at the wall flow. 0.45 × 0.2 mm at 100 mm/s")
+    p.band_x(0, 20, ORANGE, "scarf", opacity=0.08)
+    p.axes([-5, 0, 5, 10, 15, 20, 25], [-40, 0, 40, 80, 120])
+    p.hline(0, GRAY, dash="2 3")
+    cases = [(seam_profile(noz, scarf=False, restart=restart), GRAY, "Butt seam, normal restart", "6 4"),
+             (seam_profile(noz, restart=restart), RED, "Scarf, same restart", None),
+             (seam_profile(noz, restart=restart / 2), ORANGE, "Scarf, half the restart", None),
+             (seam_profile(noz, follow_flow=True), GREEN, "Scarf, PA follows flow, no restart", None)]
+    for prof, col, lab, dash in cases:
+        p.line([(x, 100 * e) for x, e in prof if -5 <= x <= 25], col, lab, dash=dash)
+    p.legend("tr")
+    save("scarf-restart.svg", p.svg())
 
 
 if __name__ == "__main__":
@@ -690,3 +895,6 @@ if __name__ == "__main__":
     pressure_wall()
     melt_age_step()
     ooze_time()
+    scarf_joint()
+    scarf_lag()
+    scarf_restart()

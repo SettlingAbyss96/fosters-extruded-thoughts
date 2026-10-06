@@ -346,11 +346,26 @@ V_s = C\,P = \tau\,q \quad \text{(linear case)}
 ```
 
 With $`\tau = 0.04`$ s and $`q = 15`$ mm³/s that's 0.6 mm³, about **a quarter of a millimeter of
-filament.** That's all the "pressure" there is.
+filament.**
 
-Direct drive retractions are usually 0.4 to 1 mm. More than the stored pressure. So retraction is
-doing a second job, and most of it is thermal. When flow stops, the under-heated core in the melt
-zone keeps heating to wall temperature and expands. Adding up the temperature deficit over the zone
+A shear-thinning melt holds more than that. $`\tau`$ is only the slope of pressure against flow,
+while the spring is charged to the full pressure, so with the exponent $`m`$ from "The melt zone in
+the pressure":
+
+```math
+V_s = C\,P = \frac{\tau\,q}{m}
+```
+
+With $`m`$ around 0.5 that's twice as much, about half a millimeter of filament, and PA only takes
+back $`K q = \tau q`$ of it when the move stops. The other half drains slowly, because the nozzle gets
+sluggish at low flow. That assumes a linear spring. One that stiffens under load would hold even
+more. It's also why a scarf seam wants its own restart ([chapter 5](05-laying-a-line.md#the-restart-is-tuned-for-the-wrong-start)).
+
+## Retraction's second job
+
+Direct drive retractions are usually 0.4 to 1 mm. What PA leaves of the pressure is about a quarter
+of a millimeter of that, so retraction is doing a second job, and that one's thermal. When flow
+stops, the under-heated core in the melt zone keeps heating to wall temperature and expands. Adding up the temperature deficit over the zone
 with chapter 3's series:
 
 ```math
@@ -359,7 +374,7 @@ with chapter 3's series:
 
 The sum of $`4/\lambda_k^4`$ is exactly 1/8, which gives the clean limit. For ABS ($`\beta_v`$ about
 4 × 10⁻⁴ /K, averaged over glass and melt) at 10 mm³/s that's 0.75 to 0.95 mm³ for melt zones from
-10 to 30 mm, or 0.3 to 0.4 mm of filament, more than the 0.4 mm³ of pressure. It scales with the flow
+10 to 30 mm, or 0.3 to 0.4 mm of filament, about as much as the pressure at that flow. It scales with the flow
 just before the stop and grows a bit with zone length. And it arrives slowly, mode by mode, each with
 its own time $`\tau_k = R^2/(\lambda_k^2\alpha)`$ (1.65, 0.31, 0.13 s...):
 
@@ -369,15 +384,15 @@ its own time $`\tau_k = R^2/(\lambda_k^2\alpha)`$ (1.65, 0.31, 0.13 s...):
 
 ![Ooze after a stop against time, split into the pressure part and the thermal part](figures/ooze-time.svg)
 
-*The pressure part is over before a short travel ends. The heat part is still going at the end of a long one.*
+*The pressure part is mostly out before a short travel ends. The heat part is still going at the end of a long one.*
 
-At 10 mm³/s on a 20 mm zone, the pressure part is gone in about 0.1 s, while the thermal part is 13%
-done at 0.2 s, half at 1 s and 95% at 5 s. Short travels are a pressure problem, long travels after
+At 10 mm³/s on a 20 mm zone, the pressure part is half out by 0.1 s and 87% by 0.5 s, while the
+thermal part is 13% done at 0.2 s, half at 1 s and 95% at 5 s. Short travels are a pressure problem, long travels after
 fast sections are a thermal one (theory, but the size lines up with real retraction lengths). It also
 explains seam blobs: with a retraction in place, that expansion fills the gap instead of oozing, so a
 full unretract after a long travel over-primes. The restart should shrink by
 $`\Delta V_{th}(t_{travel})/A_f`$. Slicers use a constant "extra length on restart". Gravity, steam
-from wet filament and the meniscus at the tip add the rest. And with PA on, most of the pressure is already gone by the time the move
+from wet filament and the meniscus at the tip add the rest. And with PA on, about half the pressure is already gone by the time the move
 ends. **If you tuned retraction without PA, your retraction is doing PA's job.**
 That's why the order is PA first, retraction second.
 
@@ -392,16 +407,16 @@ What happens at the end of a loop:
 5. Accelerate. PA pushes extra, pressure builds back
 6. Start the next loop, and hope the pressure is exactly right
 
-Any error in that sequence shows up right at the seam as a zit, a blob, or a gap. Orca's
-scarf joint seam attacks it with geometry: ramp
-the layer height along the seam so the start and end overlap gradually and the error gets spread
-out. [Wu, Qian & Okwudire (2023)](https://doi.org/10.1016/j.addma.2023.103850) attacked it with
+Any error in that sequence shows up right at the seam as a zit, a blob, or a gap. The scarf joint
+seam attacks it with geometry, and it turns out to cancel most of the PA error instead of just
+spreading it ([chapter 5](05-laying-a-line.md#the-scarf-joint)). [Wu, Qian & Okwudire (2023)](https://doi.org/10.1016/j.addma.2023.103850) attacked it with
 control: they measured extrusion force with a servo extruder, modeled retraction and re-advance,
 and built a feedforward for starts and stops.
 
 **Theory, untested:** pressure-aware retraction. The PA model already knows the pressure state at
 the moment the extrusion stops. Retract exactly what's left plus a learned ooze term, and unretract
-exactly what's needed to land at the next loop's steady-state pressure. With a pressure sensor you
+exactly what's needed to land at the next loop's starting pressure, which is zero when the loop
+starts with a scarf. With a pressure sensor you
 can check it on every single loop.
 
 ## Slip

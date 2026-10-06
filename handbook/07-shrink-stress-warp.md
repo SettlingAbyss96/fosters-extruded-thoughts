@@ -144,6 +144,19 @@ What actually moves the dimensions:
 - **Corners and seams:** PA errors bulge corners, seams add a zit. Both show up as dimension errors if you measure at the wrong spot
 - **The machine drifts too.** The frame and gantry grow as they warm up over a long print (chapter 9)
 
+## Seams eat tolerance
+
+A pin in a hole touches the highest point. Put one bump of height $`b`$ on the wall of a hole and the
+biggest pin that fits is $`D - b`$, however round the rest of it is. ABS shrinking 0.7% takes
+0.035 mm off a 5 mm hole. The seam dips in the tube scans in chapter 5 were 0.17 to 0.25 mm deep,
+and a zit a third that size beats the shrink on a hole that small. So some of the CAD hole offsets in
+the rant below are quietly compensating seams, not shrink.
+
+A scarf spreads that error along 20 mm of the loop instead of piling it next to the seam point
+([chapter 5](05-laying-a-line.md#the-scarf-joint)). Two catches. Orca's "Contour" mode skips holes,
+it's "Contour and hole" that includes them, and holes are where fits live. And a hole under about
+6 mm has a loop shorter than the default 20 mm scarf, so Orca turns the whole loop into the ramp.
+
 ## A rant about the shrinkage box
 
 This one genuinely blows my mind. ABS shrinks about 0.7% after it sets, PLA about 0.25% (the table

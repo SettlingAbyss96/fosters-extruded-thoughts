@@ -22,7 +22,7 @@ it in Orca, Klipper or Kalico, and that's what I say where I'm unsure.
 | 7 | Extrusion force tracks line width. Force feedback holds the width | ETH Zurich 2024 to 2025 | Research | A firmware loop on the pressure signal | Software + planned sensor | High |
 | 8 | Pressure vs flow vs temperature maps pick settings for unknown materials | Read 2024 | Research | A cool-down sweep routine and parameter selection | Software + planned sensor | High |
 | 9 | Slip can be measured and compensated | Greeff 2017, Moretti 2023 | Klipper corrects diameter only, motion sensors only detect jams | Encoder-based flow correction | Software + encoder | Medium |
-| 10 | Starts and stops can be modeled and fed forward | Wu, Qian, Okwudire 2023 | Constant retraction, scarf seams (geometry) | Pressure-aware retraction from the PA state | Software | Medium |
+| 10 | Starts and stops can be modeled and fed forward | Wu, Qian, Okwudire 2023 | Constant retraction, scarf seams (geometry) | Pressure-aware retraction from the PA state, restarting to the next move's flow (zero for a scarf) | Software | Medium |
 | 11 | Thermal effects dominate machine error, multi-sensor models fix it | Mayr 2012 (machine tools) | One-sensor `z_thermal_adjust` | A multi-sensor regression plugin | Software | Medium |
 | 12 | Per-motor waveform correction kills fine vertical artifacts | Prusa (phase stepping) | Prusa firmware only | A Klipper/Kalico version | Software + suitable drivers | Medium |
 | 13 | Model inversion handles several modes and position-dependent dynamics | Okwudire (filtered B-splines) | Commercial (Ulendo) | An open version, position-dependent shaping | Software | Medium |
@@ -105,7 +105,7 @@ These are my own ideas. I can't be sure nobody has done them, only that I haven'
 - **A healing number as a slicer constraint.** Plan layer time, fan and chamber to hit a target weld time for each layer (chapter 6)
 - **PA from two physical parameters** instead of a test grid (chapter 4)
 - **Melt age as a firmware variable.** The age of the plastic at the nozzle falls out of the extruder history, and it sets the melt temperature, PA and how much the melt will expand at the next stop (chapter 4)
-- **Restart length that depends on what came before,** shrinking with the flow before the stop and the travel time, to kill seam blobs (chapter 4)
+- **Restart length that depends on what came before,** shrinking with the flow before the stop and the travel time, to kill seam blobs (chapter 4). And on what comes next: a scarf starts at zero flow and wants about half the restart of an ordinary start (chapter 5)
 - **Calibration transfer for vendor filament libraries,** using anchors measured on both machines ([library.md](../calibration/library.md))
 - **Anchors as a community round robin,** so filament data from different printers can be compared (chapter 13)
 

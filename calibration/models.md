@@ -75,9 +75,9 @@ When the extruder stops, pressure bleeds off through the nozzle:
 P(t) = P_0\,e^{-t/\tau}, \qquad V_{ooze} = \int_0^{\infty} \frac{P}{R}\,dt = C\,P_0
 ```
 
-With PA right, the extruder already pulled back as the flow ramped down, so $`P_0 \approx 0`$ and
-there's almost nothing to ooze. What's left: melt expanding as it reheats, gravity, steam from
-wet filament.
+With PA right, the extruder pulls back $`\tau q`$ as the flow ramps down. For a linear nozzle that's
+all of it. A shear-thinning melt holds about twice that, so roughly half is still there to ooze or
+retract. On top of that: melt expanding as it reheats, gravity, steam from wet filament.
 
 - **Retraction gets calibrated after PA,** and it should come out small
 - **Needing big retraction means PA is off or the filament is wet.** Retraction is covering for something else

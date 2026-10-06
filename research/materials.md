@@ -133,6 +133,17 @@ For this printer:
 - The contour offset from the [dimensional test](../calibration/models.md#dimensions) is this effect
 - The first layer is this effect with a probe-set gap
 
+**Seams** are where a bead's start meets its own end.
+[Grübel et al. 2026](https://doi.org/10.1016/j.matdes.2026.115980) measured the void with micro-CT:
+about 0.027 mm³ per seam, up to 36% of the local cross-section when seams align, and up to 32% weaker
+beams. The scarf joint seam tapers both ends and overlaps them.
+[Avcioglu & Eltis 2026](https://doi.org/10.1007/s40430-026-06636-8) scanned ABS tubes and found it
+halves the seam dip, and [Ermolai, Sover & Irimia 2025](https://doi.org/10.1007/978-3-031-93554-1_4)
+ran a Taguchi study of its settings. The most useful tuning data is still the community's:
+[Adam L's guide](https://makerworld.com/en/models/211686-better-seams-orca-slicer-guide-to-scarf-seams).
+Worth stealing: the scarf cancels linear PA error on its own, and what's left is the low-flow
+nonlinearity and the restart ([handbook chapter 5](../handbook/05-laying-a-line.md#the-scarf-joint)).
+
 ## 5. Layers welding together
 
 *Long version, including where the research disagrees: [handbook chapter 6](../handbook/06-layer-bonding.md).*
@@ -262,7 +273,10 @@ prints go bad. I dry first, before touching settings.
 - Costanzo, Croce, Spotorno, Fenni, Cavallo (2020). *Fused deposition modeling of polyamides: crystallization and weld formation.* Polymers 12(12). [doi](https://doi.org/10.3390/polym12122980)
 - Das, Gilmer, Biria, Bortner (2021). *Importance of polymer rheology on material extrusion additive manufacturing.* ACS Applied Polymer Materials 3(3). [doi](https://doi.org/10.1021/acsapm.0c01228)
 - Duty et al. (2018). *What makes a material printable? A viscoelastic model for extrusion-based 3D printing of polymers.* J. Manufacturing Processes 35. [doi](https://doi.org/10.1016/j.jmapro.2018.08.008)
+- Avcioglu, Eltis (2026). *Effects of Z-seam mitigation on energy absorption and dimensional accuracy of printed circular tubes.* J. Brazilian Society of Mechanical Sciences and Engineering 48. [doi](https://doi.org/10.1007/s40430-026-06636-8)
+- Ermolai, Sover, Irimia (2025). *Improving surface finish of FFF printed parts: the role of scarf seam parameters.* Innovations in Mechanical Engineering IV, Springer. [doi](https://doi.org/10.1007/978-3-031-93554-1_4)
 - Go, Schiffres, Stevens, Hart (2017). *Rate limits of additive manufacturing by fused filament fabrication and guidelines for high-throughput system design.* Additive Manufacturing 16. [link](https://www.sciencedirect.com/science/article/abs/pii/S2214860416302834)
+- Grübel, Wihanto, Wiese, Ghavidelnia, Eberl, Mylo (2026). *Seams matter: introducing seam-induced defects and their structural and mechanical influence in 3D printed thin-walled structures and metamaterials.* Materials & Design 266. [doi](https://doi.org/10.1016/j.matdes.2026.115980)
 - Kattinger, Kornely, Ehrler, Bonten (2023). *Analysis of melting and flow in the hot-end of a material extrusion 3D printer using X-ray computed tomography.* Additive Manufacturing 76. [doi](https://doi.org/10.1016/j.addma.2023.103762)
 - Kazmer, Colon, Peterson, Kim (2021). *Concurrent characterization of compressibility and viscosity in extrusion-based additive manufacturing of acrylonitrile butadiene styrene with fault diagnoses.* Additive Manufacturing 46. [doi](https://doi.org/10.1016/j.addma.2021.102106)
 - Go, Hart (2017). *Fast desktop-scale extrusion additive manufacturing.* [arXiv](https://arxiv.org/abs/1709.05918)

@@ -20,7 +20,7 @@ or a real test showed, I say so. When I'm guessing, I'll tell you I'm guessing.
 | 2 | [Polymers 101](02-polymers-101.md) | 1 to 3 | Chains, glass transition, viscoelasticity, shear thinning, the WLF shift, reptation |
 | 3 | [Melting](03-melting.md) | 2 to 3 | Hotends, heat creep, how fast heat gets in, the Graetz number, energy bookkeeping |
 | 4 | [Extrusion dynamics](04-extrusion-dynamics.md) | 3 to 4 | Why plastic comes out late, pressure advance derived, shear thinning, seams, slip |
-| 5 | [Laying down a line](05-laying-a-line.md) | 2 to 3 | Bead shape, squish, contact area between layers, extra-wide lines |
+| 5 | [Laying down a line](05-laying-a-line.md) | 2 to 3 | Bead shape, squish, contact area between layers, extra-wide lines, seams and the scarf joint |
 | 6 | [The Z axis: how layers bond](06-layer-bonding.md) | 3 to 4 | Contact temperature, weld time, reptation, the geometry vs thermal debate, how to make Z stronger |
 | 7 | [Shrink, stress and warp](07-shrink-stress-warp.md) | 3 | Thermal strain, why hot chambers work, crystallization, annealing, tolerances |
 | 8 | [Motion](08-motion.md) | 3 to 4 | Steppers, torque vs speed, resonance, input shaping from scratch, CoreXY quirks |
