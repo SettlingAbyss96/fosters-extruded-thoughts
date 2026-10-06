@@ -28,10 +28,11 @@ the nozzle yet, and the delay depends on flow:
 t_d = \frac{L_{path}}{v_f}, \qquad v_f = \frac{Q}{A_f}
 ```
 
-100 mm of path at 10 mm³/s is about 24 seconds. So the correction should be indexed by **filament
-length, not time**: tag each diameter reading with how much filament had gone past, apply it when
-that piece reaches the melt zone. Same reasoning as the buffer plugin working in extrusion
-distance instead of time.
+100 mm of path at 10 mm³/s is about 24 seconds. So the correction has to be indexed by **filament
+length, not time.** Turns out Klipper already does exactly that: `hall_filament_width_sensor`
+applies its correction after the filament has moved `measurement_delay` millimeters, the distance
+from the sensor to the melt zone. What it doesn't do is correct for slip, which an encoder on the
+same filament path could add.
 
 ## Semiconductor fabs: run-to-run control and SPC
 

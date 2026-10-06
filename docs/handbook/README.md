@@ -1,0 +1,61 @@
+# How an FFF printer actually works
+
+This is me writing down how I think about these machines, from the spool to the finished part.
+It's meant for anyone in the community who wants to understand the *why* behind the settings, not
+just which number to type into the slicer.
+
+It starts easy and gets harder as it goes. The first chapters are plain English. By the end we're
+deriving pressure advance from a spring and a resistor, putting numbers on how fast polymer chains
+cross a layer boundary, and writing estimators. You can stop wherever it stops being useful.
+
+Fair warning: a lot of this I've worked out on paper and in my head, but I haven't built the
+scaffolding to test all of it yet. Where something is my own theory instead of something a paper
+or a real test showed, I say so. When I'm guessing, I'll tell you I'm guessing.
+
+## Chapters
+
+| # | Chapter | Level | What's in it |
+|---|---|---|---|
+| 1 | [The big picture](01-the-big-picture.md) | 1 | What a printer actually does, link by link, and why prints fail |
+| 2 | [Polymers 101](02-polymers-101.md) | 1 to 3 | Chains, glass transition, viscoelasticity, shear thinning, the WLF shift, reptation |
+| 3 | [Melting](03-melting.md) | 2 to 3 | Hotends, heat creep, how fast heat gets in, the Graetz number, energy bookkeeping |
+| 4 | [Extrusion dynamics](04-extrusion-dynamics.md) | 3 to 4 | Why plastic comes out late, pressure advance derived, shear thinning, seams, slip |
+| 5 | [Laying down a line](05-laying-a-line.md) | 2 to 3 | Bead shape, squish, contact area between layers, extra-wide lines |
+| 6 | [The Z axis: how layers bond](06-layer-bonding.md) | 3 to 4 | Contact temperature, weld time, reptation, the geometry vs thermal debate, how to make Z stronger |
+| 7 | [Shrink, stress and warp](07-shrink-stress-warp.md) | 3 | Thermal strain, why hot chambers work, crystallization, annealing, tolerances |
+| 8 | [Motion](08-motion.md) | 3 to 4 | Steppers, torque vs speed, resonance, input shaping from scratch, CoreXY quirks |
+| 9 | [Heat control](09-heat-control.md) | 3 to 4 | PID vs MPC, the bed, the chamber as a building, frame drift |
+| 10 | [Sensing and estimation](10-sensing-estimation.md) | 4 | Observability, least squares, Kalman filters, test design, run-to-run learning |
+| 11 | [Materials in practice](11-materials.md) | 2 to 3 | PLA, PETG, ABS/ASA, PC, nylon, PPA-CF, TPU: what matters and what most people skip |
+| 12 | [The gaps](12-gaps.md) | 2 to 3 | What research proved that nobody has built into slicers or firmware yet |
+| 13 | [Where this goes](13-where-this-goes.md) | 2 | Theorizing: the printer as a lab instrument, and new domains |
+
+| Level | Means |
+|---|---|
+| 1 | No math, just what's going on |
+| 2 | Some numbers, back-of-envelope |
+| 3 | Real models and equations |
+| 4 | In the weeds: rheology, control theory, estimation |
+
+## Symbols I use a lot
+
+| Symbol | Meaning | Usual units |
+|---|---|---|
+| $Q$ | Volumetric flow | mm³/s |
+| $T$, $T_g$, $T_m$ | Temperature, glass transition, melting point | °C (K inside equations) |
+| $\eta$ | Melt viscosity | Pa·s |
+| $\dot\gamma$ | Shear rate | 1/s |
+| $\tau$ | A time constant (which one is always said) | s |
+| $\alpha$ | Thermal diffusivity, or thermal expansion (said which) | mm²/s or 1/K |
+| $\rho$, $c$ | Density, specific heat | g/cm³, J/(g·K) |
+| $w$, $h$ | Line width, layer height | mm |
+| $a_T$ | Temperature shift factor (chapter 2) | none |
+
+## How this connects to the rest of the repo
+
+- [`calibration/`](../calibration/README.md) turns these ideas into a plan for this printer
+- [`research/`](../research/README.md) is the reading list behind it
+- The [roadmap](../roadmap.md) is the hardware it all lands on
+
+Work in progress. It'll change as I test things and find out which parts of my head-model were
+wrong.

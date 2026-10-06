@@ -59,7 +59,7 @@ What falls out of that:
 
 - **PA changes with flow and temperature.** $R$ isn't constant, so one PA value is always a compromise. That's what Orca's adaptive PA option is about (PA as a function of flow and accel)
 - **A pressure sensor can identify the material.** Pressure vs flow at two or three temperatures fits $\eta_0$, $E_a$ and $n$. Then PA and max flow can be *predicted* for that material, from a few minutes of extruding into the air
-- **A pressure sensor can check the nozzle.** $R \propto 1/d^4$, so 0.4 vs 0.6 is $(0.6/0.4)^4 \approx 5$. The melt zone adds resistance too, so the real ratio is smaller, but still obvious
+- **A pressure sensor can check the nozzle.** For a Newtonian fluid $R \propto 1/d^4$, but a shear-thinning melt goes more like $d^{-(1+3n)}$, so 0.4 vs 0.6 is about 2.4× for $n = 0.4$ instead of 5× ([handbook](../handbook/04-extrusion-dynamics.md#the-nozzles-resistance-for-a-real-melt)). The melt zone adds resistance that doesn't depend on the bore, so the real ratio is smaller still. Easy to tell apart anyway
 
 ## Ooze and retraction
 

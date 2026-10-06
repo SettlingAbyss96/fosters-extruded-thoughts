@@ -1,7 +1,9 @@
 # Research
 
 The science behind the [calibration](../calibration/README.md) plan, so I'm not reinventing stuff
-people already figured out. Three areas:
+people already figured out. The [handbook](../handbook/README.md) explains all of it from the ground
+up, and its [gaps chapter](../handbook/12-gaps.md) lists what research proved that nobody has built
+yet. Three areas:
 
 | Page | What's in it |
 |---|---|

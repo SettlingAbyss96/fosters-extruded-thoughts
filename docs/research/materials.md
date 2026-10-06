@@ -209,7 +209,7 @@ prints go bad. Dry first, before touching settings.
 
 - **Stiffer and they conduct heat better**, so they melt faster ([section 2](#2-melting-how-fast-the-hotend-can-go))
 - **Fibers line up with the print path.** [Tekinalp et al. 2014](https://doi.org/10.1016/j.compscitech.2014.10.009) (ORNL) printed ABS with chopped carbon fiber: strength up about 115%, stiffness up about 700%, along the print direction. Across it, much less. Shrinkage goes anisotropic too
-- **Abrasive.** The nozzle wears and the bore grows. The nozzle's resistance goes as $1/d^4$, so wear shifts PA and flow slowly. The monthly anchor check catches that
+- **Abrasive.** The nozzle wears and the bore grows. The nozzle's resistance climbs steeply as the bore shrinks (between $d^{-2}$ and $d^{-4}$ depending on how shear-thinning the melt is), so wear shifts PA and flow slowly. The monthly anchor check catches that
 - **Matte and glow fillers** move density and flow, which is why density is such a good tell
 
 ## 10. Predicting printability from properties

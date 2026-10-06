@@ -16,7 +16,8 @@ Then automate whatever sensors can measure, and keep a human only for the stuff 
 taste (seam placement, how a surface looks).
 
 The research behind all this (material science, control, and stuff borrowed from other
-industries) is in [`docs/research/`](../research/README.md).
+industries) is in [`docs/research/`](../research/README.md). The long-form explanation, from basics
+to the math, is the [handbook](../handbook/README.md).
 
 **This is big and it's not getting solved in one go.** These pages are the breakdown, not the
 answer. Work in progress.
@@ -92,7 +93,7 @@ and seams by hand with test prints.
 
 **Want:**
 
-1. Tell the machine (a `NOZZLE_SET` macro or a button), stored as machine state, not in `printer.cfg`. Even better, it checks itself: with a pressure sensor, pressure at a known flow scales roughly with $1/d^4$, so 0.4 vs 0.6 is about a 5× difference ([models](models.md#nozzle-pressure))
+1. Tell the machine (a `NOZZLE_SET` macro or a button), stored as machine state, not in `printer.cfg`. Even better, it checks itself: with a pressure sensor, pressure at a known flow climbs steeply as the bore shrinks, so 0.4 vs 0.6 is roughly a 2 to 3× difference for a typical shear-thinning melt ([handbook](../handbook/04-extrusion-dynamics.md#the-nozzles-resistance-for-a-real-melt))
 2. The machine reruns what depends on the nozzle: autoz (stickout changes), max flow, PA, ooze
 3. Derived settings regenerate: line widths, layer limits, speed caps, retraction
 4. Orca presets for that nozzle regenerate. Slicing for the wrong nozzle gets caught at `PRINT_START`
