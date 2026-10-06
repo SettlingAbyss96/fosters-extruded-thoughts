@@ -226,7 +226,7 @@ temperatures, metal-filled pastes don't belong near the thermistor or heater, an
 attacks aluminum blocks.
 
 Orca and Bambu Studio ask for your nozzle material, but as far as I can tell only to warn about
-abrasive filament. Nothing offsets the temperature. After a nozzle swap, recalibrate MPC (chapter 9)
+abrasive filament. Nothing offsets the temperature. After a nozzle swap I'd recalibrate MPC (chapter 9)
 and test hotter.
 
 ## Where the heat path actually bites
@@ -246,7 +246,7 @@ $`Bi`$ is huge and barely matters:
 | Dry threads, poor contact | about 46 | 95.8% |
 | Steel and a poor dry joint | about 33 | 94% |
 
-The plastic is its own bottleneck. Worst case, you'd want about 6% more melt zone. I didn't expect
+The plastic is its own bottleneck. Worst case, it's like losing about 6% of the melt zone. I didn't expect
 that. The clearance around the filament matters far more (two sections down).
 
 **Below the block,** the cone and tip stick out into the part fan. That's a fin: heat comes down from
@@ -278,8 +278,8 @@ silicone sock does more for a steel nozzle than any paste.
 
 All the math above assumes the filament fills the bore. It doesn't. All-metal heatbreaks and nozzle
 inlets for 1.75 mm filament are nominally about 2 mm, at least the V6-style parts and MK8-style
-nozzles. Bambu, Revo, Dragon and Rapido don't publish their bores, so it's worth checking yours with
-gauge pins. That clearance fills with melt, and it does three things.
+nozzles. Bambu, Revo, Dragon and Rapido don't publish their bores. I might check the Conch with gauge pins
+at some point and add the number here. That clearance fills with melt, and it does three things.
 
 **It insulates.** The film is plastic, the same weak conductor as the core, in series with it. For a
 concentric film the Biot number depends only on the geometry, not the material:
@@ -392,7 +392,7 @@ about 16× less black in white than white in black. That sounds about right to m
 
 ## What I'd love to measure first
 
-None of this is set up yet. These are the experiments I'm most curious about, if time allows:
+These are the experiments I'm most curious about, if time allows:
 
 - The flow ladder with heater power and block temperature logged at each step: which wall comes first, and where
 - The same ladder on two hotends with the same anchor filament: how much a longer melt zone actually buys, and whether the pressure slope climbs past $`q^{0.4}`$ near $`Fo \approx 0.3`$ like the model says

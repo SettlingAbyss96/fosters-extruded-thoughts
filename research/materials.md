@@ -178,7 +178,7 @@ of thing for polyamides, linking crystallization speed to how the welds form.
 
 For this printer:
 
-- **PPA-CF annealing makes sense now.** Printed in a cooler chamber it comes out partly crystallized, annealing finishes the job, and the part shrinks and stiffens while it does. Measure that shrink once (dimensional test before and after annealing) and pre-scale the parts
+- **PPA-CF annealing makes sense now.** Printed in a cooler chamber it comes out partly crystallized, annealing finishes the job, and the part shrinks and stiffens while it does. I'd measure that shrink once (dimensional test before and after annealing) and pre-scale the parts
 - A hot chamber crystallizes more during printing. Less annealing shrink, but maybe weaker welds since crystals form before the chains cross. Something to test, not assume
 
 ## 7. Shrinkage, stress, warping
@@ -222,7 +222,7 @@ strength. Long hot dwell does its own damage too (oxidation, color change).
 For this printer: **wet filament shows up as "runnier than its library value."** Lower pressure
 for the same flow, a flow ladder knee that moved up. The passive checks in
 [library.md](../calibration/library.md#every-print-is-a-test) can flag "probably wet" before the
-prints go bad. Dry first, before touching settings.
+prints go bad. I dry first, before touching settings.
 
 ## 9. Fillers (CF, GF, matte, glow, wood)
 

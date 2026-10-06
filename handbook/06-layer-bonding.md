@@ -266,7 +266,7 @@ For structural ABS, ASA and PPA-CF parts, this is where I'd start:
 
 ## What I'd love to measure
 
-None of this is set up yet, but it's the experiment I'm most excited about in the whole handbook:
+It's the experiment I'm most excited about in the whole handbook:
 
 - Z tensile coupons: ABS at two chamber temperatures, PLA as a control
 - Bonded width from polished cross-sections under a USB microscope

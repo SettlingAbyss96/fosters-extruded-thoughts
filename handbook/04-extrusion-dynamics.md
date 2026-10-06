@@ -438,7 +438,7 @@ What it doesn't do: correct for slip, or see ovality with a single-axis sensor.
 
 ## What I'd like to build next
 
-None of these exist on my machine yet, and some may never happen. They're the gaps I find most exciting, in the order I'd tackle them if time allows:
+They're the gaps I find most exciting, in the order I'd tackle them if time allows:
 
 1. PA as a function of flow and temperature from a two-parameter physical model, fit from a pressure sweep, then driven by the melt age at the nozzle
 2. Pressure-aware retraction and unretraction, plus a thermal term from the flow before the stop and a restart that shrinks with travel time

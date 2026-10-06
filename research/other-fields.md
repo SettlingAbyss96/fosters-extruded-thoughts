@@ -107,7 +107,7 @@ the better one, and the optimizer picks the next pair. Way less effort than rati
 ## Metrology
 
 - **Check standards and control charts:** the anchors, rerun monthly ([filament](../calibration/filament.md#compare-dont-start-from-scratch))
-- **Gauge R&R:** how much of the spread is the measurement instead of the part. Run the same anchor twice before trusting any difference
+- **Gauge R&R:** how much of the spread is the measurement instead of the part. I'd run the same anchor twice before trusting any difference
 - **Round robins** (ISO 5725): several labs measure the same reference material. Shared anchors across printer owners would be exactly that
 - **Reference materials:** Prusament's per-spool data is the closest thing the hobby has
 

@@ -44,8 +44,7 @@ I say which is which.
 
 ## Status
 
-Work in progress, and it'll stay that way. Things I'd like to measure or build are marked as such,
-and none of them are done until they say so. My test results live in my lab notes, which go public
+Work in progress, and it'll stay that way. My test results live in my lab notes, which go public
 once they're cleaned up. The printer itself (its config and build log) lives in a private repo,
 since it holds machine backups.
 

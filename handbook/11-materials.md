@@ -56,12 +56,12 @@ problems than any retraction setting.
 
 - $`T_g`$ about 145 °C. Wants a really hot chamber, well past what this printer will have
 - At 70 °C the chamber is 75 K below $`T_g`$. Small PC parts are fine, big ones will warp and split. PC-ABS blends are the realistic option here
-- Very sensitive to moisture (hydrolysis). Dry it hot and long
+- Very sensitive to moisture (hydrolysis). I dry it hot and long
 
 ## Nylon (PA6, PA12) and nylon-CF
 
 - Semi-crystalline. $`T_g`$ around 50 °C dry, and lower when wet, because water plasticizes it
-- **Extremely hygroscopic.** Wet nylon foams, strings, and makes weak parts. Dry it, print it from a dry box, and treat the dry box as part of the printer
+- **Extremely hygroscopic.** Wet nylon foams, strings, and makes weak parts. I dry it, print it from a dry box, and treat the dry box as part of the printer
 - After printing it picks up water from the air again. That makes it tougher and less stiff. Whether that's good depends on the part
 - CF versions shrink much less, are stiffer, and need a hardened nozzle
 
