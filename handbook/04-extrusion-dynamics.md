@@ -181,6 +181,67 @@ instead of about 250 ms later. What's missing is the physics. If a pressure swee
 the temperature shift, the formula above gives PA everywhere from two numbers instead of a six-test
 grid.
 
+## Flow and temperature aren't independent
+
+That formula treats flow and temperature as two separate knobs. They aren't, and this is where it
+gets messy in a way I don't think gets nearly enough attention. The temperature that matters is
+the *melt* temperature, and the melt gets cooler the more you push through it (chapter 3). Roughly,
+the drop grows with flow, scaled by how good the hotend's heat path is:
+
+```math
+T_{melt} \approx T_{set} - \beta\,q, \qquad \beta = \rho\,c\,(T_{set} - T_f)\left(R_{contact} + R_{nozzle}\right)
+```
+
+Plug that back in and flow shows up twice, pulling in opposite directions:
+
+```math
+\tau_{eff}(q) \approx \tau_0\left(\frac{q}{q_0}\right)^{n-1}\frac{a_T(T_{set} - \beta q)}{a_T(T_{set} - \beta q_0)}
+```
+
+Shear thinning says more flow, less PA. Cooling says more flow, stiffer melt, more PA. Which one
+wins depends on the hotend. Using Seppala's ABS constants (chapter 6), $`n = 0.4`$, a 250 °C
+setpoint, going from 5 to 25 mm³/s:
+
+| Hotend | Melt drop at 25 mm³/s | PA needed at 25 vs 5 mm³/s |
+|---|---|---|
+| Perfect, melt stays at setpoint | none | 0.38× |
+| Good brass setup | about 10 K | 0.55× |
+| Steel nozzle or a dry thread joint | about 30 K | **1.34×** |
+
+The trend flips. Same filament, same setpoint, and on one hotend you need much less PA at speed
+while on another you need *more*. Which means an adaptive PA curve isn't a property of the filament
+at all. It's a property of the filament, the nozzle, the paste in the threads and the heater, all
+together. Copy someone's curve to a different hotend and you can be compensating in the wrong
+direction.
+
+**And it's not even instantaneous.** PA works on milliseconds. The melt temperature follows flow with
+the heat-soak lag from chapter 3, a few seconds:
+
+```math
+\tau_{th}\,\frac{dT_{melt}}{dt} = T_{set} - \beta\,q(t) - T_{melt}, \qquad \tau_{th} \sim \text{a few s}
+```
+
+So the PA you need right now depends on what the printer was doing for the last few seconds. Think
+about the classic case: fast sparse infill, then straight onto a slow outer wall. The melt is still
+cold from the infill, so the wall starts out stiffer than any steady-state calibration assumed, PA
+is too low for it, and the first few seconds of the most visible line on the part get it wrong
+(theory, and I'd love to catch it in a pressure trace).
+
+**That's also a deposition problem, not just a corners problem.** From earlier in this chapter,
+during a flow ramp the output lags by $`(\tau - K)\,\dot q`$. At 5,000 mm/s² on a 0.65 × 0.3 mm
+line the flow ramps at about 975 mm³/s². If PA was tuned at 40 ms on a cold, slow test and the hot,
+fast reality is closer to 15 ms, that's roughly 24 mm³/s of extra plastic during the ramp. Flip it
+to the steel case and it's a similar amount missing. The linear model is past its comfort zone at
+numbers that big, but the size tells you something: at high acceleration, how much plastic lands
+where is set by thermal history as much as by the G-code. Same goes for max volumetric speed. It's a
+steady-state number, and every speed change is a transient.
+
+What would fix it, at least on paper: MPC already predicts the flow from the planned moves (chapter
+9), and Kalico's `per_move_pressure_advance` can change PA move by move. Run the flow history through
+that first-order lag, estimate the melt temperature, and set PA from the formula above. With a
+pressure sensor you wouldn't even need to trust the model, you'd measure $`\tau`$ directly. Nobody
+does this that I know of.
+
 ## Where the spring is
 
 What actually makes up $`C`$? My list, roughly in order of how much I suspect each one matters on a
@@ -275,7 +336,7 @@ What it doesn't do: correct for slip, or see ovality with a single-axis sensor.
 
 None of these exist on my machine yet, and some may never happen. They're the gaps I find most exciting, in the order I'd tackle them if time allows:
 
-1. PA as a function of flow and temperature from a two-parameter physical model, fit from a pressure sweep
+1. PA as a function of flow and temperature from a two-parameter physical model, fit from a pressure sweep, then driven by an estimated melt temperature that follows the flow history
 2. Pressure-aware retraction and unretraction
 3. Slip compensation from an encoder
 4. Melt temperature control instead of block temperature (chapter 3)

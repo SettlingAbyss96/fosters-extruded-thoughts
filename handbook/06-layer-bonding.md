@@ -250,6 +250,12 @@ ten degrees of chamber air don't become ten degrees on the layer surface once th
 and the layer time is long. So for weld strength it's nozzle first, chamber second, and the
 chamber's bigger job is warp and stress (chapter 7).
 
+One catch with "nozzle first": the nozzle temperature you set isn't the one the plastic gets. A
+hardened steel nozzle, a dry thread joint or a lot of flow can take tens of degrees off before the
+plastic ever leaves. Community tests have seen brass give 73% stronger layers than steel at the same
+setpoint ([chapter 3](03-melting.md#the-nozzle-is-part-of-the-heat-path)). So "nozzle first" really
+means *melt* first, and the hotend hardware decides how far apart those two are.
+
 **After the print:**
 
 1. **Annealing.** Relieves stress, and crystallizes nylon and PPA (chapter 7)
