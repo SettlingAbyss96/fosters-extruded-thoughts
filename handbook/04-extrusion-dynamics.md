@@ -200,6 +200,10 @@ the hotend. For ABS (Seppala's constants from chapter 6, $`n = 0.4`$, 250 °C se
 | Good brass setup | about 10 K | 0.55× |
 | Steel nozzle under a hard part fan | about 30 K | 1.34× |
 
+The drops come from chapter 3's tip resistances. At 25 mm³/s the plastic needs about 10 W, and if
+roughly a quarter of it comes through the tip, 2.8 K/W in brass gives about 7 K and 12.7 K/W in
+steel gives about 33 K.
+
 ![PA needed against flow for three hotends, relative to 5 mm³/s](figures/pa-flip.svg)
 
 *The steel curve bottoms out near 10 mm³/s and then climbs.*
@@ -255,14 +259,30 @@ PA follows, since $`\tau = C\,R_{inc} = C\,m\,P/q`$. Both $`m`$ and $`P`$ climb 
 climbs much faster than pressure near the limit. A longer melt zone raises $`Fo`$ at the same flow,
 so it should need less PA at high flow and give a flatter PA vs flow curve, while a short one bends
 upward near its limit (a prediction, not a measurement). It's the same flip as the last section,
-coming from the melt zone instead of the heat path, and the two add. A longer zone also adds a
-little compliance, but melt at about 1 GPa stores only about 0.024 mm³ per mm of 1.75 mm bore at 10 MPa,
-small next to the gears.
+coming from the melt zone instead of the heat path, and the two add.
 
 One partial self-correction: pushing melt through a pressure drop heats it by about
 $`\Delta P/(\rho c)`$, roughly 5 K per 10 MPa. A stiff melt at high pressure warms itself a little on
 the way out.
 
+## Longer isn't always better
+
+A longer melt zone isn't free. It adds a little compliance (melt at about 1 GPa stores only about
+0.024 mm³ per mm of 1.75 mm bore at 10 MPa), and, more importantly, resistance: the molten column is
+a tube too. From the power-law pressure formula above, bore against nozzle land goes as
+
+```math
+\frac{\Delta P_{bore}}{\Delta P_{land}} \approx \frac{L_b}{L_n}\left(\frac{R_n}{R_b}\right)^{1+3n}
+```
+
+which is about 1.3 for a 20 mm column and a 0.6 mm land on a 0.4 nozzle, if the column were fully
+molten. So past some length, more melt zone adds more resistance than better melting removes.
+[Wüst et al. (2026)](https://doi.org/10.3390/jmmp10070233) measured exactly that with PLA: an optimum melt zone length for
+1.75 mm filament, while 2.85 mm, whose bore is about 3× less resistive, kept improving. The CFD of
+[Serdeczny et al. (2020)](https://doi.org/10.1016/j.addma.2020.101454) also reproduces the switch from stable to unstable
+extrusion at high feed rates, which is this wall seen from the inside, and
+[Kazmer et al. (2021)](https://doi.org/10.1016/j.addma.2021.102106) fit compressibility and viscosity together from pressure on an
+instrumented ABS hot end and could flag limited melting capacity in real time.
 
 ## Melt age
 
@@ -431,6 +451,9 @@ None of these exist on my machine yet, and some may never happen. They're the ga
 - [Bellini, Güçeri, Bertoldi (2004)](https://orbit.dtu.dk/en/publications/liquefier-dynamics-in-fused-deposition/). The liquefier as a dynamic system
 - [Tronvoll et al. (2019)](https://www.emerald.com/rpj/article/25/5/830/363878/Investigating-pressure-advance-algorithms-for). First academic look at advance algorithms
 - [Wu, Qian, Okwudire (2023)](https://doi.org/10.1016/j.addma.2023.103850). Retraction and advancement modeling with feedforward
+- [Wüst, Kattinger, Dahmen, Spiehl, Bonten, Blaeser (2026)](https://doi.org/10.3390/jmmp10070233). Melting zone length and filament diameter vs force and max flow: an optimum for 1.75 mm
+- [Serdeczny, Comminal, Mollah, Pedersen, Spangenberg (2020)](https://doi.org/10.1016/j.addma.2020.101454). Hot end CFD, stable to unstable extrusion at high feed rates
+- [Kazmer, Colon, Peterson, Kim (2021)](https://doi.org/10.1016/j.addma.2021.102106). Compressibility and viscosity from an instrumented ABS hot end, with fault detection
 - Greeff, Schilling (2017). *Closed loop control of slippage during filament transport in molten material extrusion.* Additive Manufacturing 14
 - [Guidetti et al. (2024)](https://arxiv.org/abs/2403.16042). Force controlled printing
 - [Klipper: Pressure advance](https://www.klipper3d.org/Pressure_Advance.html) and [Kinematics](https://www.klipper3d.org/Kinematics.html)

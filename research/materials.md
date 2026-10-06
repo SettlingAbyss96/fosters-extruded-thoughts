@@ -93,6 +93,13 @@ predict the rest. That's how I'd compare the Conch to a Rapido 2 UHF on paper be
 Also worth knowing: [Go & Hart](https://arxiv.org/abs/1709.05918) pushed desktop FFF way past
 the usual limits with a screw feed and laser heating. Different machine, same three limits.
 
+Newer work looks inside the hot end, and it's worth stealing from:
+
+- [Kattinger et al. 2023](https://doi.org/10.1016/j.addma.2023.103762): X-ray CT of a running hot end. At higher feed rates less of the wall touches melt, and the heater setpoint barely changes how much of the nozzle is full
+- [Serdeczny et al. 2020](https://doi.org/10.1016/j.addma.2020.101454): CFD with the free surface resolved. A recirculation region in the gap between filament and wall, a wall thermal resistance backed out from feeding force, and the switch to unstable extrusion at high feed
+- [Wüst et al. 2026](https://doi.org/10.3390/jmmp10070233): longer melt zones help, until the molten column's resistance wins. 1.75 mm filament has an optimum length, 2.85 mm doesn't within their range
+- [Osswald et al. 2018](https://doi.org/10.1016/j.addma.2018.04.030): the fast extreme, melting through a thin film at the tip
+
 ## 3. Flow through the nozzle (where PA comes from)
 
 *Long version: [handbook chapter 4](../handbook/04-extrusion-dynamics.md).*
@@ -256,16 +263,21 @@ prints go bad. Dry first, before touching settings.
 - Das, Gilmer, Biria, Bortner (2021). *Importance of polymer rheology on material extrusion additive manufacturing.* ACS Applied Polymer Materials 3(3). [doi](https://doi.org/10.1021/acsapm.0c01228)
 - Duty et al. (2018). *What makes a material printable? A viscoelastic model for extrusion-based 3D printing of polymers.* J. Manufacturing Processes 35. [doi](https://doi.org/10.1016/j.jmapro.2018.08.008)
 - Go, Schiffres, Stevens, Hart (2017). *Rate limits of additive manufacturing by fused filament fabrication and guidelines for high-throughput system design.* Additive Manufacturing 16. [link](https://www.sciencedirect.com/science/article/abs/pii/S2214860416302834)
+- Kattinger, Kornely, Ehrler, Bonten (2023). *Analysis of melting and flow in the hot-end of a material extrusion 3D printer using X-ray computed tomography.* Additive Manufacturing 76. [doi](https://doi.org/10.1016/j.addma.2023.103762)
+- Kazmer, Colon, Peterson, Kim (2021). *Concurrent characterization of compressibility and viscosity in extrusion-based additive manufacturing of acrylonitrile butadiene styrene with fault diagnoses.* Additive Manufacturing 46. [doi](https://doi.org/10.1016/j.addma.2021.102106)
 - Go, Hart (2017). *Fast desktop-scale extrusion additive manufacturing.* [arXiv](https://arxiv.org/abs/1709.05918)
 - Kishore et al. (2017). *Infrared preheating to improve interlayer strength of big area additive manufacturing (BAAM) components.* Additive Manufacturing 14. [doi](https://doi.org/10.1016/j.addma.2016.11.008)
 - McIlroy, Olmsted (2017). *Disentanglement effects on welding behaviour of polymer melts during the fused-filament-fabrication method for additive manufacturing.* Polymer 123. [link](https://www.sciencedirect.com/science/article/abs/pii/S0032386117306213)
 - Northcutt, Orski, Migler, Kotula (2018). *Effect of processing conditions on crystallization kinetics during materials extrusion additive manufacturing.* Polymer 154. [link](https://www.sciencedirect.com/science/article/abs/pii/S0032386118308541)
+- Osswald, Puentes, Kattinger (2018). *Fused filament fabrication melting model.* Additive Manufacturing 22. [doi](https://doi.org/10.1016/j.addma.2018.04.030)
 - Phan, Swain, Mackay (2018). *Rheological and heat transfer effects in fused filament fabrication.* J. Rheology 62(5). [doi](https://doi.org/10.1122/1.5022982)
 - Read et al. (2024). *Online measurement for parameter discovery in fused filament fabrication.* Integrating Materials and Manufacturing Innovation 13. [link](https://pmc.ncbi.nlm.nih.gov/articles/PMC11636983/)
+- Serdeczny, Comminal, Mollah, Pedersen, Spangenberg (2020). *Numerical modeling of the polymer flow through the hot-end in filament-based material extrusion additive manufacturing.* Additive Manufacturing 36. [doi](https://doi.org/10.1016/j.addma.2020.101454)
 - Seppala, Han, Hillgartner, Davis, Migler (2017). *Weld formation during material extrusion additive manufacturing.* Soft Matter 13. [link](https://pubs.rsc.org/en/content/articlelanding/2017/sm/c7sm00950j)
 - Tekinalp et al. (2014). *Highly oriented carbon fiber–polymer composites via additive manufacturing.* Composites Science and Technology 105. [doi](https://doi.org/10.1016/j.compscitech.2014.10.009)
 - Tronvoll, Popp, Elverum, Welo (2019). *Investigating pressure advance algorithms for filament-based melt extrusion additive manufacturing.* Rapid Prototyping Journal 25(5). [link](https://www.emerald.com/rpj/article/25/5/830/363878/Investigating-pressure-advance-algorithms-for)
 - Williams, Landel, Ferry (1955). *The temperature dependence of relaxation mechanisms in amorphous polymers and other glass-forming liquids.* J. American Chemical Society 77. (The WLF equation)
 - Wool, O'Connor (1981). *A theory of crack healing in polymers.* J. Applied Physics 52. (Weld strength vs time)
+- Wüst, Kattinger, Dahmen, Spiehl, Bonten, Blaeser (2026). *High-throughput fused filament fabrication of PLA: effects of melting zone length and filament diameter on extrusion force and volumetric flow rate.* J. Manufacturing and Materials Processing 10. [doi](https://doi.org/10.3390/jmmp10070233)
 - Wu, Qian, Okwudire (2023). *Modeling and feedforward control of filament advancement and retraction in material extrusion additive manufacturing.* Additive Manufacturing 78. [doi](https://doi.org/10.1016/j.addma.2023.103850)
 - Moisture: [Influence of filament moisture on 3D printing nylon](https://doi.org/10.3390/technologies13080376) (Technologies, 2025) and [Effect of filament moisture on tensile properties and morphology of FDM PLA/PBS parts](https://pmc.ncbi.nlm.nih.gov/articles/PMC11442157/)

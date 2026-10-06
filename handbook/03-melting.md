@@ -79,7 +79,7 @@ Q_{max} \approx Gz^{\ast}\,\alpha\,L
 
 That little formula explains most hotend marketing:
 
-- **Longer melt zone, more flow.** Volcano, UHF, and so on. $`Q_{max}`$ scales with $`L`$
+- **Longer melt zone, more flow.** Volcano, UHF, and so on. $`Q_{max}`$ scales with $`L`$, up to a point: past some length the molten column's own resistance wins (chapter 4)
 - **Splitting the filament multiplies it.** CHT-style and "high flow" nozzles split the melt into $`N`$ thinner streams. Each stream gets its own $`\alpha L`$ budget, so ideally $`Q_{max}`$ goes up by $`N`$. In practice less, since they share the heat going in
 - **Filament diameter drops out,** at least in this crude version. Surprising, but it falls out of the math: a fatter filament has more area but needs more time
 - **Material matters through $`\alpha`$.** Carbon fiber fillers conduct heat better, so CF filaments can melt faster than their base plastic
@@ -124,6 +124,14 @@ isn't really at the setpoint (the heat path below).
 ![Temperature across the bore at the exit of the melt zone, for four Fourier numbers](figures/melt-profile.svg)
 
 *At Fo = 0.25 the core is 75 K below the wall. At 0.13 it's still sitting near the glass transition.*
+
+## Seen from the inside
+
+The experiments back the picture. [Kattinger et al. (2023)](https://doi.org/10.1016/j.addma.2023.103762) X-rayed a running hot
+end and found less of the nozzle wall in contact with melt at higher feed rates, while the heater
+temperature made no visible difference to how much of the nozzle was full. [Osswald et al.
+(2018)](https://doi.org/10.1016/j.addma.2018.04.030) modeled the fast extreme, where the filament barely melts on the way down
+and instead melts through a thin film where it's pressed into the cone.
 
 **What leaves the nozzle (theory).** Laminar flow keeps streamlines in order through the cone, so
 the extrudate should come out with the hottest plastic on the outside and the coolest in the middle.
@@ -175,7 +183,10 @@ which ties nozzle temperature to volumetric flow (their example: 190 °C at 1 mm
 pressure sensor and a viscosity model (chapter 2), measured pressure at a known flow tells me the
 effective viscosity, and inverting the temperature shift gives an effective melt temperature. **The
 pressure sensor becomes a melt thermometer.** Then the block target can be whatever it takes to
-hold the melt where I want it.
+hold the melt where I want it. [Coogan & Kazmer (2019)](https://www.researchgate.net/publication/330031420_In-line_rheological_monitoring_of_fused_deposition_modeling) already turned a nozzle into
+an in-line rheometer with a pressure transducer and a thermocouple, and temperature inaccuracy was one
+of the corrections that mattered most. Running it backwards, from viscosity to temperature, is the part
+I haven't seen.
 
 ## The nozzle is part of the heat path
 
@@ -198,8 +209,9 @@ above), and $`k`$ is the nozzle's conductivity:
 | Ruby tip (brass body) | 35 to 40 |
 | Hardened steel | 20 to 30 |
 
-Steel conducts four to five times worse than brass, so at the same flow its temperature drop is four
-to five times bigger. The community tests agree. [CNC Kitchen](https://www.cnckitchen.com/blog/prusament-pc-blend-review)
+Steel conducts four to five times worse than brass, so wherever heat has to travel through the
+nozzle itself, steel's drop is four to five times bigger (where that is gets worked out below). The
+community tests agree. [CNC Kitchen](https://www.cnckitchen.com/blog/prusament-pc-blend-review)
 got **73% stronger** PC Blend layers with brass than steel at the same 275 °C, and
 [MyTechFun](https://mytechfun.com/video/308) saw steel give about a third of brass's layer adhesion.
 Same setpoint, cooler melt, weaker welds (chapter 6).
@@ -286,7 +298,8 @@ Bi = \frac{1}{\ln(R_{bore}/R_f)}
 A 2 mm bore costs about as much as 30% of melt zone length, which dwarfs the nozzle material inside
 the block. In this model the knee for a 20 mm zone drops from about 17 to 13 mm³/s for ABS. The
 filament usually rides against one side rather than sitting centered, so the real penalty should be
-somewhat smaller than the concentric number.
+somewhat smaller than the concentric number. Then again, Kattinger's X-rays found less of the wall in
+contact with melt at higher feed rates, so at speed part of that gap may not be melt at all.
 
 **It adds slow volume.** A 2 mm bore holds about 30% more melt than the filament itself, and all of it
 is the slow layer at the wall, which is exactly what makes purging take a while (below).
@@ -301,7 +314,10 @@ q_{back} \approx \frac{\pi D\,\delta^3}{12\,\eta}\,\frac{dP}{dz}
 A 1.9 mm bore leaks about a fifth of what a 2.0 mm one does. That backflow freezing in the heatbreak
 is the classic jam. Going tighter isn't free either: filament tolerance (often ±0.05 mm), ovality and
 thermal swelling (about 0.016 mm at 100 K above room) all eat the clearance. 2 mm is where the
-published parts land, and it costs real melting capacity.
+published parts land, and it costs real melting capacity. [Serdeczny et al. (2020)](https://doi.org/10.1016/j.addma.2020.101454)
+simulated an ABS hot end and found a recirculation region right in this gap, between the wall and the
+incoming filament, and to match their feeding force measurements they had to back out a thermal
+resistance at the wall.
 
 ## Two ways to hit the wall
 
@@ -363,11 +379,16 @@ and $`n = 0.4`$ is close:
 *Every extra zone volume buys less. Shear thinning flattens the profile and helps a little.*
 
 Getting under 2% takes about 3.2 zone volumes: roughly 75 mm³ for a 10 mm melt zone with a 1.75 mm
-bore, 230 mm³ for 30 mm. A real 2 mm bore adds about 30%, all of it the slow kind. That's the same order as the flush volumes slicers use for color changes,
-and it scales with the melt zone, so a long high-flow hotend pays for its flow on every swap. Dead
+bore, 230 mm³ for 30 mm. A real 2 mm bore adds about 30%, all of it the slow kind. That's the same
+order as the flush volumes slicers use for color changes, and it scales with the melt zone, so a long high-flow hotend pays for its flow on every swap. Dead
 pockets, like a gap between the nozzle and the heat break, add an even longer tail. That slow layer at
 the wall also sits hot far longer than the average transit time, which is my guess for where
 discolored, degraded plastic comes from.
+
+The tail also explains a purge rule of thumb. [Polymaker's guide](https://wiki.polymaker.com/the-basics/fun-3d-printing-facts/reduce-purge-waste) puts black to
+white at 250 to 300 mm of filament and white to black at 60 to 80, about 4× apart. From
+$`c = (V_z/2V)^2`$, the volume needed goes as $`1/\sqrt{c}`$, so 4× more purge means the eye catches
+about 16× less black in white than white in black. That sounds about right to me (theory).
 
 ## What I'd love to measure first
 
@@ -386,6 +407,11 @@ None of this is set up yet. These are the experiments I'm most curious about, if
 - [Phan, Swain, Mackay (2018)](https://doi.org/10.1122/1.5022982). Rheology and heat transfer in FFF, Nusselt vs Graetz
 - [Anderegg et al. (2019)](https://www.researchgate.net/publication/330392702_In-Situ_Monitoring_of_Polymer_Flow_Temperature_and_Pressure_in_Extrusion_Based_Additive_Manufacturing). Pressure and melt temperature in the flow
 - [Kapusuzoglu, Sato, Mahadevan, Witherell (2026)](https://arxiv.org/abs/2608.18431). ABS bond quality optimization; filament came out 40 to 50 °C below a 260 °C setpoint
+- [Kattinger, Kornely, Ehrler, Bonten (2023)](https://doi.org/10.1016/j.addma.2023.103762). X-ray CT of melting inside a running hot end
+- [Osswald, Puentes, Kattinger (2018)](https://doi.org/10.1016/j.addma.2018.04.030). Melting model with a thin film at the filament tip
+- [Serdeczny, Comminal, Mollah, Pedersen, Spangenberg (2020)](https://doi.org/10.1016/j.addma.2020.101454). CFD of the hot end: recirculation in the gap, wall thermal resistance
+- [Coogan, Kazmer (2019)](https://www.researchgate.net/publication/330031420_In-line_rheological_monitoring_of_fused_deposition_modeling). An in-line rheometer built into the nozzle
+- [Polymaker, reduce purge waste](https://wiki.polymaker.com/the-basics/fun-3d-printing-facts/reduce-purge-waste). Purge lengths for different color changes
 - [Turner, Strong, Gold (2014)](https://www.semanticscholar.org/paper/A-review-of-melt-extrusion-additive-manufacturing-Turner-Strong/2f47b171bb818a99a3f1f3a4b652bdc0db682d19). Review of liquefier modeling
 - [G-Code Flow Temperature Controller](https://github.com/sb53systems/G-Code-Flow-Temperature-Controller). Flow-dependent temperature as a post-processor
 - [CNC Kitchen, Prusament PC Blend review](https://www.cnckitchen.com/blog/prusament-pc-blend-review). Brass vs steel nozzle at the same temperature: 73% stronger layers with brass
