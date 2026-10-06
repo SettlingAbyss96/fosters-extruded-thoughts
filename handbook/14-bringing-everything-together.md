@@ -14,6 +14,25 @@ finish. Every piece comes from an earlier chapter, but bolting them together is 
 of the connections are rough, and a few are guesses (I'll mark them). The point isn't precision.
 It's seeing the whole thing at once, so the influences and the dynamics are visible from above.
 
+## How much happens in one print
+
+Before any model, some counting. I sliced a real project, a four-plate PETG toolbox for a Bambu P2S
+(202 g, 5 h 48 min, the standard 0.2 mm profile), and counted the G-code line by line:
+
+![Bars on a log scale counting what happens in one six-hour print: over a billion motor steps, hundreds of thousands of moves and corners, thousands of retractions and seams, and about ten to the seventeenth polymer chains crossing the welds](figures/print-numbers.svg)
+
+*Steps are counted as my Voron's motors would take them. The chain count is an order of magnitude, the rest is exact.*
+
+On average, every second for almost six hours: 64,000 motor steps, 15 moves, 7 corners, a new line
+starting about once a second, and a retraction every 2.8 s. The motors step more times in that one
+print than a heart beats in 36 years. The nozzle lays 2 km of bead, and the welds between layers add
+up to 0.41 m² of interface, a square about 64 cm on a side, built in strips under half a millimeter
+wide. Across it, around $`10^{17}`$ polymer chains have to wriggle from one layer into the next before
+it freezes (rough: 50 kg/mol chains, coils about 7 nm in radius).
+
+Every corner, start, stop and retraction is a pressure transient (chapter 4), about 197,000 of
+them, and every millimeter of bead is a weld (chapter 6). Nearly all of it has to go right.
+
 ## The whole printer in one block
 
 In control terms, a print is a system with inputs I choose $`u`$, states I mostly can't see $`x`$,
@@ -54,6 +73,7 @@ A few things jump out once it's all on one page:
 - **Melt temperature is the hub.** Four knobs feed it, and it feeds viscosity, the weld and the seam. Half the chapters are about it under different names
 - **PA needed sits downstream of almost everything.** Speed, layer height, width, nozzle temperature, the heat path and the melt zone all reach it. No wonder one PA value never stays tuned
 - **There are really three trunks.** Flow (speed, width, layer height), heat (nozzle temperature, heat path, melt zone on one side, chamber and fan on the other), and motion. Motion barely touches the plastic. Acceleration shakes the toolhead and saves time, and that's it
+- **There are 108 routes through it.** 30 boxes and 44 arrows make 108 distinct routes from a knob to an outcome, up to 7 links long. Speed alone reaches the outcomes 24 different ways
 - **Two arrows go nowhere you'd expect.** Speed reaches Z strength twice with opposite signs, and so do layer height and line width. That's "Tug of war" below
 
 ## Follow one slice of filament
@@ -133,6 +153,10 @@ of a two-path arrow.
 
 ## How many knobs there really are
 
+Orca's config code defines 852 settings. With just two choices each, that's about $`10^{256}`$
+combinations, against roughly $`10^{80}`$ atoms in the observable universe. Nobody is searching that
+with test prints, so the question is how many of those settings are really independent.
+
 Here's the most controls-flavored part, and the part I trust least. Stack the grid into a matrix
 $`J`$, with each row scaled by what counts as a meaningful change for that outcome (5 points of corner
 error, 5% Z strength, 10% throughput, and so on), and ask which combinations of knobs move the
@@ -176,6 +200,36 @@ same time. It only happens when the outer wall comes right after fast infill, so
 order setting is quietly a melt temperature setting. And it suggests something cheap (theory): put
 an inner wall between the infill and the outer wall to use up the cold melt, or let PA and
 temperature follow melt age, which every input for already exists in Kalico.
+
+## The odds
+
+So how reliable are these machines? The biggest number I've found is Obico's: their failure detection
+has watched [89.8 million hours of printing and caught 1,067,608 failed prints](https://www.obico.io/blog/ai-failure-detection-in-3d-printing/),
+one per 84 hours. It only counts what a camera caught, from people who set one up, so the real rate
+is probably higher. Treated as a constant hazard, a print finishes with probability $`e^{-t/84}`$:
+99% for an hour, 93% for the toolbox, 75% for a day, a coin flip at about two and a half days.
+
+Now spread that over the events. With $`N`$ independent chances to fail, each with probability $`p`$:
+
+```math
+P(\text{finish}) = (1 - p)^N \approx e^{-Np} \quad\Longrightarrow\quad p \approx \frac{5.8/84}{197{,}000} \approx 3.5 \times 10^{-7}
+```
+
+**Every corner, start and stop already goes right about 2,999,999 times out of 3 million.** Factories
+call 3.4 defects per million "six sigma". Per event, on the failures that end a print, a hobby
+printer beats that by 10×. It just does so many events that the tiny number still wins on long
+prints: a 99% chance on the toolbox needs fewer than 5 failures per 100 million events.
+
+![The chance a print finishes against its length, for three per-event failure rates and for Obico's observed rate](figures/print-odds.svg)
+
+*Obico's observed rate sits between one in a million and one in ten million per event.*
+
+Surveys that count every failure are harsher: 41% failed in a university makerspace, a quarter of
+all prints from human error, and experience didn't help ([Song & Telenko 2019](https://doi.org/10.1016/j.procir.2018.12.007)).
+Early RepRaps ran around 20%, newer setups about 10% ([Petsiuk & Pearce 2020](https://arxiv.org/abs/2003.05660)).
+And none of this counts defects. If each transient had just a 1 in 10,000 chance of leaving a zit, a
+bulge or a gap, the toolbox would carry about 20 of them. Which might be why a print that worked still
+has a handful of flaws up close.
 
 ## What the map says about tuning order
 
@@ -255,5 +309,8 @@ used most:
 - Built-in stress and warp: [chapter 7](07-shrink-stress-warp.md)
 - Ringing: [chapter 8](08-motion.md)
 - Observability and the SVD's cousin, the Fisher information: [chapter 10](10-sensing-estimation.md)
+- [Obico: AI failure detection](https://www.obico.io/blog/ai-failure-detection-in-3d-printing/). 89.8 million monitored print hours, 1,067,608 failures caught
+- [Song, Telenko (2019)](https://doi.org/10.1016/j.procir.2018.12.007). 41.1% of prints failed in a university makerspace, 26.3% of prints from human error
+- [Petsiuk, Pearce (2020)](https://arxiv.org/abs/2003.05660). Failure rates from about 20% on early RepRaps to about 10%, with community polls at 1 to 20%
 - Skogestad, Postlethwaite (2005). *Multivariable Feedback Control.* Wiley. Where the singular value view of a plant comes from
 - Kokotović, Khalil, O'Reilly (1999). *Singular Perturbation Methods in Control.* SIAM. The formal version of "fast things are instant, slow things are constant"

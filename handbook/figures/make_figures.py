@@ -1264,6 +1264,55 @@ def print_stretch_fig():
     save("print-stretch.svg", "\n".join(parts) + "\n")
 
 
+# Chapter 14: one real print, counted. A four-plate PETG toolbox (202 g, 5 h 48 min) sliced for a
+# Bambu P2S in Bambu Studio, the G-code counted line by line. Steps are what my Voron's motors would
+# take for the same moves (320 microsteps per mm on A and B, four Z motors, Galileo 2 extruder).
+TOOLBOX_HOURS = 20882 / 3600
+TOOLBOX = [("Motor microsteps", 1338132223), ("G-code moves", 318033), ("Corners over 10°", 148964),
+           ("Heater control updates", 139213), ("Extrusion starts and stops", 39606), ("Retractions", 7375),
+           ("Wall loops started (seams)", 5923), ("Fan speed changes", 1572), ("Layers", 582)]
+TOOLBOX_TRANSIENTS = 196527            # starts, stops, corners, retractions and layer changes
+OBICO_HAZARD = 1067608 / 89.8e6        # failures caught per hour of monitored printing
+
+
+def print_numbers():
+    rows = [("Polymer chains crossing the welds", 9e16, "about 10¹⁷ (rough)", PURPLE)] + \
+           [(n, v, f"{v:,}", BLUE) for n, v in TOOLBOX]
+    n = len(rows)
+    p = Plot("One toolbox, counted", "How many times it happens (log scale)", "", (1, 1e18), (0, n), xlog=True,
+             w=900, h=110 + 30 * n, ml=230, mr=24, mt=64, mb=52, title_x=20,
+             subtitle="Four plates of PETG on a Bambu P2S, 202 g, 5 h 48 min. Steps as my Voron's motors would take them")
+    ticks = [1, 1e3, 1e6, 1e9, 1e12, 1e15, 1e18]
+    p.axes(ticks, [], ["1", "thousand", "million", "billion", "10¹²", "10¹⁵", "10¹⁸"])
+    for i, (label, v, txt, col) in enumerate(rows):
+        yc = n - i - 0.5
+        x0, x1 = p.X(1), p.X(v)
+        p.items.append(f'<rect x="{x0:.1f}" y="{p.Y(yc) - 9:.1f}" width="{x1 - x0:.1f}" height="18" rx="4" fill="{col}" opacity="0.8"/>')
+        p.items.append(f'<text x="{p.ml - 8}" y="{p.Y(yc) + 4:.1f}" font-size="12.5" text-anchor="end" fill="{INK}">{esc(label)}</text>')
+        inside = x1 > p.w - 160
+        p.items.append(f'<text x="{x1 - 8 if inside else x1 + 6:.1f}" y="{p.Y(yc) + 4:.1f}" font-size="12" '
+                       f'text-anchor="{"end" if inside else "start"}" fill="{"white" if inside else INK}">{esc(txt)}</text>')
+    save("print-numbers.svg", p.svg())
+
+
+def print_odds():
+    per_hour = TOOLBOX_TRANSIENTS / TOOLBOX_HOURS
+    p = Plot("The odds of finishing", "Print length (hours, log scale)", "Chance it finishes (%)", (0.5, 100), (0, 100),
+             xlog=True, subtitle=f"Every corner, start, stop and retraction as its own small risk, about {round(per_hour, -3):,.0f} of them an hour")
+    p.axes([0.5, 1, 2, 5, 10, 20, 50, 100], [0, 20, 40, 60, 80, 100], ["0.5", "1", "2", "5", "10", "20", "50", "100"])
+    ts = logspace(0.5, 100)
+    for pe, col, lab in [(1e-6, RED, "1 in a million per event"), (1e-7, ORANGE, "1 in 10 million"),
+                         (1e-8, GREEN, "1 in 100 million")]:
+        p.line([(t, 100 * math.exp(-pe * per_hour * t)) for t in ts], col, lab)
+    p.line([(t, 100 * math.exp(-OBICO_HAZARD * t)) for t in ts], INK, "Obico: one caught failure per 84 h", dash="6 4")
+    for t, lab, xt, yt in [(TOOLBOX_HOURS, "the toolbox", 2.3, 64), (24, "a day", 13, 50)]:
+        s = 100 * math.exp(-OBICO_HAZARD * t)
+        p.point(t, s, INK)
+        p.callout(xt, yt, t, s, f"{lab}: {s:.0f}%", anchor="end")
+    p.legend("bl")
+    save("print-odds.svg", p.svg())
+
+
 def _segments(pts):
     segs, cur = [], []
     for x, y in pts:
@@ -1305,3 +1354,5 @@ if __name__ == "__main__":
     timescales()
     sensitivity()
     print_stretch_fig()
+    print_numbers()
+    print_odds()

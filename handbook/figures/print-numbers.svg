@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="410" viewBox="0 0 900 410" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect x="0.5" y="0.5" width="899" height="409" rx="10" fill="white" stroke="#e5e7eb"/>
+<text x="20" y="28" font-size="16" font-weight="600" fill="#111827">One toolbox, counted</text>
+<text x="20" y="47" font-size="12.5" fill="#6b7280">Four plates of PETG on a Bambu P2S, 202 g, 5 h 48 min. Steps as my Voron's motors would take them</text>
+<line x1="230.0" y1="64" x2="230.0" y2="358" stroke="#e5e7eb"/>
+<text x="230.0" y="378" font-size="13" text-anchor="middle" fill="#6b7280">1</text>
+<line x1="337.7" y1="64" x2="337.7" y2="358" stroke="#e5e7eb"/>
+<text x="337.7" y="378" font-size="13" text-anchor="middle" fill="#6b7280">thousand</text>
+<line x1="445.3" y1="64" x2="445.3" y2="358" stroke="#e5e7eb"/>
+<text x="445.3" y="378" font-size="13" text-anchor="middle" fill="#6b7280">million</text>
+<line x1="553.0" y1="64" x2="553.0" y2="358" stroke="#e5e7eb"/>
+<text x="553.0" y="378" font-size="13" text-anchor="middle" fill="#6b7280">billion</text>
+<line x1="660.7" y1="64" x2="660.7" y2="358" stroke="#e5e7eb"/>
+<text x="660.7" y="378" font-size="13" text-anchor="middle" fill="#6b7280">10¹²</text>
+<line x1="768.3" y1="64" x2="768.3" y2="358" stroke="#e5e7eb"/>
+<text x="768.3" y="378" font-size="13" text-anchor="middle" fill="#6b7280">10¹⁵</text>
+<line x1="876.0" y1="64" x2="876.0" y2="358" stroke="#e5e7eb"/>
+<text x="876.0" y="378" font-size="13" text-anchor="middle" fill="#6b7280">10¹⁸</text>
+<line x1="230" y1="358" x2="876" y2="358" stroke="#111827" stroke-width="1.2"/>
+<line x1="230" y1="64" x2="230" y2="358" stroke="#111827" stroke-width="1.2"/>
+<rect x="230.0" y="69.7" width="608.5" height="18" rx="4" fill="#7c3aed" opacity="0.8"/>
+<text x="222" y="82.7" font-size="12.5" text-anchor="end" fill="#111827">Polymer chains crossing the welds</text>
+<text x="830.5" y="82.7" font-size="12" text-anchor="end" fill="white">about 10¹⁷ (rough)</text>
+<rect x="230.0" y="99.1" width="327.5" height="18" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="112.1" font-size="12.5" text-anchor="end" fill="#111827">Motor microsteps</text>
+<text x="563.5" y="112.1" font-size="12" text-anchor="start" fill="#111827">1,338,132,223</text>
+<rect x="230.0" y="128.5" width="197.5" height="18" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="141.5" font-size="12.5" text-anchor="end" fill="#111827">G-code moves</text>
+<text x="433.5" y="141.5" font-size="12" text-anchor="start" fill="#111827">318,033</text>
+<rect x="230.0" y="157.9" width="185.7" height="18" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="170.9" font-size="12.5" text-anchor="end" fill="#111827">Corners over 10°</text>
+<text x="421.7" y="170.9" font-size="12" text-anchor="start" fill="#111827">148,964</text>
+<rect x="230.0" y="187.3" width="184.6" height="18" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="200.3" font-size="12.5" text-anchor="end" fill="#111827">Heater control updates</text>
+<text x="420.6" y="200.3" font-size="12" text-anchor="start" fill="#111827">139,213</text>
+<rect x="230.0" y="216.7" width="165.0" height="18" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="229.7" font-size="12.5" text-anchor="end" fill="#111827">Extrusion starts and stops</text>
+<text x="401.0" y="229.7" font-size="12" text-anchor="start" fill="#111827">39,606</text>
+<rect x="230.0" y="246.1" width="138.8" height="18" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="259.1" font-size="12.5" text-anchor="end" fill="#111827">Retractions</text>
+<text x="374.8" y="259.1" font-size="12" text-anchor="start" fill="#111827">7,375</text>
+<rect x="230.0" y="275.5" width="135.4" height="18" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="288.5" font-size="12.5" text-anchor="end" fill="#111827">Wall loops started (seams)</text>
+<text x="371.4" y="288.5" font-size="12" text-anchor="start" fill="#111827">5,923</text>
+<rect x="230.0" y="304.9" width="114.7" height="18" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="317.9" font-size="12.5" text-anchor="end" fill="#111827">Fan speed changes</text>
+<text x="350.7" y="317.9" font-size="12" text-anchor="start" fill="#111827">1,572</text>
+<rect x="230.0" y="334.3" width="99.2" height="18" rx="4" fill="#2563eb" opacity="0.8"/>
+<text x="222" y="347.3" font-size="12.5" text-anchor="end" fill="#111827">Layers</text>
+<text x="335.2" y="347.3" font-size="12" text-anchor="start" fill="#111827">582</text>
+<text x="553.0" y="394" font-size="13.5" text-anchor="middle" fill="#111827">How many times it happens (log scale)</text>
+<text x="24" y="211.0" font-size="13.5" text-anchor="middle" fill="#111827" transform="rotate(-90 24 211.0)"></text>
+</svg>
