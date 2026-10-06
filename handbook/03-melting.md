@@ -89,6 +89,42 @@ Graetz correlation built from pressure data. My version is the back-of-envelope 
 thing about it: fit $`Gz^{\ast}`$ once with a known filament, and you can predict roughly how a longer
 melt zone or a different material changes max flow before buying anything.
 
+## Inside the melt zone
+
+The Graetz number says whether the core gets hot in time. The full solution says how hot every part
+of it gets, and that's what the nozzle actually receives. Treat the filament (radius $`R`$) as a plug
+moving through a bore whose wall sits at $`T_w`$, and let $`\theta = (T_w - T)/(T_w - T_{in})`$, so 1
+is still cold and 0 is at wall temperature. The classic solution is a Bessel series:
+
+```math
+\theta(r, z) = \sum_{k} \frac{2}{\lambda_k J_1(\lambda_k)}\,J_0\!\left(\frac{\lambda_k r}{R}\right) e^{-\lambda_k^2 Fo}, \qquad \bar\theta = \sum_k \frac{4}{\lambda_k^2}\,e^{-\lambda_k^2 Fo}
+```
+
+$`\lambda_k`$ are the zeros of $`J_0`$ (2.405, 5.520, 8.654...), $`\bar\theta`$ is the average across the
+bore, and $`Fo = \pi\alpha z/Q`$ as above. The thing to notice: **$`L`$ and $`Q`$ only ever show up
+together, as $`L/Q`$.** Doubling the melt zone and halving the flow give the same temperature profile.
+
+What leaves a melt zone for ABS ($`\alpha = 0.08`$ mm²/s, wall at 250 °C, filament entering at 50 °C):
+
+| $`Fo`$ at the exit | Example | Mean | Core | Viscosity, mean vs wall | Core vs wall |
+|---|---|---|---|---|---|
+| 1.0 | 20 mm at 5 mm³/s | 249.6 °C | 249.0 °C | 1.02× | 1.04× |
+| 0.5 | 20 mm at 10 mm³/s | 242 °C | 233 °C | 1.4× | 2.3× |
+| 0.25 | 10 mm at 10, or 20 at 20 | 218 °C | 175 °C | 5.3× | about 150× |
+| 0.13 | 10 mm at 20 mm³/s | 183 °C | about 100 °C | about 70× | still solid |
+
+Viscosities use Seppala's ABS fit from chapter 6, which is extrapolated well below its range for the
+core, so read those as orders of magnitude. The knee is around $`Fo \approx 0.3`$, which puts
+$`Gz^{\ast}`$ near 10. Above it the melt is close to uniform. Below it you don't have a melt, you have
+a stiff core inside a runny sleeve. Two things push the whole table toward the cold end: latent heat
+in semi-crystalline plastics (effectively $`T_{in}`$ drops by $`X\,\Delta H_m/c`$), and a wall that
+isn't really at the setpoint (the heat path below).
+
+**What leaves the nozzle (theory).** Laminar flow keeps streamlines in order through the cone, so
+the extrudate should come out with the hottest plastic on the outside and the coolest in the middle.
+That's good for the weld, since the surface touching the layer below is the hot part. But a stiff,
+elastic core should swell more coming out and lock in more stress.
+
 ## Energy bookkeeping
 
 The heater has to pay for two things: losses to the air and fans, and heating the plastic going
@@ -215,7 +251,7 @@ crude differential scanning calorimeter. I haven't seen anyone use it that way.
 None of this is set up yet. These are the experiments I'm most curious about, if time allows:
 
 - The flow ladder with heater power and block temperature logged at each step: which wall comes first, and where
-- The same ladder on two hotends with the same anchor filament: how much a longer melt zone actually buys
+- The same ladder on two hotends with the same anchor filament: how much a longer melt zone actually buys, and whether the pressure slope climbs past $`q^{0.4}`$ near $`Fo \approx 0.3`$ like the model says
 - Heater power vs flow during normal prints, against the energy equation: does the slope match the material?
 - Brass, tungsten carbide and hardened steel nozzles in the same hotend, each with and without boron nitride paste: the flow ladder plus Z coupons at the same setpoint, to see how much is the melt and how much is the joint
 

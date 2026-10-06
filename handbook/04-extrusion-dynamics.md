@@ -218,6 +218,46 @@ A possible fix: MPC already predicts flow from the planned moves, and Kalico's
 flow and set PA from it, or measure $`\tau`$ directly with a pressure sensor. Nobody does this that I
 know of.
 
+## The melt zone in the pressure
+
+The nozzle doesn't see one viscosity, it sees the profile from chapter 3. For flow through a bore
+where viscosity varies across the radius, integrating the momentum balance gives
+
+```math
+Q = \frac{\pi\,\Delta P}{2L}\int_0^R \frac{r^3}{\eta(r)}\,dr \quad\Longrightarrow\quad \frac{1}{\eta_{eff}} = \frac{4}{R^4}\int_0^R \frac{r^3}{\eta(r)}\,dr
+```
+
+(Newtonian form, the idea carries over to a shear-thinning melt). The $`r^3`$ weights the wall, so the
+hot outer layer carries most of the flow and lubricates the stiff core. The real resistance lands
+between the wall value and the mean-temperature value in chapter 3's table, so treat that table as
+an upper bound.
+
+With the mean temperature falling as flow rises, $`P \propto q^n a_T(\bar T(q))`$, and its local slope is
+
+```math
+m = \frac{d\ln P}{d\ln q} = n + \frac{d\ln a_T}{dT}\,\frac{d\bar T}{d\ln q}, \qquad \frac{d\bar T}{d\ln q} = -(T_w - T_{in})\,Fo\sum_k 4\,e^{-\lambda_k^2 Fo}
+```
+
+| $`Fo`$ | 1.0 | 0.5 | 0.25 | 0.13 |
+|---|---|---|---|---|
+| $`m`$ (ABS, $`n = 0.4`$) | 0.51 | 1.4 | 3.3 | 5.0 |
+
+That's the max flow wall, derived instead of observed. Pressure that grows like $`q^{0.4}`$ in a
+comfortable melt zone grows like $`q^3`$ to $`q^5`$ near the knee, which is the pressure spike from
+chapter 3's "Two ways to hit the wall".
+
+PA follows, since $`\tau = C\,R_{inc} = C\,m\,P/q`$. Both $`m`$ and $`P`$ climb as $`Fo`$ falls, so PA
+climbs much faster than pressure near the limit. A longer melt zone raises $`Fo`$ at the same flow,
+so it should need less PA at high flow and give a flatter PA vs flow curve, while a short one bends
+upward near its limit (a prediction, not a measurement). It's the same flip as the last section,
+coming from the melt zone instead of the heat path, and the two add. A longer zone also adds a
+little compliance, but melt at about 1 GPa stores only about 0.03 mm³ per mm of bore at 10 MPa,
+small next to the gears.
+
+One partial self-correction: pushing melt through a pressure drop heats it by about
+$`\Delta P/(\rho c)`$, roughly 5 K per 10 MPa. A stiff melt at high pressure warms itself a little on
+the way out.
+
 ## Where the spring is
 
 What actually makes up $`C`$? My list, roughly in order of how much I suspect each one matters on a
@@ -248,9 +288,24 @@ With $`\tau = 0.04`$ s and $`q = 15`$ mm³/s that's 0.6 mm³, about **a quarter 
 filament.** That's all the "pressure" there is.
 
 Direct drive retractions are usually 0.4 to 1 mm. More than the stored pressure. So retraction is
-doing a second job: covering melt that expands as it reheats when flow stops, gravity, steam from
-wet filament, and the meniscus at the tip. And with PA on, most of the pressure is already gone by
-the time the move ends. **If you tuned retraction without PA, your retraction is doing PA's job.**
+doing a second job, and most of it is thermal. When flow stops, the under-heated core in the melt
+zone keeps heating to wall temperature and expands. Adding up the temperature deficit over the zone
+with chapter 3's series:
+
+```math
+\Delta V_{th} = \beta_v\,(T_w - T_{in})\,\frac{R^2 q}{\alpha}\sum_k \frac{4}{\lambda_k^4}\left(1 - e^{-\lambda_k^2 Fo_L}\right) \;\le\; \frac{\beta_v\,(T_w - T_{in})\,R^2\,q}{8\,\alpha}
+```
+
+The sum of $`4/\lambda_k^4`$ is exactly 1/8, which gives the clean limit. For ABS ($`\beta_v`$ about
+4 × 10⁻⁴ /K, averaged over glass and melt) at 10 mm³/s that's about 0.75 to 0.95 mm³ for melt zones
+from 10 to 30 mm, or 0.3 to 0.4 mm of filament. That's more than the 0.4 mm³ of pressure at the same
+flow, and it plays out over the core's thermal time, $`R^2/(\lambda_1^2\alpha) \approx 1.7`$ s, not PA's
+tens of milliseconds. It scales with the flow you were just printing at, and grows a bit with melt
+zone length (a longer zone keeps more of the deficit inside instead of sending it out cold). So short
+travels are a pressure problem, and long travels after fast sections are a thermal one (theory, but
+the size lines up with real retraction lengths). Gravity, steam from wet filament and the meniscus
+at the tip add the rest. And with PA on, most of the pressure is already gone by the time the move
+ends. **If you tuned retraction without PA, your retraction is doing PA's job.**
 That's why the order is PA first, retraction second.
 
 ## Seams are pressure transients
@@ -313,7 +368,7 @@ What it doesn't do: correct for slip, or see ovality with a single-axis sensor.
 None of these exist on my machine yet, and some may never happen. They're the gaps I find most exciting, in the order I'd tackle them if time allows:
 
 1. PA as a function of flow and temperature from a two-parameter physical model, fit from a pressure sweep, then driven by an estimated melt temperature that follows the flow history
-2. Pressure-aware retraction and unretraction
+2. Pressure-aware retraction and unretraction, plus a thermal term that tracks the flow just before the stop
 3. Slip compensation from an encoder
 4. Melt temperature control instead of block temperature (chapter 3)
 5. Closed-loop extrusion force, like the [ETH Zurich work](https://arxiv.org/abs/2403.16042), which used force to hold line width (chapter 5)
