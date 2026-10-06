@@ -157,7 +157,10 @@ why warping cares so much about the chamber (chapter 7).
 
 And here's the part I find beautiful: **one shift factor $`a_T`$ rescales everything at once.**
 Viscosity, relaxation time, how fast chains diffuse across a weld. They all shift by the same
-factor with temperature. That's called time-temperature superposition. It means if you match the
+factor with temperature. That's called time-temperature superposition. For viscosity the shift is
+sideways, along the shear rate axis, so in the shear-thinning range the viscosity at a given rate
+only moves by about $`a_T^{\,n}`$ ([chapter 15](15-trying-to-prove-it-wrong.md#does-temperature-do-something-the-model-cant-predict)
+is where I tripped over that). It means if you match the
 "melt state" of two plastics, a bunch of other behavior comes along for free. The filament matching
 idea in [calibration](../calibration/filament.md#matching-temperature) rests on this.
 

@@ -47,7 +47,7 @@ about $`y`$. Chained together from the chapters, at one operating point:
 q &= A(w,h)\,v && \text{flow (5)}\\
 T_w &= T_{set} - \tfrac{1}{4}\,\rho c\,q\,(T_w - T_{in})\,R_{tip} && \text{heat path (3, 4)}\\
 \bar T &= T_w - (T_w - T_{in})\,\bar\theta(Fo), \qquad Fo = \pi\alpha L/q && \text{melting (3)}\\
-P &\propto q^{\,n}\,a_{T,eff}(T_w, Fo) && \text{pressure, } r^3 \text{ weighted (4)}\\
+P &\propto q^{\,n}\,a_{eff}^{\,n}(T_w, Fo) && \text{pressure, wall weighted (4, 15)}\\
 \tau &= C\,n\,P/q, \qquad V_s = C\,P && \text{PA and stored volume (4)}\\
 T_i &= \frac{\bar T + T_{ch}\left(1 - e^{-t_L/\tau_c}\right)}{2 - e^{-t_L/\tau_c}}, \qquad \tau_c = \frac{\rho c\,h}{h_{conv}} && \text{landing (6)}\\
 H &= \frac{1}{\tau_{rep}}\int \frac{dt}{a_T\big(T_i(t)\big)} && \text{weld (6)}\\
@@ -129,7 +129,7 @@ Now the numbers. Each column is one knob moved by a typical step, everything els
 What I read off it:
 
 - **The chamber and the nozzle are the strongest knobs for Z strength**, about +20% each per 10 K, through the weld. Chamber also takes 18% off the built-in stress and costs nothing at the nozzle
-- **A steel nozzle is a quiet disaster for ABS** in this model: the melt 11 K colder, pressure up 77%, and if PA isn't retuned, the corner flow error is off by about 100 points. After a nozzle swap I'd recalibrate everything that's red in that column
+- **A steel nozzle is a quiet disaster for ABS** in this model: the melt 11 K colder, pressure up 25%, and if PA isn't retuned, the corner flow error is off by about 34 points. After a nozzle swap I'd recalibrate everything that's red in that column
 - **The part fan costs as much Z strength as the chamber buys.** 20 points of fan undoes 10 K of chamber
 - **Speed, width and layer height all spend melt margin.** Throughput goes up 18 to 22%, margin goes down 15 to 18%. There's no free flow
 - **Acceleration only touches ringing,** which is why chapter 8 could ignore the plastic entirely
@@ -148,8 +148,8 @@ into paths (toy model again, each path alone, then everything together):
 | Line width +20% | More contact: +13%. Melt cooler (more flow): −15%. Layers sooner: +9% | +5% |
 | Layer 0.20 → 0.24 | Less contact: −16%. A thicker bead holds its heat longer: +14%. Melt cooler: −12% | −16% |
 
-And for the seam, a hotter nozzle cuts the pressure left over at a stop by 36% while adding 5% of
-thermal ooze, net −12%.
+And for the seam, a hotter nozzle cuts the pressure left over at a stop by 16% while adding 5% of
+thermal ooze, net −4%.
 
 That's why so many forum arguments never end. "Faster prints are weaker" and "faster prints are
 stronger" are both true, depending on whether the hotend or the layer time is the bottleneck on that
@@ -172,7 +172,8 @@ J = U\,\Sigma\,V^T, \qquad \frac{\sigma_1^2 + \dots + \sigma_k^2}{\sum_i \sigma_
 ```
 
 Nine continuous knobs (leaving the nozzle swap out, since nobody keeps their PA through one). Four
-directions carry 94% to nearly all of the effect, under every scaling I tried (four quite different ones):
+directions carry 91 to 97% of the effect under three quite different scalings, and 83% under the
+bluntest one, which just evens out every outcome's spread:
 
 1. **Heat in the melt:** nozzle temperature, melt zone, a bit of layer height
 2. **Heat in the part:** chamber up, fan down
@@ -195,12 +196,13 @@ short stretch of print: inner wall, eight seconds of fast infill, a travel, then
 
 The infill drags the melt down to 213 °C within its first transit. Then the outer wall starts, and
 for about the next ten seconds it's printing infill-temperature plastic at wall speed: 226 °C at
-the start, PA needed 1.7 times what the wall was tuned at, and a weld only 65% as strong as the
-same wall manages ten seconds later. It's gentler than chapter 4's "5× stiffer", because the hot
-outer layer of the melt carries most of the flow, but it's still the most visible line on the part
+the start, PA needed about 1.2 times what the wall was tuned at, and a weld only 65% as strong as the
+same wall manages ten seconds later. It's much gentler than chapter 4's "5× stiffer", because the hot
+outer layer of the melt carries most of the flow and a power-law melt only feels temperature as
+$`a_T^{\,n}`$ ([chapter 15](15-trying-to-prove-it-wrong.md#does-temperature-do-something-the-model-cant-predict)), but it's still the most visible line on the part
 starting with the wrong PA and a weaker weld.
 
-None of the single chapters shows this. It needs melt age, the r³ weighting, PA and the weld at the
+None of the single chapters shows this. It needs melt age, the wall weighting, PA and the weld at the
 same time. It only happens when the outer wall comes right after fast infill, so the wall and infill
 order setting is quietly a melt temperature setting. And it suggests something cheap (theory): put
 an inner wall between the infill and the outer wall to use up the cold melt, or let PA and
@@ -282,8 +284,8 @@ That's the [calibration order](../calibration/README.md) I wrote before I had th
 was a relief. The one place that acts like a loop is flow ↔ melt temperature ↔ PA, and the map says why calibrating
 PA at one flow and printing at another fails: the arrow from flow to PA is two arrows with opposite
 signs (shear thinning and the cooler melt), and which wins moves with the operating point. At this
-base point they nearly cancel (+7% PA for +20% speed), in a short melt zone or a steel nozzle they
-don't.
+base point shear thinning wins (−5% PA for +20% speed). On a steel nozzle the two cancel, and push the
+steel tip harder and the cooler melt takes over.
 
 ## What it would take to see all of it
 
@@ -315,7 +317,7 @@ column instead of the left.
 | Flow from speed and bead shape, contact from $`h/w`$ | Established geometry (chapter 5) |
 | Melt temperature from flow and melt zone | Established physics, plug flow is an idealization (chapter 3) |
 | Tip drop with nozzle material | Measured trends, my numbers (chapters 3, 4) |
-| Pressure and PA from shear thinning and temperature | Established, the combination is mine (chapter 4) |
+| Pressure and PA from shear thinning and temperature | Established, the combination is mine (chapter 4), the temperature exponent fixed in chapter 15 |
 | Stored volume and the restart | My theory (chapters 4, 5) |
 | Landing temperature, cooling, weld time | Established ideas, toy numbers (chapter 6) |
 | Speed changing squish | Shown in simulation (Comminal), not in my model |
@@ -361,7 +363,7 @@ Everything here comes from the earlier chapters, and their references carry the 
 used most:
 
 - Melting and the melt zone profile: [chapter 3](03-melting.md)
-- PA, stored volume, melt age, the r³ weighting: [chapter 4](04-extrusion-dynamics.md)
+- PA, stored volume, melt age, the wall weighting: [chapter 4](04-extrusion-dynamics.md)
 - Bead shape, contact, seams: [chapter 5](05-laying-a-line.md)
 - Landing temperature, weld time, the healing number, Seppala's ABS fit: [chapter 6](06-layer-bonding.md)
 - Built-in stress and warp: [chapter 7](07-shrink-stress-warp.md)
@@ -375,3 +377,6 @@ used most:
 - [Stratasys, Inc. (company history)](https://www.encyclopedia.com/books/politics-and-business-magazines/stratasys-inc). The 3D Modeler: April 1992, $130,000, $178,000 with a workstation
 - [Bambu Lab A1 mini](https://bambulab.com/en-us/a1-mini). Nozzle probing, resonance calibration on both axes, pressure advance from an eddy current nozzle pressure sensor, active flow compensation
 - Kokotović, Khalil, O'Reilly (1999). *Singular Perturbation Methods in Control.* SIAM. The formal version of "fast things are instant, slow things are constant"
+
+Next: [Trying to prove it wrong](15-trying-to-prove-it-wrong.md), because a picture this coherent is
+exactly the kind that can be wrong all the way down.

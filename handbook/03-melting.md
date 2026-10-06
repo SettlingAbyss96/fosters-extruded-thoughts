@@ -325,7 +325,7 @@ resistance at the wall.
 |---|---|---|
 | What runs out | Heater power | Time for heat to reach the core |
 | Block temperature | Drops | Holds steady |
-| Pressure | Rises a bit | Spikes (cold, thick core) |
+| Pressure | Rises a bit | Spikes (most likely the unmelted core jamming at the cone, chapter 15) |
 | What you see | Temperature droop, then underextrusion | Extruder clicking or skipping, matte rough strands |
 | What helps | Bigger heater, MPC feedforward | Longer melt zone, HF nozzle, hotter, slower |
 
@@ -398,7 +398,7 @@ about 16× less black in white than white in black. That sounds about right to m
 These are the experiments I'm most curious about, if time allows:
 
 - The flow ladder with heater power and block temperature logged at each step: which wall comes first, and where
-- The same ladder on two hotends with the same anchor filament: how much a longer melt zone actually buys, and whether the pressure slope climbs past $`q^{0.4}`$ near $`Fo \approx 0.3`$ like the model says
+- The same ladder on two hotends with the same anchor filament: how much a longer melt zone actually buys, and how far the pressure slope climbs past $`q^{0.4}`$ near $`Fo \approx 0.3`$ (the model now says only to about $`q^{0.7}`$, so anything much steeper is the cone)
 - A thermal camera on the nozzle tip with and without the silicone sock, brass against steel, to check the fin numbers
 - Heater power vs flow during normal prints, against the energy equation: does the slope match the material?
 - Brass, tungsten carbide and hardened steel nozzles in the same hotend, each with and without boron nitride paste: the flow ladder plus Z coupons at the same setpoint, to see how much is the melt and how much is the joint

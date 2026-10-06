@@ -59,6 +59,11 @@ the faster they flow):
 \eta(T, \dot\gamma) = \eta_0\, e^{\frac{E_a}{R_g}\left(\frac{1}{T} - \frac{1}{T_0}\right)} \left(\frac{\dot\gamma}{\dot\gamma_0}\right)^{n-1}, \qquad n < 1
 ```
 
+One catch: fit from pressure at printing flows, this $`E_a`$ comes out about $`n`$ times the
+zero-shear value a rheometer or datasheet quotes, because heating slides the whole curve sideways
+([handbook chapter 15](../handbook/15-trying-to-prove-it-wrong.md#does-temperature-do-something-the-model-cant-predict)).
+Fit it from my own pressure data and it's self-consistent.
+
 What falls out of that:
 
 - **PA changes with flow and temperature.** $`R`$ isn't constant, so one PA value is always a compromise. That's what Orca's adaptive PA option is about (PA as a function of flow and accel)

@@ -163,19 +163,25 @@ through them.
 
 *The more a melt shear-thins (smaller n), the faster the PA it needs drops off with flow.*
 
-Temperature does the same thing through the shift factor from chapter 2. The melt's consistency
-$`K`$ scales with $`a_T`$, so
+Temperature does the same thing through the shift factor from chapter 2, though not the way I
+first wrote it. Heating a melt slides its whole viscosity curve along the shear rate axis, so in the
+power-law range the consistency $`K`$ scales with $`a_T^{\,n}`$, not $`a_T`$:
 
 ```math
-\tau_{eff}(q, T) \approx \tau_0\left(\frac{q}{q_0}\right)^{n-1}\frac{a_T(T)}{a_T(T_0)}
+\tau_{eff}(q, T) \approx \tau_0\left(\frac{q}{q_0}\right)^{n-1}\left(\frac{a_T(T)}{a_T(T_0)}\right)^{n}
 ```
 
-Hotter means runnier, which means less PA.
+Hotter means runnier, which means less PA, but less than the shift factor alone suggests: 10 K
+hotter takes about 18% off PA for ABS, not 40%. This used to say $`a_T`$, and
+[chapter 15](15-trying-to-prove-it-wrong.md#does-temperature-do-something-the-model-cant-predict) is where that got caught.
 
-Acceleration is the one I can't derive cleanly. Orca's testing says higher accel wants less PA too.
-My guesses: the smoothing window becomes a bigger fraction of a short acceleration phase, and the
-compliance itself is probably nonlinear (gear teeth bite deeper under load, so the spring stiffens).
-I'd want pressure data before believing any of my explanations.
+Acceleration is the one I couldn't derive cleanly. Orca's testing says higher accel wants less PA
+too. Part of it turns out to be shear thinning itself: a fast corner rushes through the sluggish
+low-flow region before the nozzle settles into it, and a simulated pattern test picks 10 to 20% less
+PA at 4,000 than at 1,000 mm/s² from that alone
+([chapter 15](15-trying-to-prove-it-wrong.md#does-the-time-constant-change-with-flow)). The rest is still guesses:
+the smoothing window, a spring that stiffens under load, slack when PA reverses the extruder. I'd
+want pressure data before believing any of them.
 
 **Theory, untested:** the plumbing for variable PA already exists. Orca emits per-feature PA, and
 Kalico has `per_move_pressure_advance`, which applies PA changes to moves already in the queue
@@ -199,8 +205,8 @@ the hotend. For ABS (Seppala's constants from chapter 6, $`n = 0.4`$, 250 °C se
 | Hotend | Melt drop at 25 mm³/s | PA needed, 25 vs 5 mm³/s |
 |---|---|---|
 | Melt stays at setpoint | none | 0.38× |
-| Good brass setup | about 10 K | 0.55× |
-| Steel nozzle | about 30 K | 1.34× |
+| Good brass setup | about 10 K | 0.44× |
+| Steel nozzle | about 30 K | 0.63× |
 
 The drops come from chapter 3's tip resistances. At 25 mm³/s the plastic needs about 10 W, and if
 roughly a quarter of it comes through the tip, 2.8 K/W in brass gives about 7 K, plus a few kelvin
@@ -209,9 +215,11 @@ tip takes more off on top of that (chapter 3's fin model), so the steel row is t
 
 ![PA needed against flow for three hotends, relative to 5 mm³/s](figures/pa-flip.svg)
 
-*The steel curve bottoms out near 10 mm³/s and then climbs.*
+*The steel curve bottoms out near 22 mm³/s and then climbs, slowly.*
 
-**The trend can flip.** An adaptive PA curve belongs to the filament plus the nozzle, the paste and
+**The trend flattens, and on a hot-running tip it flips.** At 25 mm³/s the steel nozzle needs about
+40% more PA than the brass one, relative to where each was tuned, and past about 22 mm³/s its PA
+starts climbing again. An adaptive PA curve belongs to the filament plus the nozzle, the paste and
 the heater, so copying one to a different hotend can compensate in the wrong direction.
 
 It also lags: PA acts in milliseconds, the melt over seconds. Exactly how is in "Melt age" below.
@@ -229,41 +237,49 @@ know of.
 ## The melt zone in the pressure
 
 The nozzle doesn't see one viscosity, it sees the profile from chapter 3. For flow through a bore
-where viscosity varies across the radius, integrating the momentum balance gives
+where viscosity varies across the radius, integrating the momentum balance gives, Newtonian first,
 
 ```math
 Q = \frac{\pi\,\Delta P}{2L}\int_0^R \frac{r^3}{\eta(r)}\,dr \quad\Longrightarrow\quad \frac{1}{\eta_{eff}} = \frac{4}{R^4}\int_0^R \frac{r^3}{\eta(r)}\,dr
 ```
 
-(Newtonian form, the idea carries over to a shear-thinning melt). The $`r^3`$ weights the wall, so the
-hot outer layer carries most of the flow and lubricates the stiff core. The real resistance lands
-between the wall value and the mean-temperature value in chapter 3's table, so treat that table as
-an upper bound.
-
-With the mean temperature falling as flow rises, $`P \propto q^n a_T(\bar T(q))`$, and its local slope is
+The $`r^3`$ weights the wall, so the hot outer layer carries most of the flow and lubricates the
+stiff core. A power-law melt is even more lopsided. With $`\xi = r/R`$ and the temperature profile
+inside $`a_T(\xi)`$:
 
 ```math
-m = \frac{d\ln P}{d\ln q} = n + \frac{d\ln a_T}{dT}\,\frac{d\bar T}{d\ln q}, \qquad \frac{d\bar T}{d\ln q} = -(T_w - T_{in})\,Fo\sum_k 4\,e^{-\lambda_k^2 Fo}
+\frac{1}{a_{eff}} = \left(3 + \frac{1}{n}\right)\int_0^1 \frac{\xi^{\,2+1/n}}{a_T(\xi)}\,d\xi, \qquad P \propto q^{\,n}\,a_{eff}^{\,n}
 ```
+
+For $`n = 0.4`$ that's the 4.5th power of the radius, and the pressure only feels the result to the
+power $`n`$. So the local slope of pressure against flow,
+
+```math
+m = \frac{d\ln P}{d\ln q} = n\left(1 + \frac{d\ln a_{eff}}{d\ln q}\right)
+```
+
+stays tame even with a cold core:
 
 | $`Fo`$ | 1.0 | 0.5 | 0.25 | 0.13 |
 |---|---|---|---|---|
-| $`m`$ (ABS, $`n = 0.4`$) | 0.51 | 1.4 | 3.3 | 5.0 |
+| $`m`$ (ABS, $`n = 0.4`$) | 0.42 | 0.57 | 0.68 | 0.64 |
 
 ![Pressure against flow for three melt zone lengths, with the fully melted line for reference](figures/pressure-wall.svg)
 
-*Every curve starts on the fully melted line and peels off once the core stops keeping up. Shorter zones peel off earlier.*
+*Every curve peels off the fully melted line once the core stops keeping up, but not by much. The hot sleeve at the wall carries the flow.*
 
-That's the max flow wall, derived instead of observed. Pressure that grows like $`q^{0.4}`$ in a
-comfortable melt zone grows like $`q^3`$ to $`q^5`$ near the knee, which is the pressure spike from
-chapter 3's "Two ways to hit the wall".
+This table used to say $`m`$ climbs to 3 to 5 near the knee, which made a great story: the max flow
+wall as a pressure spike from the cold core. That came from using the mean temperature instead of
+the wall-weighted one, and [chapter 15](15-trying-to-prove-it-wrong.md#the-max-flow-wall-isnt-viscous) is where it fell
+apart. Viscous flow in the bore doesn't make the wall. My best guess now is the cone: the unmelted
+core reaches the taper, can't fit through, and has to be melted by contact under force, the regime
+[Osswald et al. (2018)](https://doi.org/10.1016/j.addma.2018.04.030) modeled. A pressure trace through
+the knee would show it as a step on top of a gentle climb.
 
-PA follows, but with $`n`$ instead of $`m`$: PA acts in milliseconds, too fast for the melt
-temperature to move, so $`\tau = C\,n\,P/q`$. Near the knee $`P`$ grows faster than $`q`$ ($`m > 1`$), so
-$`P/q`$, and PA with it, climbs with flow instead of falling. A longer melt zone raises $`Fo`$ at the same flow,
-so it should need less PA at high flow and give a flatter PA vs flow curve, while a short one bends
-upward near its limit (a prediction, not a measurement). It's the same flip as the last section,
-coming from the melt zone instead of the heat path, and the two add.
+PA follows with $`n`$ instead of $`m`$: PA acts in milliseconds, too fast for the melt temperature to
+move, so $`\tau = C\,n\,P/q`$, and with $`m < 1`$ that still falls with flow. A colder melt only
+flattens the PA curve, to $`\tau \propto q^{\,m-1}`$ instead of $`q^{\,n-1}`$, more so in a short melt
+zone near its limit. Same direction as the heat path above, and the two add.
 
 One partial self-correction: pushing melt through a pressure drop heats it by about
 $`\Delta P/(\rho c)`$, roughly 5 K per 10 MPa. A stiff melt at high pressure warms itself a little on
@@ -312,8 +328,11 @@ nothing happens, then the melt cools over 2.4 s (the new, short transit), ending
 stiffer, most of it in the last second. Step back down and the recovery takes 9.6 s (the new, long
 transit). **Speeding up hits within one fast transit, slowing down recovers over one slow transit.**
 So fast infill straight into a slow outer wall means the first several seconds of the wall run on
-melt up to 5× stiffer than steady state, with PA too low on the most visible line on the part. That's
-a prediction, and a pressure trace would confirm it or kill it.
+melt that's stiffer than steady state, with PA too low on the most visible line on the part. The 5×
+is at low shear, though. The hot plastic at the wall carries the flow, and at printing shear rates
+the pressure only feels $`a_T^{\,n}`$, so the PA it needs is more like 1.2×
+([chapter 14](14-bringing-everything-together.md#eight-seconds-of-infill-then-a-wall)). That's a
+prediction, and a pressure trace would confirm it or kill it.
 
 ![Melt temperature leaving a 20 mm zone after a step up and a step down in flow](figures/melt-age-step.svg)
 
@@ -362,8 +381,9 @@ V_s = C\,P = \frac{\tau\,q}{n}
 
 With $`n`$ around 0.4 to 0.5 that's twice as much or more, about half a millimeter of filament, and
 PA only takes back $`K q = \tau q`$ of it when the move stops. The other half drains slowly, because the nozzle gets
-sluggish at low flow. That assumes a linear spring. One that stiffens under load would hold even
-more. It's also why a scarf seam wants its own restart ([chapter 5](05-laying-a-line.md#the-restart-is-tuned-for-the-wrong-start)).
+sluggish at low flow. In general the stored volume is $`\int_0^q \tau\,dq`$, whatever is nonlinear,
+so it's the PA curve at low flow that decides it
+([chapter 15](15-trying-to-prove-it-wrong.md#the-degeneracy-no-print-test-gets-out-of)). It's also why a scarf seam wants its own restart ([chapter 5](05-laying-a-line.md#the-restart-is-tuned-for-the-wrong-start)).
 
 ## Retraction's second job
 

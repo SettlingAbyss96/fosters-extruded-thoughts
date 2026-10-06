@@ -534,13 +534,13 @@ def theta_at(xi, Fo):
 
 
 def pa_ratio(q, drop25):
+    # a power-law melt's pressure goes as a_T to the power n at printing shear rates (chapter 15)
     beta = drop25 / 25
-    return (q / 5) ** (N_POW - 1) * 10 ** (log_aT(T_WALL - beta * q) - log_aT(T_WALL - beta * 5))
+    return (q / 5) ** (N_POW - 1) * 10 ** (N_POW * (log_aT(T_WALL - beta * q) - log_aT(T_WALL - beta * 5)))
 
 
 def p_rel(q, L):
-    t_mean = T_WALL - (T_WALL - T_IN) * theta_mean(math.pi * ALPHA * L / q)
-    return (q / 2) ** N_POW * 10 ** (log_aT(t_mean) - log_aT(T_WALL))
+    return (q / 2) ** N_POW * shift_eff(T_WALL, math.pi * ALPHA * L / q) / 10 ** (N_POW * log_aT(T_WALL))
 
 
 def step_temp(t, q1, q2, L=20.0):
@@ -723,12 +723,15 @@ def wall_temp(q, t_set, nozzle):
 
 
 def shift_eff(t_w, fo, n=120):
-    """a_T of the melt leaving the zone, weighted by r³ the way the flow resistance is."""
+    """How the melt zone's temperature profile scales the pressure. A power-law melt carries flow as
+    the integral of r^(2+1/n)/a_T, and pressure goes as that average a_T to the power n (chapter 15).
+    The Newtonian version is r³ and the power 1."""
+    w = 2 + 1 / N_POW
     s = 0.0
     for i in range(n):
         xi = (i + 0.5) / n
-        s += xi ** 3 / 10 ** log_aT(t_w - (t_w - T_IN) * theta_at(xi, fo)) / n
-    return 1 / (4 * s)
+        s += xi ** w / 10 ** log_aT(t_w - (t_w - T_IN) * theta_at(xi, fo)) / n
+    return (1 / ((w + 1) * s)) ** N_POW
 
 
 def landing(t_m, t_ch, fan, h, t_layer):
@@ -929,9 +932,9 @@ def washout():
 
 
 def pa_flip():
-    p = Plot("Same filament, opposite trends", "Flow (mm³/s)", "PA needed, relative to 5 mm³/s", (5, 30), (0, 2),
+    p = Plot("Same filament, different hotends", "Flow (mm³/s)", "PA needed, relative to 5 mm³/s", (5, 30), (0, 1.2),
              subtitle="ABS at a 250 °C setpoint: shear thinning lowers PA, a cooler melt raises it")
-    p.axes([5, 10, 15, 20, 25, 30], [0, 0.5, 1, 1.5, 2], ylabels=["0", "0.5×", "1×", "1.5×", "2×"])
+    p.axes([5, 10, 15, 20, 25, 30], [0, 0.25, 0.5, 0.75, 1], ylabels=["0", "0.25×", "0.5×", "0.75×", "1×"])
     p.hline(1, GRAY, "tuned at 5 mm³/s")
     qs = linspace(5, 30)
     for drop, col, lab in [(0, GRAY, "Melt stays at the setpoint"), (10, BLUE, "Good brass setup (10 K cooler at 25)"),
@@ -948,15 +951,15 @@ def pa_flip():
 
 
 def pressure_wall():
-    p = Plot("The max flow wall, from the model", "Flow (mm³/s, log scale)",
-             "Pressure, relative (log scale)", (2, 40), (1, 1000), xlog=True, ylog=True,
+    p = Plot("A cold core barely moves the pressure", "Flow (mm³/s, log scale)",
+             "Pressure, relative (log scale)", (2, 40), (1, 10), xlog=True, ylog=True,
              subtitle="ABS, wall at 250 °C, relative to fully melted flow at 2 mm³/s. Curves stop where the core goes solid")
-    p.axes([2, 5, 10, 20, 40], [1, 10, 100, 1000], ylabels=["1", "10", "100", "1,000"])
+    p.axes([2, 5, 10, 20, 40], [1, 2, 5, 10])
     qs = logspace(2, 40)
     p.line([(q, (q / 2) ** N_POW) for q in qs], GRAY, "Fully melted (goes as flow^0.4)", dash="6 4")
     for L, col in [(30, GREEN), (20, ORANGE), (10, RED)]:
         p.line([(q, p_rel(q, L)) for q in qs if math.pi * ALPHA * L / q >= 0.12], col, f"{L} mm melt zone")
-    p.text(14, p_rel(14, 10), "slope 3 to 5 near the wall", color=RED, anchor="end", dx=-10, dy=-4)
+    p.text(19, p_rel(19, 10), "slope never above 0.7", color=RED, anchor="end", dx=-10, dy=-8)
     p.legend("tl")
     save("pressure-wall.svg", p.svg())
 
@@ -1313,6 +1316,323 @@ def print_odds():
     save("print-odds.svg", p.svg())
 
 
+# Chapter 15: trying to prove it wrong. The worked example from Orca's adaptive PA wiki page (PA read
+# off a pattern at 50, 100, 150 and 200 mm/s and three accelerations), then the PA model attacked
+# with a richer nozzle: chapter 2's filament A for the shear thinning, chapter 3's melt zone and the
+# brass tip for the heat.
+ORCA_PA = {1000: [0.036, 0.036, 0.036, 0.036], 2000: [0.036, 0.030, 0.029, 0.028], 4000: [0.032, 0.028, 0.026, 0.024]}
+ORCA_FLOW = [3.84, 7.68, 11.51, 15.35]
+
+
+def pa_orca():
+    p = Plot("One published PA table against chapter 4", "Flow (mm³/s, log scale)", "PA picked (s, log scale)",
+             (3.5, 17), (0.012, 0.05), xlog=True, ylog=True,
+             subtitle="The worked example on Orca's adaptive PA page, read off a pattern at four speeds and three accelerations")
+    p.axes([4, 6, 8, 12, 16], [0.015, 0.02, 0.03, 0.04, 0.05])
+    q0, k0 = ORCA_FLOW[0], ORCA_PA[4000][0]
+    qs = logspace(q0, 16)
+    p.line([(q, k0 * (q / q0) ** (N_POW - 1)) for q in qs], RED, "Chapter 4 with n = 0.4", dash="6 4")
+    for acc, col in [(1000, GRAY), (2000, BLUE), (4000, ORANGE)]:
+        pts = list(zip(ORCA_FLOW, ORCA_PA[acc]))
+        p.line(pts, col, f"Measured at {acc:,} mm/s²")
+        for x, y in pts:
+            p.point(x, y, col)
+    p.text(15.35, k0 * (15.35 / q0) ** (N_POW - 1), "slope −0.6", color=RED, anchor="end", dx=-4, dy=20)
+    p.text(15.35, 0.024, "slope −0.2", color=ORANGE, anchor="end", dx=-8, dy=16)
+    p.legend("bl")
+    save("pa-orca.svg", p.svg())
+
+
+def _tau_challenger(q, nozzle="brass", L=20.0):
+    eta0, lam, n = FIL_A
+    t_w = wall_temp(q, 250.0, nozzle)
+    a = shift_eff(t_w, math.pi * ALPHA * L / q, 60) ** (1 / N_POW)
+    f = lambda u: u * eta0 / (1 + (lam * 160.0 * u) ** (1 - n))
+    d = 1e-4 * q
+    return (f(a * (q + d)) - f(a * (q - d))) / (2 * d)
+
+
+def pa_envelope_numbers(eps=0.05, spread=1.5):
+    """How far each PA is off the richer nozzle (worst within spread× of each flow, since a speed
+    change never sits at one flow), and the error a corner can tolerate: eps v / a."""
+    line = bead_area(0.45, 0.2)
+    grid = logspace(0.2, 60, 400)
+    ref = _tau_challenger(8.0)
+    true = {q: 0.033 * _tau_challenger(q) / ref for q in grid}
+    tau = lambda q: 0.033 * _tau_challenger(q) / ref
+    k_const = tau(8.0)
+    t4, t16 = tau(4.0), tau(16.0)
+    slope = math.log(t16 / t4) / math.log(4)
+    models = {"const": lambda q: k_const, "two": lambda q: t4 * (q / 4) ** slope}
+
+    def worst(q, m):
+        return max(abs(true[x] - models[m](x)) for x in grid if q / spread <= x <= q * spread)
+
+    allowed = lambda q, a: eps * (q / line) / a
+    return worst, allowed
+
+
+def pa_envelope():
+    worst, allowed = pa_envelope_numbers()
+    p = Plot("How right PA has to be", "Flow where the speed changes (mm³/s, log scale)", "PA error (ms, log scale)",
+             (0.3, 40), (0.03, 30), xlog=True, ylog=True,
+             subtitle="Gray: the error that still keeps a 0.45 × 0.2 mm corner within 5%. Color: how far each PA is off a richer nozzle")
+    p.axes([0.3, 1, 3, 10, 30], [0.03, 0.1, 0.3, 1, 3, 10, 30], ["0.3", "1", "3", "10", "30"],
+           ["0.03", "0.1", "0.3", "1", "3", "10", "30"])
+    qs = logspace(0.3, 40, 160)
+    for a, dash in [(2000, "2 3"), (5000, "6 4"), (10000, "10 4")]:
+        p.line([(q, 1000 * allowed(q, a)) for q in qs], GRAY, f"Allowed at {a:,} mm/s²", width=1.8, dash=dash)
+    p.line([(q, 1000 * worst(q, "const")) for q in qs], BLUE, "One PA, tuned at 8 mm³/s", width=3)
+    p.line([(q, 1000 * worst(q, "two")) for q in qs], GREEN, "PA from two numbers, fit at 4 and 16", width=3)
+    p.text(1.06, 18, "← scarf bottoms, corner tips", color=RED)
+    p.vline(1.0, RED, dash="3 4")
+    p.legend("br")
+    save("pa-envelope.svg", p.svg())
+
+
+def _step_response(noz, q1, q2, t_end=0.25, dt=1e-5):
+    v, t, out = noz.stored(q1), 0.0, []
+    i = 0
+    while t <= t_end:
+        f = noz.flow(v)
+        if i % 25 == 0:
+            out.append((1000 * t, (f - q1) / (q2 - q1)))
+        v += (q2 - f) * dt
+        t += dt
+        i += 1
+    return out
+
+
+def pa_asymmetry():
+    thin = ToyNozzle(shear_thin=True, q_ref=8.0, tau_ref=0.033)
+    lin = ToyNozzle(shear_thin=False, q_ref=8.0, tau_ref=0.033)
+    p = Plot("Speeding up isn't slowing down in reverse", "Time after the extruder steps (ms)",
+             "How far it got to the new flow", (0, 250), (0, 1.05),
+             subtitle="Chapter 2's filament A, time constant 33 ms at 8 mm³/s, stepping between 2 and 16 mm³/s")
+    p.axes([0, 50, 100, 150, 200, 250], [0, 0.25, 0.5, 0.75, 1.0], ylabels=["0", "25%", "50%", "75%", "100%"])
+    p.hline(0.95, GRAY, dash="2 3")
+    p.text(4, 0.95, "95%", color=GRAY, dy=-6)
+    p.line(_step_response(lin, 2, 16), GRAY, "Linear nozzle, either way", dash="6 4")
+    p.line(_step_response(thin, 2, 16), RED, "2 → 16 mm³/s: slow start, fast finish")
+    p.line(_step_response(thin, 16, 2), BLUE, "16 → 2 mm³/s: fast start, slow finish")
+    p.legend("br")
+    save("pa-asymmetry.svg", p.svg())
+
+
+def _history_pa(phases, q_probe, t0=-30.0, t1=8.0, dt=0.02):
+    """PA needed on a line at q_probe that starts at t = 0, relative to steady, after a flow history."""
+    v_z = A_FIL * 20.0
+
+    def flow(t):
+        for a, b, q in phases:
+            if a <= t < b:
+                return q
+        return q_probe
+
+    t_w = wall_temp(q_probe, 250.0, "brass")
+    steady = shift_eff(t_w, ALPHA * (v_z / q_probe) / R_FIL ** 2, 48)
+    hist, cum, t, out = [], 0.0, t0, []
+    while t <= t1 + 1e-9:
+        hist.append((t, cum))
+        target = cum - v_z
+        if t >= 0 and target > hist[0][1]:
+            i = len(hist) - 1
+            while hist[i][1] > target:
+                i -= 1
+            (ta, ca), (tb, cb) = hist[i], hist[min(i + 1, len(hist) - 1)]
+            age = t - (ta + (tb - ta) * (target - ca) / (cb - ca) if cb > ca else ta)
+            out.append((t, shift_eff(t_w, ALPHA * age / R_FIL ** 2, 48) / steady))
+        cum += flow(t) * dt
+        t += dt
+    return out
+
+
+def pa_history():
+    p = Plot("Same line, three pasts", "Time into a 10 mm³/s line (s)", "PA needed, relative to steady", (0, 8), (0.85, 1.25),
+             subtitle="ABS at 250 °C, 20 mm melt zone. Melt age from chapter 4, pressure as a power-law melt sees it (this chapter)")
+    p.axes([0, 2, 4, 6, 8], [0.9, 1.0, 1.1, 1.2], ylabels=["0.9×", "1×", "1.1×", "1.2×"])
+    p.hline(1, GRAY, dash="2 3")
+    for phases, col, lab in [([(-30, -10, 10.0), (-10, 0, 20.0)], RED, "After 10 s of infill at 20 mm³/s"),
+                             ([(-30, 0, 10.0)], GRAY, "After steady printing at 10 mm³/s"),
+                             ([(-30, -10, 10.0), (-10, 0, 0.0)], BLUE, "After a 10 s pause")]:
+        p.line(_history_pa(phases, 10.0), col, lab)
+    p.legend("tr")
+    save("pa-history.svg", p.svg())
+
+
+def pa_degeneracy():
+    qs = logspace(1, 30)
+    tau = lambda q: 33 * (q / 8) ** (N_POW - 1)
+    left = Plot("What every print test sees", "Flow (mm³/s, log scale)", "PA (ms, log scale)", (1, 30), (10, 120),
+                xlog=True, ylog=True, w=450, h=330, ml=70, mr=20, mt=44, mb=58)
+    left.axes([1, 3, 10, 30], [10, 20, 50, 100])
+    left.line([(q, tau(q)) for q in qs], BLUE, width=3.4)
+    left.line([(q, tau(q)) for q in qs], ORANGE, dash="6 5", width=2.4)
+    left.text(1.2, 14, "the two curves are identical", color=GRAY)
+    right = Plot("What a pressure sensor sees", "Flow (mm³/s, log scale)", "Pressure, relative to 8 mm³/s", (1, 30), (0.1, 4),
+                 xlog=True, ylog=True, w=450, h=330, ml=70, mr=20, mt=44, mb=58)
+    right.axes([1, 3, 10, 30], [0.1, 0.3, 1, 3])
+    right.line([(q, (q / 8) ** N_POW) for q in qs], BLUE, "Shear-thinning melt, linear spring")
+    right.line([(q, q / 8) for q in qs], ORANGE, "Plain melt, spring that stiffens", dash="6 5")
+    right.legend("tl")
+    W, H = 900, 400
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="{FONT}">',
+             f'<rect x="0.5" y="0.5" width="{W - 1}" height="{H - 1}" rx="10" fill="white" stroke="{GRID}"/>',
+             f'<text x="20" y="30" font-size="16" font-weight="600" fill="{INK}">Two nozzles, one PA curve</text>',
+             f'<text x="20" y="50" font-size="12.5" fill="{GRAY}">Same time constant at every flow, so the same corners, seams and ooze. Different physics inside</text>']
+    for i, pp in enumerate((left, right)):
+        inner = pp.svg(card=False).split("\n", 1)[1].rsplit("</svg>", 1)[0]
+        parts.append(f'<svg x="{i * 450}" y="64" width="{pp.w}" height="{pp.h}" viewBox="0 0 {pp.w} {pp.h}">{inner}</svg>')
+    parts.append("</svg>")
+    save("pa-degeneracy.svg", "\n".join(parts) + "\n")
+
+
+# Chapter 14's toy model with all 16 constants exposed, and the measurements the planned sensors
+# could take. Fisher information in log-parameter space (chapter 10): each eigenvalue says how well
+# one combination of parameters is pinned.
+FIM_P0 = dict(alpha=0.08, t_in=50.0, n=0.4, rho_c=2.1e-3, r_tip=2.8, f_tip=0.25, c1=4.65, c2=200.9,
+              h0=20.0, h1=280.0, tg=105.0, cte=90e-6, beta_v=4e-4, C=1.0, k=1.0, tau_rep=1.0)
+FIM_NAMES = {"alpha": "heat diffusivity", "t_in": "filament entry temp", "n": "shear thinning n", "rho_c": "heat capacity",
+             "r_tip": "tip resistance", "f_tip": "tip heat share", "c1": "WLF C1", "c2": "WLF C2", "h0": "still-air cooling",
+             "h1": "fan cooling", "tg": "Tg", "cte": "expansion", "beta_v": "melt expansion", "C": "spring",
+             "k": "melt consistency", "tau_rep": "reptation time"}
+
+
+def _fim_model(p, q, t_set, t_ch=50.0, fan=0.3, h=0.2, L=20.0, t_layer=10.0):
+    la = lambda T: -p["c1"] * (T - 230.0) / (p["c2"] + T - 230.0)
+    t_w = t_set
+    for _ in range(40):
+        t_w = t_set - p["f_tip"] * p["rho_c"] * q * (t_w - p["t_in"]) * p["r_tip"]
+    fo = math.pi * p["alpha"] * L / q
+    th_mean = sum(4 / l ** 2 * math.exp(-l * l * fo) for l in ZEROS[:60])
+    t_m = t_w - (t_w - p["t_in"]) * th_mean
+    w, s, nr = 2 + 1 / p["n"], 0.0, 40
+    for i in range(nr):
+        xi = (i + 0.5) / nr
+        th = sum(2 / (l * bessel(l, 1)) * bessel(l * xi, 0) * math.exp(-l * l * fo) for l in ZEROS[:8])
+        s += xi ** w / 10 ** la(t_w - (t_w - p["t_in"]) * th) / nr
+    pres = p["k"] * (q / ((w + 1) * s)) ** p["n"]
+    tau = p["C"] * p["n"] * pres / q
+    ooze = tau * q / p["n"] * (1 - p["n"]) + p["beta_v"] * (t_w - p["t_in"]) * R_FIL ** 2 * q / p["alpha"] * sum(
+        4 / l ** 4 * (1 - math.exp(-l * l * fo)) for l in ZEROS[:60])
+    tau_c = p["rho_c"] * h * 1e6 / (p["h0"] + p["h1"] * fan)
+    e = math.exp(-t_layer / tau_c)
+    t_i0 = (t_m + t_ch * (1 - e)) / (2 - e)
+    teq, t, dt = 0.0, 0.0, 4e-3
+    while t < t_layer:
+        temp = t_ch + (t_i0 - t_ch) * math.exp(-t / tau_c)
+        if temp <= p["tg"]:
+            break
+        teq += dt / 10 ** la(temp)
+        t += dt
+    z = min(1.0, teq / p["tau_rep"] / 2.4e-4) ** 0.25
+    return dict(P=pres, tau=tau, power=p["rho_c"] * q * (t_m - p["t_in"]), ooze=ooze, t_i0=t_i0, z=z,
+                shrink=p["cte"] * (p["tg"] - 25.0))
+
+
+def _fim_measure(p):
+    ys, sig = [], []
+    for q in (4.0, 10.0, 20.0):
+        for t_set in (240.0, 260.0):
+            o = _fim_model(p, q, t_set)
+            ys += [o["P"], o["tau"], o["power"]]
+            sig += [0.03, 0.05, 0.05]
+    for q in (5.0, 15.0):
+        ys.append(_fim_model(p, q, 250.0)["ooze"])
+        sig.append(0.10)
+    for fan in (0.1, 0.6):
+        for t_ch in (40.0, 70.0):
+            o = _fim_model(p, 12.0, 250.0, t_ch=t_ch, fan=fan)
+            ys += [o["t_i0"], o["z"]]
+            sig += [3.0 / o["t_i0"], 0.08]
+    ys.append(_fim_model(p, 12.0, 250.0)["shrink"])
+    sig.append(0.03)
+    return ys, sig
+
+
+def _jacobi_eig(S, sweeps=60):
+    n = len(S)
+    A = [row[:] for row in S]
+    V = [[float(i == j) for j in range(n)] for i in range(n)]
+    for _ in range(sweeps):
+        off = sum(A[i][j] ** 2 for i in range(n) for j in range(n) if i != j)
+        if off < 1e-30:
+            break
+        for a in range(n):
+            for b in range(a + 1, n):
+                if abs(A[a][b]) < 1e-300:
+                    continue
+                th = 0.5 * math.atan2(2 * A[a][b], A[b][b] - A[a][a])
+                c, s = math.cos(th), math.sin(th)
+                for k in range(n):
+                    A[k][a], A[k][b] = c * A[k][a] - s * A[k][b], s * A[k][a] + c * A[k][b]
+                for k in range(n):
+                    A[a][k], A[b][k] = c * A[a][k] - s * A[b][k], s * A[a][k] + c * A[b][k]
+                for k in range(n):
+                    V[k][a], V[k][b] = c * V[k][a] - s * V[k][b], s * V[k][a] + c * V[k][b]
+    return [A[i][i] for i in range(n)], V
+
+
+def fisher_spectrum():
+    names = list(FIM_P0)
+    base, sig = _fim_measure(FIM_P0)
+    cols = []
+    for nm in names:
+        hi, lo = dict(FIM_P0), dict(FIM_P0)
+        hi[nm] *= 1.01
+        lo[nm] *= 0.99
+        yh, _ = _fim_measure(hi)
+        yl, _ = _fim_measure(lo)
+        cols.append([(math.log(a) - math.log(b)) / 0.02 / s for a, b, s in zip(yh, yl, sig)])
+    F = [[sum(ci[r] * cj[r] for r in range(len(sig))) for cj in cols] for ci in cols]
+    ev, V = _jacobi_eig(F)
+    order = sorted(range(len(ev)), key=lambda i: -ev[i])
+    rows = []
+    for i in order:
+        vec = [V[k][i] for k in range(len(names))]
+        top = sorted(range(len(names)), key=lambda k: -abs(vec[k]))[:2]
+        rows.append((ev[i], [names[k] for k in top]))
+    return rows, len(sig)
+
+
+def sloppy():
+    rows, n_meas = fisher_spectrum()
+    lo_x, hi_x = 0.1, 1e6
+    W, top, rh, left = 860, 92, 25, 320
+    H = top + len(rows) * rh + 70
+    x0, x1 = left, W - 40
+    X = lambda v: x0 + (math.log10(v) - math.log10(lo_x)) / (math.log10(hi_x) - math.log10(lo_x)) * (x1 - x0)
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" font-family="{FONT}">',
+           f'<rect x="0.5" y="0.5" width="{W - 1}" height="{H - 1}" rx="10" fill="white" stroke="{GRID}"/>',
+           f'<text x="20" y="30" font-size="16" font-weight="600" fill="{INK}">16 parameters, {n_meas} measurements: what actually gets pinned</text>',
+           f'<text x="20" y="50" font-size="12.5" fill="{GRAY}">Chapter 14\'s toy model with every planned sensor. Each bar is one combination of parameters and how well the data pins it</text>']
+    for t in (0.1, 1, 10, 100, 1e3, 1e4, 1e5, 1e6):
+        x = X(t)
+        lab = {0.1: "0.1%", 1: "1%", 10: "10%", 100: "100%", 1e3: "1,000%", 1e4: "10⁴%", 1e5: "10⁵%", 1e6: "10⁶%"}[t]
+        out.append(f'<line x1="{x:.1f}" y1="{top - 8}" x2="{x:.1f}" y2="{top + len(rows) * rh}" stroke="{GRID}"/>')
+        out.append(f'<text x="{x:.1f}" y="{top + len(rows) * rh + 18}" font-size="12.5" text-anchor="middle" fill="{GRAY}">{lab}</text>')
+    out.append(f'<text x="{(x0 + x1) / 2:.1f}" y="{H - 18}" font-size="13.5" text-anchor="middle" fill="{INK}">How well it is pinned (± one standard deviation, log scale)</text>')
+    xt = X(10)
+    out.append(f'<line x1="{xt:.1f}" y1="{top - 14}" x2="{xt:.1f}" y2="{top + len(rows) * rh}" stroke="{GREEN}" stroke-width="1.6" stroke-dasharray="5 4"/>')
+    out.append(f'<text x="{xt + 6:.1f}" y="{top - 4}" font-size="12.5" fill="{GREEN}">±10%</text>')
+    big = max(e for e, _ in rows)
+    for i, (e, names) in enumerate(rows):
+        y = top + i * rh
+        label = " + ".join(FIM_NAMES[nm] for nm in names)
+        out.append(f'<text x="{left - 10}" y="{y + 16}" font-size="12.5" text-anchor="end" fill="{INK}">{esc(label)}</text>')
+        never = e < 1e-9 * big
+        pct = 100 / math.sqrt(e) if not never else hi_x
+        col = GREEN if pct <= 10 else (ORANGE if pct <= 100 else RED)
+        xe = X(min(max(pct, lo_x), hi_x))
+        out.append(f'<rect x="{x0}" y="{y + 5}" width="{xe - x0:.1f}" height="{rh - 10}" rx="3" fill="{col}" opacity="0.8"/>')
+        txt = "never" if never else (f"±{pct:.1f}%" if pct < 10 else f"±{pct:,.0f}%")
+        inside = xe > x1 - 90
+        out.append(f'<text x="{xe - 6 if inside else xe + 6:.1f}" y="{y + 16}" font-size="12" text-anchor="{"end" if inside else "start"}" '
+                   f'fill="{"white" if inside else INK}">{txt}</text>')
+    out.append("</svg>")
+    save("sloppy.svg", "\n".join(out) + "\n")
+
+
 def _segments(pts):
     segs, cur = [], []
     for x, y in pts:
@@ -1356,3 +1676,9 @@ if __name__ == "__main__":
     print_stretch_fig()
     print_numbers()
     print_odds()
+    pa_orca()
+    pa_envelope()
+    pa_asymmetry()
+    pa_history()
+    pa_degeneracy()
+    sloppy()
